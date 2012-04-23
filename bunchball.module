@@ -32,3 +32,13 @@ function bunchball_permission() {
     ),
   );
 }
+
+
+/**
+ * Implement hook_help()
+ */
+function bunchball_help($path, $arg) {
+   if ($path == 'admin/help#bunchball') {
+    return t("Here is a stub help page.  We'll need one eventually.");
+  }
+}
