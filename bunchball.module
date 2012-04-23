@@ -14,8 +14,21 @@ function bunchball_menu() {
     'description' => 'The main configuration screen for the bunchball api modules',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('bunchball_admin_form'),
-    'access arguments' => array('Administer modules'),
+    'access arguments' => array('configure bunchball'),
     'file' => 'bunchball.admin.inc',
   );
   return $items;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function bunchball_permission() {
+  return array(
+    'configure bunchball' => array(
+      'title' => t('Configure Bunchball settings'),
+      'description' => t('Users allowed to configure the core bunchball module including reading or writing Bunchball API keys.'),
+    ),
+  );
 }
