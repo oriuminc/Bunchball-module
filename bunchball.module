@@ -1,0 +1,21 @@
+<?php
+
+
+/**
+ * Implement hook_menu().
+ *
+ * @return
+ *   An array of menu items.
+ */
+function bunchball_menu() {
+  $items = array();
+  $items['admin/config/bunchball'] = array(
+    'title' => 'Bunchball configuration',
+    'description' => 'The main configuration screen for the bunchball api modules',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_admin_form'),
+    'access arguments' => array('Administer modules'),
+    'file' => 'bunchball.admin.inc',
+  );
+  return $items;
+}
