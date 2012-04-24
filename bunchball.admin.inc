@@ -4,22 +4,26 @@ function bunchball_admin_form($form, &$form_state) {
 
   $form['bunchball_apikey'] = array(
     '#type' => 'textfield',
-    '#default_value' => isset($form_state['values']['apikey']) ? $form_state['values']['apikey'] : variable_get('bunchball_apikey', ''),
+    '#default_value' => isset($form_state['values']['bunchball_apikey']) ? $form_state['values']['bunchball_apikey'] : variable_get('bunchball_apikey', ''),
     '#title' => t('Bunchball API Key'),
     '#required' => TRUE,
   );
 
   $form['bunchball_apisecret'] = array(
     '#type' => 'textfield',
-    '#default_value' => isset($form_state['values']['apisecret']) ? $form_state['values']['apisecret'] : variable_get('bunchball_apisecret', ''),
+    '#default_value' => isset($form_state['values']['bunchball_apisecret']) ? $form_state['values']['bunchball_apisecret'] : variable_get('bunchball_apisecret', ''),
     '#title' => t('Bunchball API Secret'),
     '#required' => TRUE,
   );
 
-  $form['environment'] = array(
+  $form['bunchball_environment'] = array(
     '#type' => 'select',
-    '#options' => array(0 => '', 'production' => t('Production'), 'sandbox' => t('Sandbox')),
-    '#value' => isset($form_state['values']['environment']) ? $form_state['values']['environment'] : variable_get('bunchball_environment', ''),
+    '#options' => array(
+       0 => ' ',
+       'production' => t('Production'),
+       'sandbox' => t('Sandbox')
+    ),
+    '#default_value' => isset($form_state['values']['bunchball_environment']) ? $form_state['values']['bunchball_environment'] : variable_get('bunchball_environment', ''),
   );
 
   return system_settings_form($form);
