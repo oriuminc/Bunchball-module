@@ -2,29 +2,31 @@
 
 function bunchball_admin_form($form, &$form_state) {
 
-  $form['apikey'] = array(
+  $form['bunchball_apikey'] = array(
     '#type' => 'textfield',
     '#default_value' => isset($form_state['values']['apikey']) ? $form_state['values']['apikey'] : variable_get('bunchball_apikey', ''),
     '#title' => t('Bunchball API Key'),
     '#required' => TRUE,
   );
 
-  $form['apisecret'] = array(
+  $form['bunchball_apisecret'] = array(
     '#type' => 'textfield',
     '#default_value' => isset($form_state['values']['apisecret']) ? $form_state['values']['apisecret'] : variable_get('bunchball_apisecret', ''),
     '#title' => t('Bunchball API Secret'),
     '#required' => TRUE,
   );
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
+  $form['environment'] = array(
+    '#type' => 'select',
+    '#options' => array(0 => '', 'production' => t('Production'), 'sandbox' => t('Sandbox')),
+    '#value' => isset($form_state['values']['environment']) ? $form_state['values']['environment'] : variable_get('bunchball_environment', ''),
   );
 
-  return $form;
+  return system_settings_form($form);
 }
 
-function bunchball_admin_form_submit(&$form, &$form_state, $form_id) {
-  variable_set('bunchball_apikey', $form_state['values']['apikey']);
-  variable_set('bunchball_apisecret', $form_state['values']['apisecret']);
-}
+//function bunchball_admin_form_submit(&$form, &$form_state) {
+//  variable_set('bunchball_apikey', $form_state['values']['apikey']);
+//  variable_set('bunchball_apisecret', $form_state['values']['apisecret']);
+//  variable_set('bunchball_environment', $form_state['values']['environment']);
+//}
