@@ -2,6 +2,8 @@
 
 function bunchball_admin_form($form, &$form_state) {
 
+  ctools_include('dependent');
+
   $form['bunchball_apikey'] = array(
     '#type' => 'textfield',
     '#default_value' => isset($form_state['values']['bunchball_apikey']) ? $form_state['values']['bunchball_apikey'] : variable_get('bunchball_apikey', ''),
@@ -23,7 +25,24 @@ function bunchball_admin_form($form, &$form_state) {
        'production' => t('Production'),
        'sandbox' => t('Sandbox')
     ),
+    '#required' => TRUE,
     '#default_value' => isset($form_state['values']['bunchball_environment']) ? $form_state['values']['bunchball_environment'] : variable_get('bunchball_environment', ''),
+  );
+
+  $form['bunchball_production_url'] = array(
+    '#title' => t('Production server url'),
+    '#type' => 'textfield',
+    '#default_value' => isset($form_state['values']['bunchball_production_url']) ? $form_state['values']['bunchball_production_url'] : variable_get('bunchball_production_url', ''),
+    '#process' => array('ctools_dependent_process'),
+    '#dependency' => array('edit-bunchball-environment' => array('production')),
+  );
+
+  $form['bunchball_sandbox_url'] = array(
+    '#title' => t('Sandbox server url'),
+    '#type' => 'textfield',
+    '#default_value' => isset($form_state['values']['bunchball_sandbox_url']) ? $form_state['values']['bunchball_sandbox_url'] : variable_get('bunchball_sandbox_url', ''),
+    '#process' => array('ctools_dependent_process'),
+    '#dependency' => array('edit-bunchball-environment' => array('sandbox')),
   );
 
   return system_settings_form($form);
