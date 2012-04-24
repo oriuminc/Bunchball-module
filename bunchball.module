@@ -9,14 +9,20 @@
  */
 function bunchball_menu() {
   $items = array();
-  $items['admin/config/bunchball'] =
-  $items['admin/config/bunchball/main'] = array(
+
+  $items['admin/config/bunchball'] = array(
     'title' => 'Bunchball configuration',
     'description' => 'The main configuration screen for the bunchball api modules',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('bunchball_admin_form'),
     'access arguments' => array('configure bunchball'),
     'file' => 'bunchball.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => -10,
+  );
+
+  $items['admin/config/bunchball/main'] = array(
+    'title' => 'Bunchball configuration',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
