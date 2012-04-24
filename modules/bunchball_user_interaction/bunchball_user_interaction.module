@@ -1,0 +1,17 @@
+<?php
+
+function bunchball_user_interaction_menu() {
+
+  $items = array();
+
+  $items['admin/config/bunchball/user-interaction'] = array(
+    'title' => 'User interaction',
+    'type' => MENU_LOCAL_TASK,
+    'callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_user_interaction_admin_form'),
+    'file' => 'bunchball_user_interaction.admin.inc',
+    'access arguments' => array('configure bunchball'),
+  );
+
+  return $items;
+}
