@@ -9,6 +9,8 @@ package = bunchball
 
 dependencies[] = ctools
 
+files[] = nitro/nitro.api.class.php
+
 #Stylesheets - if you want a stylesheet loaded on every single page
 #stylesheets[all][] = somefile.css
 
