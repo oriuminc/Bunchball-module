@@ -1,9 +1,7 @@
 <?php
 
 function bunchball_user_interaction_menu() {
-
   $items = array();
-
   $items['admin/config/bunchball/user-interaction'] = array(
     'title' => 'User interaction',
     'type' => MENU_LOCAL_TASK,
@@ -12,6 +10,54 @@ function bunchball_user_interaction_menu() {
     'file' => 'bunchball_user_interaction.admin.inc',
     'access arguments' => array('configure bunchball'),
   );
-
   return $items;
+}
+
+/**
+ * Implement hook_user_insert()
+ */
+function bunchball_user_interaction_user_insert(&$edit, $account, $category) {
+  //This has got to be where we are going to do the API call for a new user account
+  //If the user was created from a janrain account creation (facebook, twitter)
+  //we may need to know more information about that
+
+  //Need to see where photo is - is that part of the user
+  //Need to know what fields have been entered by the user as part of the registration
+  //DO we need to sent two calls, for this stuff - one for the user creation
+  //one for the number of fields that were completed?
+  //Is that information even really available to us.
+
+  $foo = 'bar';
+
+}
+
+function bunchball_user_interaction_get_plugin_instance($id) {
+  $instances = &drupal_static(__FUNCTION__);
+  if(!isset($instances[$id])) {
+    ctools_include('plugins');
+    $plugin = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction', $id);
+    $class = ctools_plugin_get_class($plugin, 'handler');
+    $instances[$id] = new $class();
+  }
+  return $instances[$id];
+}
+
+/**
+ * Implement hook_ctools_plugin_type
+ */
+function bunchball_user_interaction_ctools_plugin_type() {
+  $plugins['bunchball_user_interaction'] = array(
+    'use hooks' => FALSE,
+    'child plugins' => TRUE,
+  );
+  return $plugins;
+}
+
+/**
+ * Implement hook_ctools_plugin_directory
+ */
+function bunchball_user_interaction_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_user_interaction' && $plugin == 'bunchball_user_interaction') {
+    return 'plugins/bunchball_user_interaction';
+  }
 }
