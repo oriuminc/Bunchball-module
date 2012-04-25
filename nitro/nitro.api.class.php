@@ -75,15 +75,16 @@ class NitroAPI {
   /**
    *  Parse Nitro XML response as array of attributes and values.
    *
-   * @param $__url
+   * @param $url
    *   XML to parse
    * 
    * @return
    *   Array of values 
    */
-  private function my_xml2array($__url) {
+  private function my_xml2array($url) {
     $xml_values = array();
-    $contents = file_get_contents($__url);
+    $result = drupal_http_request($url);
+    $contents = file_get_contents($url);
     $parser = xml_parser_create('');
     if (!$parser)
       return false;
@@ -136,15 +137,15 @@ class NitroAPI {
   /**
    *  Access the attribute values like XPATH
    *
-   * @param $__xml_tree
-   * @param $__tag_path
+   * @param $xml_tree
+   * @param $tag_path
    * @return
    *    values 
    */
-  private function get_value_by_path($__xml_tree, $__tag_path) {
-    $tmp_arr = & $__xml_tree;
-    $tag_path = explode('/', $__tag_path);
-    foreach ($tag_path as $tag_name) {
+  private function get_value_by_path($xml_tree, $tag_path) {
+    $tmp_arr = & $xml_tree;
+    $tag_path_array = explode('/', $tag_path);
+    foreach ($tag_path_array as $tag_name) {
       $res = false;
       foreach ($tmp_arr as $key => $node) {
         if (is_int($key) && $node['name'] == $tag_name) {
@@ -282,3 +283,8 @@ class NitroAPI_NoSessionException extends Exception {}
  * Exception to be thrown when log action is unsuccessful.
  */
 class NitroAPI_LogActionException extends Exception {}
+
+/**
+ * Exception to be thrown on HTTP error
+ */
+class NitroAPI_HttpException extends Exception {}
