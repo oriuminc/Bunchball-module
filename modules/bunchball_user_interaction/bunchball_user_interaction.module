@@ -1,9 +1,7 @@
 <?php
 
 function bunchball_user_interaction_menu() {
-
   $items = array();
-
   $items['admin/config/bunchball/user-interaction'] = array(
     'title' => 'User interaction',
     'type' => MENU_LOCAL_TASK,
@@ -12,7 +10,6 @@ function bunchball_user_interaction_menu() {
     'file' => 'bunchball_user_interaction.admin.inc',
     'access arguments' => array('configure bunchball'),
   );
-
   return $items;
 }
 
@@ -34,16 +31,14 @@ function bunchball_user_interaction_user_insert(&$edit, $account, $category) {
 
 }
 
-function bunchball_user_interaction_get_plugin_instances($id) {
+function bunchball_user_interaction_get_plugin_instance($id) {
   $instances = &drupal_static(__FUNCTION__);
-
   if(!isset($instances[$id])) {
     ctools_include('plugins');
     $plugin = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction', $id);
     $class = ctools_plugin_get_class($plugin, 'handler');
     $instances[$id] = new $class();
   }
-
   return $instances[$id];
 }
 
