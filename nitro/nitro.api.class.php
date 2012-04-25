@@ -167,6 +167,8 @@ class NitroAPI {
    *    the user name to record info
    */
   public function login($userName) {
+    if (!empty($this->sessionKey)) return;  // don't log in if session exists
+    
     $this->userName = $userName;
     // construct a signature
     $signature = $this->getSignature();
