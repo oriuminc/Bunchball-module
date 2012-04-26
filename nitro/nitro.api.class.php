@@ -166,37 +166,26 @@ class NitroAPI {
    * @param $userName
    *    the user name to record info
    */
-  public function login($userName) {
-    if (!empty($this->sessionKey)) return;  // don't log in if session exists
-    
-    $this->userName = $userName;
-    // construct a signature
-    $signature = $this->getSignature();
+  private function login($userName) {
+    if (empty($this->sessionKey) || empty ($this->userName) || $userName != $this->userName) {
+      $this->userName = $userName;
+      // construct a signature
+      $signature = $this->getSignature();
 
-    // Construct a URL for REST API call user_login to extract Session Key
-    $request = $this->baseURL .
-            "method=user.login" .
-            "&apiKey={$this->apiKey}" .
-            "&userId={$this->userName}" .
-            "&ts=" . time() .
-            "&sig=$signature";
+      // Construct a URL for REST API call user_login to extract Session Key
+      $request = $this->baseURL .
+              "method=user.login" .
+              "&apiKey={$this->apiKey}" .
+              "&userId={$this->userName}" .
+              "&ts=" . time() .
+              "&sig=$signature";
 
-    // Converting XML response attribute and values to array attributes and values
-    $arr = $this->my_xml2array($request);
+      // Converting XML response attribute and values to array attributes and values
+      $arr = $this->my_xml2array($request);
 
-    // Accessing the sessionKey through XPATH
-    $sessionKeyArray = $this->get_value_by_path($arr, 'Nitro/Login/sessionKey');
-    $this->sessionKey = $sessionKeyArray['value'];
-  }
-
-  /**
-   * Ensure the API session has been established.
-   * 
-   * @throws NitroAPI_NoSessionException if session is empty
-   */
-  private function check_session() {
-    if (empty($this->sessionKey)) {
-      throw new NitroAPI_NoSessionException(t('Nitro API session not found.'));
+      // Accessing the sessionKey through XPATH
+      $sessionKeyArray = $this->get_value_by_path($arr, 'Nitro/Login/sessionKey');
+      $this->sessionKey = $sessionKeyArray['value'];
     }
   }
   
@@ -204,16 +193,17 @@ class NitroAPI {
   /**
    * Log an action for the established session.
    * 
+   * @param $userName
+   *    the user name to record info for
    * @param $actionTag
    *    The action tag to log
-   * 
    * @param $value
    *    Value associated with the action tag
    * 
    * @throws NitroAPI_NoSessionException
    */
-  public function logAction($actionTag, $value) {
-    $this->check_session();
+  public function logAction($userName, $actionTag, $value) {
+    $this->login($userName);
     // Construct a URL for user logAction
     $request = "{$this->baseURL}method=user.logAction" .
             "&sessionKey=$sessionKey" .
@@ -233,11 +223,14 @@ class NitroAPI {
   /**
    * Return the user point balance for current session.
    * 
+   * @param $userName
+   *    the user name to record info for
+   * 
    * @return
    *    the user point balance
    */
-  public function getUserPointsBalance() {
-    $this->check_session();
+  public function getUserPointsBalance($userName) {
+    $this->login($userName);
     // Construct a URL to get point balance from user
     $request = $this->baseURL .
             "method=user.getPointsBalance" .
@@ -256,13 +249,15 @@ class NitroAPI {
   /**
    * Retrieve site action leaders.
    * 
+   * @param $userName
+   *    the user name to record info for
    * @param $actionTag
    *    action tag to retrieve
    * @return
    *    array containing leaders
    */
-  public function getSiteActionLeaders($actionTag) {
-    $this->check_session();
+  public function getSiteActionLeaders($userName, $actionTag) {
+    $this->login($userName);
     // Construct a URL to get action leaders
     $request = $this->baseURL . "method=site.getActionLeaders" . "&sessionKey=" . $this->sessionKey . "&tags=" . $actionTag . "&tagsOperator=" . $this->TAGS_OPERATOR_OR . "&criteria=" . $this->CRITERIA_MAX . "&returnCount=" . $this->value;
 
@@ -275,11 +270,6 @@ class NitroAPI {
   }
 
 }
-
-/**
- * Exception to be thrown when action is attempted but session does not exist.
- */
-class NitroAPI_NoSessionException extends Exception {}
 
 /**
  * Exception to be thrown when log action is unsuccessful.
