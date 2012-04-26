@@ -37,6 +37,26 @@ function bunchball_user_interaction_user_insert(&$edit, $account, $category) {
   }
 }
 
+/**
+ * Implement hook_user_save()
+ */
+function bunchball_user_interaction_user_update(&$edit, $account, $category){
+
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $options = $class->getOptions();
+    //@TODO - this is a problem in that we have a specific option
+    //and the best another plugin could do is override this one
+    //so the pattern may be to only allow a single plugin to be
+    //*the* plugin that handles these things
+    //at any rate, this works for the one we have for now
+    if (isset($options['bunchball_user_profile_complete']['enabled'])) {
+      $class->$options['bunchball_user_profile_complete']['method']($account);
+    }
+  }
+}
 
 /**
  * Implement hook_user_login
