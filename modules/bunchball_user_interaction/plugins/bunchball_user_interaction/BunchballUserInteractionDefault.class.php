@@ -79,7 +79,15 @@ class BunchballUserInteractionDefault {
    * @param $user - a valid drupal user object
    */
   public function userRegister($user) {
-     //
+    try {
+      // Get a create a user and/or get a bunchball session
+      // with the user currently logging in
+      $this->apiUserLogin($user);
+      $this->bunchballApi->logAction('Register');
+    }
+    catch (NitroAPI_LogActionException $e) {
+      drupal_set_message($e->getMessage(), 'error');
+    }
   }
 
   /**
