@@ -203,6 +203,7 @@ class NitroAPI {
    */
   public function login($userName, $firstName ='', $lastName = '') {
     if (empty($this->sessionKey) || empty ($this->userName) || $userName != $this->userName) {
+      // perform the login only if needed
       $this->userName = $userName;
       // construct a signature
       $signature = $this->getSignature();
@@ -239,8 +240,7 @@ class NitroAPI {
    *
    * @throws NitroAPI_NoSessionException
    */
-  public function logAction($userName, $actionTag, $value) {
-    $this->login($userName);
+  public function logAction($actionTag, $value) {
     // Construct a URL for user logAction
     $request = "{$this->baseURL}?method=user.logAction" .
             "&sessionKey={$this->sessionKey}" .
@@ -266,8 +266,7 @@ class NitroAPI {
    * @return
    *    the user point balance
    */
-  public function getUserPointsBalance($userName) {
-    $this->login($userName);
+  public function getUserPointsBalance() {
     // Construct a URL to get point balance from user
     $request = $this->baseURL .
             "?method=user.getPointsBalance" .
@@ -293,8 +292,7 @@ class NitroAPI {
    * @return
    *    array containing leaders
    */
-  public function getSiteActionLeaders($userName, $actionTag) {
-    $this->login($userName);
+  public function getSiteActionLeaders($actionTag) {
     // Construct a URL to get action leaders
     $request = $this->baseURL . "?method=site.getActionLeaders" . "&sessionKey=" . $this->sessionKey . "&tags=" . $actionTag . "&tagsOperator=" . $this->TAGS_OPERATOR_OR . "&criteria=" . $this->CRITERIA_MAX . "&returnCount=" . $this->value;
 
