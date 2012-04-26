@@ -26,9 +26,36 @@ function bunchball_user_interaction_user_insert(&$edit, $account, $category) {
   //DO we need to sent two calls, for this stuff - one for the user creation
   //one for the number of fields that were completed?
   //Is that information even really available to us.
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $options = $class->getOptions();
+    if (issset($options['bunchball_user_register']['enabled'])) {
+      $class->$options['bunchball_user_register']['method']();
+    }
+  }
+}
 
-  $foo = 'bar';
 
+/**
+ * Implement hook_user_login
+ */
+function bunchball_user_interaction_user_login(&$edit, $account) {
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $options = $class->getOptions();
+    //@TODO - this is a problem in that we have a specific option
+    //and the best another plugin could do is override this one
+    //so the pattern may be to only allow a single plugin to be
+    //*the* plugin that handles these things
+    //at any rate, this works for the one we have for now
+    if (isset($options['bunchball_user_login']['enabled'])) {
+      $class->$options['bunchball_user_login']['method']($account);
+    }
+  }
 }
 
 function bunchball_user_interaction_get_plugin_instance($id) {
@@ -37,7 +64,7 @@ function bunchball_user_interaction_get_plugin_instance($id) {
     ctools_include('plugins');
     $plugin = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction', $id);
     $class = ctools_plugin_get_class($plugin, 'handler');
-    $instances[$id] = new $class();
+    $instances[$id] = new $class(NitroAPI::getInstance());
   }
   return $instances[$id];
 }

@@ -16,7 +16,7 @@ class NitroAPI {
 
   // singleton instance
   private static $instance;
-  
+
   /**
    * Constructor
    */
@@ -37,10 +37,10 @@ class NitroAPI {
     $this->apiKey = variable_get('bunchball_apikey');
     $this->secretKey = variable_get('bunchball_apisecret');
   }
-  
+
   /**
    * Implement singleton pattern.
-   * 
+   *
    * @return singleton instance of this class
    */
   public static function getInstance() {
@@ -54,7 +54,7 @@ class NitroAPI {
 
   /**
    * Generate a signature from the api key, secret and username.
-   * 
+   *
    * @return the signature
    */
   private function getSignature() {
@@ -77,14 +77,14 @@ class NitroAPI {
    *
    * @param $url
    *   XML to parse
-   * 
+   *
    * @return
-   *   Array of values 
+   *   Array of values
    */
   private function my_xml2array($url) {
     $xml_values = array();
     $result = drupal_http_request($url);
-    $contents = file_get_contents($url);
+    $contents = $result->data;
     $parser = xml_parser_create('');
     if (!$parser)
       return false;
@@ -140,7 +140,7 @@ class NitroAPI {
    * @param $xml_tree
    * @param $tag_path
    * @return
-   *    values 
+   *    values
    */
   private function get_value_by_path($xml_tree, $tag_path) {
     $tmp_arr = & $xml_tree;
@@ -162,18 +162,53 @@ class NitroAPI {
 
   /**
    * Log in to set session.
-   * 
+   *
    * @param $userName
-   *    the user name to record info
+   *    Do I use the user's GUID, or username, or email, or what?
+   *    All of these can be stored in bunchball as user preferences, so you can
+   *    always look them up.  But you still have to pick one to be the userId in
+   *    our (bunchball) system.  This is what you will use to make API calls, so
+   *    you should use the one that you will always have access to wherever you
+   *    need to make an API call from.
+   *
+   *    For Drupal and the bunchball module, the default plugins for interacting
+   *    with bunchball will assume a Drupal user id as the $userName.
+   *
+   *    If you need to use another ID (e.g. Janrain or other SSO id), then a
+   *    plugin can extend the base plugin class and override the actual calls to
+   *    the api
+   *
+   *  @param $firstName
+   *    optional.  Does not need to be the user's real first name
+   *
+   *  @param $lastName
+   *    option. Does not need to be the user's real last name
+   *
+   *    You can pass in optional firstName and lastName information for a user.
+   *    These become stored as preferences (named 'firstName' and 'lastName')
+   *    and can be looked up later using user.getPreference. They are also
+   *    returned as part of the response to most site.* methods, such as
+   *    site.getPointsLeaders. Note that you can put anything in these fields,
+   *    like a username or email address. Think of them as custom data for a
+   *    user that you don't want to have to lookup later when you're rendering
+   *    leaderboards and similar things.
+   *
+   *    For Drupal 'firstName' is going to be the Drupal user name and 'lastName'
+   *    user email.
+   *
+   *    As with 'userName' if different values are required, then the base plugin
+   *    class can be overriden to pass different values (e.g. Actual first and
+   *    last names as defined by fields added to the user entity)
+   *
    */
-  public function login($userName) {
+  public function login($userName, $firstName ='', $lastName = '') {
     $this->userName = $userName;
     // construct a signature
     $signature = $this->getSignature();
 
     // Construct a URL for REST API call user_login to extract Session Key
     $request = $this->baseURL .
-            "method=user.login" .
+            "?method=user.login" .
             "&apiKey={$this->apiKey}" .
             "&userId={$this->userName}" .
             "&ts=" . time() .
@@ -189,7 +224,7 @@ class NitroAPI {
 
   /**
    * Ensure the API session has been established.
-   * 
+   *
    * @throws NitroAPI_NoSessionException if session is empty
    */
   private function check_session() {
@@ -197,24 +232,24 @@ class NitroAPI {
       throw new NitroAPI_NoSessionException(t('Nitro API session not found.'));
     }
   }
-  
-  
+
+
   /**
    * Log an action for the established session.
-   * 
+   *
    * @param $actionTag
    *    The action tag to log
-   * 
+   *
    * @param $value
    *    Value associated with the action tag
-   * 
+   *
    * @throws NitroAPI_NoSessionException
    */
-  public function logAction($actionTag, $value) {
+  public function logAction($actionTag, $value ='') {
     $this->check_session();
     // Construct a URL for user logAction
-    $request = "{$this->baseURL}method=user.logAction" .
-            "&sessionKey=$sessionKey" .
+    $request = "{$this->baseURL}?method=user.logAction" .
+            "&sessionKey={$this->sessionKey}" .
             "&userId={$this->userName}" .
             "&tags=$actionTag" .
             "&value=$value";
@@ -230,7 +265,7 @@ class NitroAPI {
 
   /**
    * Return the user point balance for current session.
-   * 
+   *
    * @return
    *    the user point balance
    */
@@ -238,7 +273,7 @@ class NitroAPI {
     $this->check_session();
     // Construct a URL to get point balance from user
     $request = $this->baseURL .
-            "method=user.getPointsBalance" .
+            "?method=user.getPointsBalance" .
             "&sessionKey=" . $this->sessionKey .
             "&start=0" . "&pointCategory=" .
             $this->POINT_CATEGORY_ALL . "&criteria=" .
@@ -253,7 +288,7 @@ class NitroAPI {
 
   /**
    * Retrieve site action leaders.
-   * 
+   *
    * @param $actionTag
    *    action tag to retrieve
    * @return
@@ -262,7 +297,7 @@ class NitroAPI {
   public function getSiteActionLeaders($actionTag) {
     $this->check_session();
     // Construct a URL to get action leaders
-    $request = $this->baseURL . "method=site.getActionLeaders" . "&sessionKey=" . $this->sessionKey . "&tags=" . $actionTag . "&tagsOperator=" . $this->TAGS_OPERATOR_OR . "&criteria=" . $this->CRITERIA_MAX . "&returnCount=" . $this->value;
+    $request = $this->baseURL . "?method=site.getActionLeaders" . "&sessionKey=" . $this->sessionKey . "&tags=" . $actionTag . "&tagsOperator=" . $this->TAGS_OPERATOR_OR . "&criteria=" . $this->CRITERIA_MAX . "&returnCount=" . $this->value;
 
     //Converting XML response attribute and values to array attributes and values
     $arr = $this->my_xml2array($request);
