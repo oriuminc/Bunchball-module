@@ -68,7 +68,7 @@ class BunchballUserInteractionDefault {
           $identity_provider = $user->data['rpx_data']['profile']['providerName'];
         }
       }
-      $this->bunchballApi($user->uid, 'Login, Identity Provider: '. $identity_provider);
+      $this->bunchballApi->logAction('Login, Identity Provider: '. $identity_provider);
     }
     catch (NitroAPI_LogActionException $e) {
       drupal_set_message($e->getMessage(), 'error');
@@ -98,7 +98,7 @@ class BunchballUserInteractionDefault {
           $count++;
         }
       }
-      $this->bunchballApi->logAction($user->uid, 'Profile_Fields_Entered', $count);
+      $this->bunchballApi->logAction('Profile_Fields_Entered', $count);
     }
     catch (NitroAPI_LogActionException $e) {
       drupal_set_message($e->getMessage(), 'error');
