@@ -1,0 +1,51 @@
+<?php 
+
+/**
+ * Implement hook_view($node, $view_mode)
+ */
+function bunchball_nitro_view($node, $view_mode) { 
+  // make sure the user is currently viewing in full content more
+  if ($view_mode != 'full') {
+    return;
+  }
+
+  // initialize the JS
+  _bunchball_nitro_initialize();
+}
+
+function bunchball_nitro_init() {
+  _bunchball_nitro_initialize();
+}
+
+/**
+ * Initialize the JavaScript on the page
+ */
+function _bunchball_nitro_initialize() {
+  // variable_get('bunchball_apikey',0); will get the API key from server side
+  $api_key = variable_get('bunchball_apikey', '');
+  
+  if ($api_key == '') {
+    watchdog('bunchball_nitro', t('API Key not set'), array());
+    return;
+  }
+
+  // add the API key to the settings file..
+  drupal_add_js(array(
+      'bunchball_nitro' => array(
+          'apikey' => $api_key
+          )
+      ),
+      'setting');
+  
+  
+  // To include nitro.js, first put the following code into your HTML page as a 
+  // direct child of the <body> element or after the </body> tag.
+  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
+  drupal_add_js($nitro_js_url,
+          array(
+              'type' => 'external',
+              'scope' => 'footer'
+              ));
+  
+  
+}
