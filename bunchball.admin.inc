@@ -47,6 +47,20 @@ function bunchball_admin_form($form, &$form_state) {
     '#description' => t('The Bunchball sandbox URL. Most likely http://sandbox.bunchball.com/nitro/xml'),
   );
 
+  // Load the available bunchball user interaction plugins, so the admin can
+  // choose which one to make use of.
+  ctools_include('plugins');
+  if ($plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction')) {
+    foreach($plugins as $id => $plugin) {
+      $options[$id] = $plugin['label'];
+    }
+    $form['bunchball_user_interaction_plugin'] = array(
+      '#title' => t('Bunchball user/profile iteraction plugin'),
+      '#type' => 'select',
+      '#options' => $options
+    );
+  }
+
   return system_settings_form($form);
 }
 

@@ -1,11 +1,15 @@
 <?php
 
 /**
- * Administration form for which user / profile interactions
+ * Administration form for which of the user / profile interactions
  * should be communicated to bunch ball
  */
 function bunchball_user_interaction_admin_form($form, &$form_state) {
-
+  //@TODO this assumes multiple plugins could be used for bunchball_user_interaction
+  //but the main callbacks in the main bunchball_user_interaction module
+  //are making use of only one plugin.
+  //So either this or the main module will have to change to pick one or the other
+  //method of doing things.
   ctools_include('plugins');
   $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
   $options = array();
@@ -27,7 +31,15 @@ function bunchball_user_interaction_admin_form($form, &$form_state) {
   return $form;
 }
 
+/**
+ * Admin form submit hander
+ */
 function bunchball_user_interaction_admin_form_submit($form, &$form_state) {
+  //@TODO this assumes multiple plugins could be used for bunchball_user_interaction
+  //but the main callbacks in the main bunchball_user_interaction module
+  //are making use of only one plugin.
+  //So either this or the main module will have to change to pick one or the other
+  //method of doing things.
   ctools_include('plugins');
   $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
   foreach ($plugins as $id => $plugin) {

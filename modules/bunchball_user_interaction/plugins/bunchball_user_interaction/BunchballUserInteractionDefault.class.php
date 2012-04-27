@@ -1,11 +1,18 @@
 <?php
+/**
+ * @file
+ * Defines BunchballUserInteractionDefault class
+ * that is used as a ctools plugin defined by the bunchball_user_interaction
+ * module.
+ */
 
-class BunchballUserInteractionDefault {
+class BunchballUserInteractionDefault implements BunchballUserInteractionInterface{
 
-   public $options;
-  //unlikely that I need to have the api object in here, but maybe
-  //public $api;
-  //
+  public $options;
+
+  /**
+   * @param $api a class implmenting the NitroAPI interface (could be json or xml)
+   */
   function __construct(NitroAPI $api) {
     $this->options['bunchball_user_login'] = variable_get('bunchball_user_login','');
     $this->options['bunchball_user_register'] = variable_get('bunchball_user_register', '');
@@ -49,10 +56,10 @@ class BunchballUserInteractionDefault {
 
   //The thinking here is that modules could override this and set their own callbacks?
   public function adminFormSubmit($form, &$form_state) {
-    isset($form_state['values']['bunchball_user_login']) ? variable_set('bunchball_user_login', array('enabled'=>1, 'method' => 'userLogin')) : variable_set('bunchball_user_login', array('enabled'=> 0, 'method' => ''));
-    isset($form_state['values']['bunchball_user_register']) ? variable_set('bunchball_user_register', array('enabled' => 1, 'method' => 'userRegister')) : variable_set('bunchball_user_register', array('enabled'=>0, 'method' => ''));
-    isset($form_state['values']['bunchball_user_profile_complete']) ? variable_set('bunchball_user_profile_complete', array('enabled' => 1, 'method'  => 'userProfileComplete')) : variable_set('bunchball_user_profile_complete', array('enabled'=>0, 'method' => ''));
-    isset($form_state['values']['bunchball_user_profile_complete']) ? variable_set('bunchball_user_profile_complete', array('enabled' => 1, 'method'  => 'userProfilePicture')) : variable_set('bunchball_user_profile_picture', array('enabled'=>0, 'method' => ''));
+    $form_state['values']['bunchball_user_login'] ? variable_set('bunchball_user_login', array('enabled'=>1, 'method' => 'userLogin')) : variable_set('bunchball_user_login', array('enabled'=> 0, 'method' => ''));
+    $form_state['values']['bunchball_user_register'] ? variable_set('bunchball_user_register', array('enabled' => 1, 'method' => 'userRegister')) : variable_set('bunchball_user_register', array('enabled'=> 0, 'method' => ''));
+    $form_state['values']['bunchball_user_profile_complete'] ? variable_set('bunchball_user_profile_complete', array('enabled' => 1, 'method'  => 'userProfileComplete')) : variable_set('bunchball_user_profile_complete', array('enabled'=> 0, 'method' => ''));
+    $form_state['values']['bunchball_user_profile_picture'] ? variable_set('bunchball_user_profile_picture', array('enabled' => 1, 'method'  => 'userProfilePicture')) : variable_set('bunchball_user_profile_picture', array('enabled'=> 0, 'method' => ''));
   }
 
   /**
@@ -143,7 +150,7 @@ class BunchballUserInteractionDefault {
   /**
    * @param $user - a valid drupal user object
    */
-  public function apiUserLogin($user) {
+  private function apiUserLogin($user) {
     try {
       //In this default bunchball.login we are making some assumptions about
       //what bits of information are sent to bunchball to identify a user.
