@@ -1,6 +1,79 @@
 <?php
 
-class NitroAPI {
+interface NitroAPI {
+  /**
+   * Log in to set session.
+   *
+   * @param $userName
+   *    User name
+   *
+   *  @param $firstName
+   *    optional.  Does not need to be the user's real first name
+   *
+   *  @param $lastName
+   *    option. Does not need to be the user's real last name
+   */
+  public function login($userName, $firstName ='', $lastName = '');
+  
+  /**
+   * Log an action for the established session.
+   *
+   * @param $userName
+   *    the user name to record info for
+   * @param $actionTag
+   *    The action tag to log
+   * @param $value
+   *    Value associated with the action tag
+   *
+   * @throws NitroAPI_NoSessionException
+   */
+  public function logAction($actionTag, $value = '');
+  
+  /**
+   * Return the user point balance for current session.
+   *
+   * @param $userName
+   *    the user name to record info for
+   *
+   * @return
+   *    the user point balance
+   */
+  public function getUserPointsBalance();
+  
+  /**
+   * Retrieve site action leaders.
+   *
+   * @param $userName
+   *    the user name to record info for
+   * @param $actionTag
+   *    action tag to retrieve
+   * @return
+   *    array containing leaders
+   */
+  public function getSiteActionLeaders($actionTag);
+  
+}
+
+class NitroAPI_Factory {
+    // singleton instance
+  private static $instance;
+
+    /**
+   * Implement singleton pattern.
+   *
+   * @return singleton instance of this class
+   */
+  public static function getInstance($type = 'XML') {
+    if (!isset(self::$instance)) {
+      echo 'Creating new instance.';
+      $className = "NitroAPI_$type";
+      self::$instance = new $className;
+    }
+    return self::$instance;
+  }
+}
+
+class NitroAPI_XML implements NitroAPI {
 
   private $baseURL;
   private $secretKey;
@@ -13,9 +86,6 @@ class NitroAPI {
   private $CRITERIA_CREDITS = "credits";
   private $POINT_CATEGORY_ALL = "all";
   private $TAGS_OPERATOR_OR = "OR";
-
-  // singleton instance
-  private static $instance;
 
   /**
    * Constructor
@@ -36,20 +106,6 @@ class NitroAPI {
     }
     $this->apiKey = variable_get('bunchball_apikey');
     $this->secretKey = variable_get('bunchball_apisecret');
-  }
-
-  /**
-   * Implement singleton pattern.
-   *
-   * @return singleton instance of this class
-   */
-  public static function getInstance() {
-    if (!isset(self::$instance)) {
-      echo 'Creating new instance.';
-      $className = __CLASS__;
-      self::$instance = new $className;
-    }
-    return self::$instance;
   }
 
   /**
