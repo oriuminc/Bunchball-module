@@ -10,6 +10,7 @@ class BunchballUserInteractionDefault {
     $this->options['bunchball_user_login'] = variable_get('bunchball_user_login','');
     $this->options['bunchball_user_register'] = variable_get('bunchball_user_register', '');
     $this->options['bunchball_user_profile_complete'] = variable_get('bunchball_user_profile_complete', '');
+    $this->options['bunchball_user_profile_picture'] = variable_get('bunchball_user_profile_picture', '');
     $this->bunchballApi = $api;
   }
 
@@ -32,8 +33,14 @@ class BunchballUserInteractionDefault {
 
     $form['bunchball_user_profile_complete'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Communicate a user completing their user profile'),
+      '#title' => t('Communicate the number of user profile fields completed when a user saves their account.'),
       '#default_value' => $this->options['bunchball_user_profile_complete']['enabled'],
+    );
+
+    $form['bunchball_user_profile_picture'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Communicate whether a user has uploaded a profile picture'),
+      '#default_value' => $this->options['bunchball_user_profile_picture']['enabled'],
     );
     return $form;
   }
@@ -45,6 +52,7 @@ class BunchballUserInteractionDefault {
     isset($form_state['values']['bunchball_user_login']) ? variable_set('bunchball_user_login', array('enabled'=>1, 'method' => 'userLogin')) : variable_set('bunchball_user_login', array('enabled'=> 0, 'method' => ''));
     isset($form_state['values']['bunchball_user_register']) ? variable_set('bunchball_user_register', array('enabled' => 1, 'method' => 'userRegister')) : variable_set('bunchball_user_register', array('enabled'=>0, 'method' => ''));
     isset($form_state['values']['bunchball_user_profile_complete']) ? variable_set('bunchball_user_profile_complete', array('enabled' => 1, 'method'  => 'userProfileComplete')) : variable_set('bunchball_user_profile_complete', array('enabled'=>0, 'method' => ''));
+    isset($form_state['values']['bunchball_user_profile_complete']) ? variable_set('bunchball_user_profile_complete', array('enabled' => 1, 'method'  => 'userProfilePicture')) : variable_set('bunchball_user_profile_picture', array('enabled'=>0, 'method' => ''));
   }
 
   /**
@@ -84,6 +92,7 @@ class BunchballUserInteractionDefault {
       // with the user currently logging in
       $this->apiUserLogin($user);
       $this->bunchballApi->logAction('Register');
+      $this->userProfileComplete($user);
     }
     catch (NitroAPI_LogActionException $e) {
       drupal_set_message($e->getMessage(), 'error');
@@ -107,6 +116,23 @@ class BunchballUserInteractionDefault {
         }
       }
       $this->bunchballApi->logAction('Profile_Fields_Entered', $count);
+
+    }
+    catch (NitroAPI_LogActionException $e) {
+      drupal_set_message($e->getMessage(), 'error');
+    }
+
+  }
+
+  /**
+   * @param $user - a valid drupal user object
+   */
+  public function userProfilePicture($user) {
+    try {
+      $this->apiUserLogin($user);
+      if (isset($user->picture_upload)) {
+        $this->bunchballApi->logAction('Profile_Photo_Added');
+      }
     }
     catch (NitroAPI_LogActionException $e) {
       drupal_set_message($e->getMessage(), 'error');

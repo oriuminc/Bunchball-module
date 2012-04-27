@@ -31,8 +31,8 @@ function bunchball_user_interaction_user_insert(&$edit, $account, $category) {
   foreach ($plugins as $id => $plugin) {
     $class = bunchball_user_interaction_get_plugin_instance($id);
     $options = $class->getOptions();
-    if (issset($options['bunchball_user_register']['enabled'])) {
-      $class->$options['bunchball_user_register']['method']();
+    if (isset($options['bunchball_user_register']['enabled'])) {
+      $class->$options['bunchball_user_register']['method']($account);
     }
   }
 }
@@ -54,6 +54,9 @@ function bunchball_user_interaction_user_update(&$edit, $account, $category){
     //at any rate, this works for the one we have for now
     if (isset($options['bunchball_user_profile_complete']['enabled'])) {
       $class->$options['bunchball_user_profile_complete']['method']($account);
+    }
+    if (isset($options['bunchball_user_profile_picture']['enabled'])) {
+      $class->$options['bunchball_user_profile_picture']['method']($account);
     }
   }
 }

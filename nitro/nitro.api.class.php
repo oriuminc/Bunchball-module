@@ -240,7 +240,7 @@ class NitroAPI {
    *
    * @throws NitroAPI_NoSessionException
    */
-  public function logAction($actionTag, $value) {
+  public function logAction($actionTag, $value = '') {
     // Construct a URL for user logAction
     $request = "{$this->baseURL}?method=user.logAction" .
             "&sessionKey={$this->sessionKey}" .
