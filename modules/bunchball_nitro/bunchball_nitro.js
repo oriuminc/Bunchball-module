@@ -26,7 +26,7 @@ function submitNitroAPICall(tags) {
     return;
   }
 
-  // TODO: populate this properly with session Key in Drupal.settings..
+  // populate this properly with session Key in Drupal.settings..
   var sessionKey = Drupal.settings.bunchball_nitro.sessionkey;
   
   var queryString = 'method=user.logAction&sessionKey=' + sessionKey + '&tags=';
