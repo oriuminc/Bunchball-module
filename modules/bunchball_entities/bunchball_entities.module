@@ -13,51 +13,6 @@ function bunchball_entities_menu() {
   return $items;
 }
 
-/**
- * Implement hook_user_insert()
- */
-function bunchball_entities_user_insert(&$edit, $account, $category) {
-  //This has got to be where we are going to do the API call for a new user account
-  //If the user was created from a janrain account creation (facebook, twitter)
-  //we may need to know more information about that
-
-  //Need to see where photo is - is that part of the user
-  //Need to know what fields have been entered by the user as part of the registration
-  //DO we need to sent two calls, for this stuff - one for the user creation
-  //one for the number of fields that were completed?
-  //Is that information even really available to us.
-  ctools_include('plugins');
-  $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
-  foreach ($plugins as $id => $plugin) {
-    $class = bunchball_entities_get_plugin_instance($id);
-    $options = $class->getOptions();
-    if (issset($options['bunchball_user_register']['enabled'])) {
-      $class->$options['bunchball_user_register']['method']();
-    }
-  }
-}
-
-
-/**
- * Implement hook_user_login
- */
-function bunchball_entities_user_login(&$edit, $account) {
-  ctools_include('plugins');
-  $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
-  foreach ($plugins as $id => $plugin) {
-    $class = bunchball_entities_get_plugin_instance($id);
-    $options = $class->getOptions();
-    //@TODO - this is a problem in that we have a specific option
-    //and the best another plugin could do is override this one
-    //so the pattern may be to only allow a single plugin to be
-    //*the* plugin that handles these things
-    //at any rate, this works for the one we have for now
-    if (isset($options['bunchball_user_login']['enabled'])) {
-      $class->$options['bunchball_user_login']['method']($account);
-    }
-  }
-}
-
 function bunchball_entities_get_plugin_instance($id) {
   $instances = &drupal_static(__FUNCTION__);
   if(!isset($instances[$id])) {
@@ -86,5 +41,54 @@ function bunchball_entities_ctools_plugin_type() {
 function bunchball_entities_ctools_plugin_directory($module, $plugin) {
   if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
     return 'plugins/bunchball_entities';
+  }
+}
+
+
+/**
+ * Implements hook_node_insert()
+ * 
+ * @param type $node 
+ */
+function bunchball_entities_node_insert($node) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+    ctools_include('plugins');
+    $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+    foreach ($plugins as $id => $plugin) {
+      $class = bunchball_entities_get_plugin_instance($id);
+      $node_type = "node_{$node->type}";
+      $class->insert($node_type, 'node', $user);
+    }
+  }
+}
+
+/**
+ * Implements hook_node_update()
+ * 
+ * @param type $node 
+ */
+function bunchball_entities_node_update($node) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+    ctools_include('plugins');
+    $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+    foreach ($plugins as $id => $plugin) {
+      $class = bunchball_entities_get_plugin_instance($id);
+      $node_type = "node_{$node->type}";
+      $class->update($node_type, 'node', $user);
+    }
+  }
+}
+
+function bunchball_entities_node_view($node, $view_mode, $langcode) {
+  
+  global $user;
+  if ($user->uid > 0) {
+    print('<pre>');
+    print_r($user);
+    print('</pre>');
   }
 }

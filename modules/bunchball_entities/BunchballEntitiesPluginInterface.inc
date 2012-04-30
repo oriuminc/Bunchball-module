@@ -14,7 +14,7 @@ interface BunchballEntitiesPluginInterface {
    * @param $user
    *    user object
    */
-  public function insert($id, $type);
+  public function insert($id, $type, $user);
   
   /**
    * Register content update actions.
@@ -28,6 +28,6 @@ interface BunchballEntitiesPluginInterface {
    * @param $user
    *    user object
    */
-  public function update($id, $type);
+  public function update($id, $type, $user);
   
 }

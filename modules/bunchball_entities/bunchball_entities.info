@@ -3,3 +3,4 @@ description = Expose entity operations and to Bunchball.
 core = 7.x
 package = Bunchball
 dependencies[] = bunchball
+files[] = BunchballEntitiesPluginInterface.inc
