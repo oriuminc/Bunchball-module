@@ -4,7 +4,7 @@
  * Implement hook_view($node, $view_mode)
  */
 function bunchball_nitro_view($node, $view_mode) { 
-  // make sure the user is currently viewing in full content more
+  // make sure the user is currently viewing in full content mode
   if ($view_mode != 'full') {
     return;
   }
@@ -13,6 +13,7 @@ function bunchball_nitro_view($node, $view_mode) {
   _bunchball_nitro_initialize();
 }
 
+// TODO: remove this after testing is over..
 function bunchball_nitro_init() {
   _bunchball_nitro_initialize();
 }
@@ -34,6 +35,7 @@ function _bunchball_nitro_initialize() {
   // TODO: change this so that the customer url is proper.
   $customer_subdomain = 'fakecustomer';
 
+  // instantiate the variables for the JS
   $server_url = $in_debug_mode ? 
       'http://sandbox.bunchball.net/nitro/json' : 
       'http://'.$customer_subdomain.'.nitro.bunchball.net/nitro/json/';
@@ -70,6 +72,9 @@ EOD;
       'weight' => -9,
       'scope' => 'footer'
   ));
+  
+  // TODO: look for sessionKey that is acquired during login, and place it into
+  // Drupal.settings for use in the script.
   
   // add jQuery functions file
   drupal_add_js(
