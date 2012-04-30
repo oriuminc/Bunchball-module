@@ -1,0 +1,90 @@
+<?php
+
+function bunchball_entities_menu() {
+  $items = array();
+  $items['admin/config/system/bunchball/entities'] = array(
+    'title' => 'Entities',
+    'type' => MENU_LOCAL_TASK,
+    'callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_entities_admin_form'),
+    'file' => 'bunchball_entities.admin.inc',
+    'access arguments' => array('configure bunchball'),
+  );
+  return $items;
+}
+
+/**
+ * Implement hook_user_insert()
+ */
+function bunchball_entities_user_insert(&$edit, $account, $category) {
+  //This has got to be where we are going to do the API call for a new user account
+  //If the user was created from a janrain account creation (facebook, twitter)
+  //we may need to know more information about that
+
+  //Need to see where photo is - is that part of the user
+  //Need to know what fields have been entered by the user as part of the registration
+  //DO we need to sent two calls, for this stuff - one for the user creation
+  //one for the number of fields that were completed?
+  //Is that information even really available to us.
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_entities_get_plugin_instance($id);
+    $options = $class->getOptions();
+    if (issset($options['bunchball_user_register']['enabled'])) {
+      $class->$options['bunchball_user_register']['method']();
+    }
+  }
+}
+
+
+/**
+ * Implement hook_user_login
+ */
+function bunchball_entities_user_login(&$edit, $account) {
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_entities_get_plugin_instance($id);
+    $options = $class->getOptions();
+    //@TODO - this is a problem in that we have a specific option
+    //and the best another plugin could do is override this one
+    //so the pattern may be to only allow a single plugin to be
+    //*the* plugin that handles these things
+    //at any rate, this works for the one we have for now
+    if (isset($options['bunchball_user_login']['enabled'])) {
+      $class->$options['bunchball_user_login']['method']($account);
+    }
+  }
+}
+
+function bunchball_entities_get_plugin_instance($id) {
+  $instances = &drupal_static(__FUNCTION__);
+  if(!isset($instances[$id])) {
+    ctools_include('plugins');
+    $plugin = ctools_get_plugins('bunchball_entities', 'bunchball_entities', $id);
+    $class = ctools_plugin_get_class($plugin, 'handler');
+    $instances[$id] = new $class;
+  }
+  return $instances[$id];
+}
+
+/**
+ * Implement hook_ctools_plugin_type
+ */
+function bunchball_entities_ctools_plugin_type() {
+  $plugins['bunchball_entities'] = array(
+    'use hooks' => FALSE,
+    'child plugins' => TRUE,
+  );
+  return $plugins;
+}
+
+/**
+ * Implement hook_ctools_plugin_directory
+ */
+function bunchball_entities_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
+    return 'plugins/bunchball_entities';
+  }
+}
