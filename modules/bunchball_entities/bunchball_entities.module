@@ -82,13 +82,3 @@ function bunchball_entities_node_update($node) {
     }
   }
 }
-
-function bunchball_entities_node_view($node, $view_mode, $langcode) {
-  
-  global $user;
-  if ($user->uid > 0) {
-    print('<pre>');
-    print_r($user);
-    print('</pre>');
-  }
-}
