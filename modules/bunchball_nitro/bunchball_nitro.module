@@ -28,24 +28,51 @@ function _bunchball_nitro_initialize() {
     watchdog('bunchball_nitro', t('API Key not set'), array());
     return;
   }
-
-  // add the API key to the settings file..
-  drupal_add_js(array(
-      'bunchball_nitro' => array(
-          'apikey' => $api_key
-          )
-      ),
-      'setting');
   
+  // TODO: change this so that debug mode is reflected in the environment.
+  $in_debug_mode = true;
+  // TODO: change this so that the customer url is proper.
+  $customer_subdomain = 'fakecustomer';
+
+  $server_url = $in_debug_mode ? 
+      'http://sandbox.bunchball.net/nitro/json' : 
+      'http://'.$customer_subdomain.'.nitro.bunchball.net/nitro/json/';
+  $user_id = 'IDunnoYet';
+  $timestamp = time();
+  $signature = 'thisShouldBeFiguredOutSoonerThanLater';
+  $debug = $in_debug_mode ? 'true' : 'false';
+  
+  // Build the Nitro Object in JS to be added at the bottom of the file.
+  $embedded_js = <<<EOD
+var connectionParams={};
+connectionParams.apiKey = "$api_key";
+connectionParams.server = "$server_url";
+connectionParams.userId = escape("$user_id");     
+connectionParams.timeStamp = "$timestamp";
+connectionParams.signature = "$signature";
+connectionParams.debug = $debug;
+
+var nitro = new Nitro(connectionParams);
+
+EOD;
   
   // To include nitro.js, first put the following code into your HTML page as a 
   // direct child of the <body> element or after the </body> tag.
   $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
-  drupal_add_js($nitro_js_url,
-          array(
-              'type' => 'external',
-              'scope' => 'footer'
-              ));
+  drupal_add_js($nitro_js_url, array(
+      'type' => 'external',
+      'weight' => -10,
+      'scope' => 'footer'
+  ));
+
+  drupal_add_js($embedded_js, array(
+      'type' => 'inline',
+      'weight' => -9,
+      'scope' => 'footer'
+  ));
   
-  
+  // add jQuery functions file
+  drupal_add_js(
+      drupal_get_path('module','bunchball_nitro') . '/bunchball_nitro.js'
+  );
 }

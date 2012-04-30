@@ -2,4 +2,5 @@ name = bunchball_nitro
 description = Integration points for the nitro API and drupal
 core = 7.x
 package = bunchball
+scripts[] = bunchball_nitro.js
 dependencies[] = bunchball
