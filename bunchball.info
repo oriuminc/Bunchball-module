@@ -5,11 +5,12 @@ core = 7.x
 version = "7.x-1.0"
 core = "7.x"
 
-package = bunchball
+package = Bunchball
 
 dependencies[] = ctools
 
 files[] = nitro/nitro.api.class.php
+files[] = BunchballPluginInterface.inc
 
 #Stylesheets - if you want a stylesheet loaded on every single page
 #stylesheets[all][] = somefile.css

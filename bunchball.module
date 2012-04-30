@@ -10,8 +10,8 @@
 function bunchball_menu() {
   $items = array();
 
-  $items['admin/config/bunchball'] = array(
-    'title' => 'Bunchball configuration',
+  $items['admin/config/system/bunchball'] = array(
+    'title' => 'Bunchball',
     'description' => 'The main configuration screen for the bunchball api modules',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('bunchball_admin_form'),
@@ -21,8 +21,8 @@ function bunchball_menu() {
     'weight' => -10,
   );
 
-  $items['admin/config/bunchball/main'] = array(
-    'title' => 'Bunchball configuration',
+  $items['admin/config/system/bunchball/main'] = array(
+    'title' => 'Configuration',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -37,7 +37,7 @@ function bunchball_permission() {
   return array(
     'configure bunchball' => array(
       'title' => t('Configure Bunchball settings'),
-      'description' => t('Users allowed to configure the core bunchball module including reading or writing Bunchball API keys.'),
+      'description' => t('Configure the bunchball module including Bunchball API keys.'),
     ),
   );
 }

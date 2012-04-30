@@ -65,7 +65,6 @@ class NitroAPI_Factory {
    */
   public static function getInstance($type = 'XML') {
     if (!isset(self::$instance)) {
-      echo 'Creating new instance.';
       $className = "NitroAPI_$type";
       self::$instance = new $className;
     }
