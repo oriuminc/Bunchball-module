@@ -75,6 +75,11 @@ EOD;
   
   // TODO: look for sessionKey that is acquired during login, and place it into
   // Drupal.settings for use in the script.
+  drupal_add_js(array(
+      'bunchball_nitro' => array(
+          'sessionkey' => 'thereIsASessionKeyFromDrupal'
+          )
+      ), 'setting');
   
   // add jQuery functions file
   drupal_add_js(
