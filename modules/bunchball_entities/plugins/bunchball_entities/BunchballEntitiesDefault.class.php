@@ -65,13 +65,15 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
    * @param $user
    */
   public function insert($id, $type, $user) {
-    try {
-      // log in
-      $this->nitro->login($user->uid, $user->name, $user->mail);
-      $this->nitro->logAction($this->getActionName($id, $type, 'update'));
-    }
-    catch (NitroAPI_LogActionException $e) {
-      drupal_set_message($e->getMessage(), 'error');
+    if ($this->checkSend($id, 'insert')) {
+      try {
+        // log in
+        $this->nitro->login($user->uid, $user->name, $user->mail);
+        $this->nitro->logAction($this->getActionName($id, 'update'));
+      }
+      catch (NitroAPI_LogActionException $e) {
+        drupal_set_message($e->getMessage(), 'error');
+      }
     }
   }
   
@@ -83,14 +85,24 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
    * @param $user
    */
   public function update($id, $type, $user) {
-    try {
-      // log in
-      $this->nitro->login($user->uid, $user->name, $user->mail);
-      $this->nitro->logAction($this->getActionName($id, $type, 'update'));
+    if ($this->checkSend($id, 'update')) {
+      try {
+        // log in
+        $this->nitro->login($user->uid, $user->name, $user->mail);
+        $this->nitro->logAction($this->getActionName($id, 'update'));
+      }
+      catch (NitroAPI_LogActionException $e) {
+        drupal_set_message($e->getMessage(), 'error');
+      }
     }
-    catch (NitroAPI_LogActionException $e) {
-      drupal_set_message($e->getMessage(), 'error');
-    }
+  }
+  
+  private function checkSend($id, $op) {
+    return $this->options[$id][$op];
+  }
+
+  private function getActionName($id, $op) {
+    return $this->options[$id]["{$op}_action"];
   }
   
   /**
