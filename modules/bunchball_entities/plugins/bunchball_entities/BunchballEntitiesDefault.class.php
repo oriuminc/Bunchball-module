@@ -68,7 +68,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
     if ($this->checkSend($id, 'insert')) {
       try {
         // log in
-        $this->nitro->login($user->uid, $user->name, $user->mail);
+        $this->nitro->drupalLogin($user);
         $this->nitro->logAction($this->getActionName($id, 'update'));
       }
       catch (NitroAPI_LogActionException $e) {
@@ -88,7 +88,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
     if ($this->checkSend($id, 'update')) {
       try {
         // log in
-        $this->nitro->login($user->uid, $user->name, $user->mail);
+        $this->nitro->drupalLogin($user);
         $this->nitro->logAction($this->getActionName($id, 'update'));
       }
       catch (NitroAPI_LogActionException $e) {

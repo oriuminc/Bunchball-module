@@ -281,6 +281,19 @@ class NitroAPI_XML implements NitroAPI {
     }
   }
 
+  /**
+   * For convenience log in using Drupal user.
+   * 
+   * @param $user
+   *    Drupal global $user object
+   * 
+   * @param $setPreferences 
+   *    If TRUE, send the Drupal user roles as prefences.
+   */
+  public function drupalLogin($user, $setPreferences = TRUE) {
+    $this->login($user->uid, $user->name, $user->mail);
+    $this->setPreferences($user->roles);
+  }
 
   /**
    * Log an action for the established session.

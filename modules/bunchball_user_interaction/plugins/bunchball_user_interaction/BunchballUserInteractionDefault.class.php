@@ -156,7 +156,7 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       //what bits of information are sent to bunchball to identify a user.
       //See nitro.api.class::login doxygen for more information if you want to
       //extend this class to override this method.
-      $this->bunchballApi->login($user->uid, $user->name, $user->mail);
+      $this->bunchballApi->drupalLogin($user);
     }
     catch (NitroAPI_LogActionException $e) {
       drupal_set_message($e->getMessage(), 'error');
