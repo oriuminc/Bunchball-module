@@ -310,6 +310,47 @@ class NitroAPI_XML implements NitroAPI {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
   }
+  
+  /**
+   * Set preferences for current session.
+   * 
+   * @param $names
+   *    Array of preferences to send EG: array("Key1" => "Value1", "Key2" => "Value2")
+   * 
+   * @param $key_value
+   *    Treat array as key-value pairs if TRUE.
+   *    EG:
+   *      TRUE: send &names=Key1|Key2&values=Value1|Value2
+   *      FALSE: send &names=Value1|Value2
+   */
+  public function setPreferences($names, $key_value = FALSE) {
+    
+    if ($key_value) {
+      
+      $names_list = implode('|', array_keys($names));
+      $values_list = implode('|', array_values($names));
+      // Construct a URL for user setPreferences
+      $request = "{$this->baseURL}?method=user.setPreferences" .
+              "&sessionKey={$this->sessionKey}" .
+              "&userId={$this->userName}" .
+              "&names=$names_list" .
+              "&values=$values_list";
+    }
+    else {
+      $names_list = implode('|', array_values($names));
+      $request = "{$this->baseURL}?method=user.setPreferences" .
+              "&sessionKey={$this->sessionKey}" .
+              "&userId={$this->userName}" .
+              "&names=$names_list";
+    }
+    //Converting XML response attribute and values to array attributes and values
+    $arr = $this->my_xml2array($request);
+
+    $responseArray = $this->get_value_by_path($arr, 'Nitro');
+    if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
+      throw new NitroAPI_LogActionException(t('Nitro API setPreferences failed'));
+    }
+  }
 
   /**
    * Return the user point balance for current session.
