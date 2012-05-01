@@ -3,20 +3,31 @@
 /**
  * Implement hook_view($node, $view_mode)
  */
-function bunchball_nitro_view($node, $view_mode) { 
+function bunchball_nitro_node_view($node, $view_mode, $langcode) { 
   // make sure the user is currently viewing in full content mode
   if ($view_mode != 'full') {
     return;
   }
+  
+  drupal_add_js(array(
+    'bunchball_nitro' => array(
+        'node_id' => $node->nid,
+        'node_uid' => $node->uid,
+        'node_title' => $node->title,
+        'node_cat' => $node->type,
+        'node_type' => $node->type
+        )
+    ), 'setting');
+
 
   // initialize the JS
   _bunchball_nitro_initialize();
 }
 
 // TODO: remove this after testing is over..
-function bunchball_nitro_init() {
-  _bunchball_nitro_initialize();
-}
+//function bunchball_nitro_init() {
+//  _bunchball_nitro_initialize();
+//}
 
 /**
  * Initialize the JavaScript on the page
@@ -30,6 +41,8 @@ function _bunchball_nitro_initialize() {
     return;
   }
   
+  global $user;
+
   // TODO: change this so that debug mode is reflected in the environment.
   $in_debug_mode = true;
   // TODO: change this so that the customer url is proper.
@@ -39,9 +52,10 @@ function _bunchball_nitro_initialize() {
   $server_url = $in_debug_mode ? 
       'http://sandbox.bunchball.net/nitro/json' : 
       'http://'.$customer_subdomain.'.nitro.bunchball.net/nitro/json/';
-  $user_id = 'IDunnoYet';
+  $user_id = $user->uid;
   $timestamp = time();
-  $signature = 'thisShouldBeFiguredOutSoonerThanLater';
+  $nitro = NitroAPI_Factory::getInstance();
+  $signature = $nitro->getSignature();
   $debug = $in_debug_mode ? 'true' : 'false';
   
   // Build the Nitro Object in JS to be added at the bottom of the file.
@@ -49,9 +63,21 @@ function _bunchball_nitro_initialize() {
 var connectionParams={};
 connectionParams.apiKey = "$api_key";
 connectionParams.server = "$server_url";
-connectionParams.userId = escape("$user_id");     
 connectionParams.timeStamp = "$timestamp";
 connectionParams.signature = "$signature";
+EOD;
+
+  // if the user is logged in....
+  if ($user_id > 0) {
+    $embedded_js .= <<<EOD
+
+connectionParams.userId = escape("$user_id");
+EOD;
+    
+  }
+  
+  $embedded_js .= <<<EOD
+
 connectionParams.debug = $debug;
 
 var nitro = new Nitro(connectionParams);
@@ -72,14 +98,6 @@ EOD;
       'weight' => -9,
       'scope' => 'footer'
   ));
-  
-  // TODO: look for sessionKey that is acquired during login, and place it into
-  // Drupal.settings for use in the script.
-  drupal_add_js(array(
-      'bunchball_nitro' => array(
-          'sessionkey' => 'thereIsASessionKeyFromDrupal'
-          )
-      ), 'setting');
   
   // add jQuery functions file
   drupal_add_js(
