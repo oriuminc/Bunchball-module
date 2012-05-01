@@ -112,7 +112,7 @@ class NitroAPI_XML implements NitroAPI {
    *
    * @return the signature
    */
-  private function getSignature() {
+  public function getSignature() {
     $unencryptedSignature = $this->apiKey . $this->secretKey . time() . $this->userName;
 
     // get the length
@@ -263,8 +263,8 @@ class NitroAPI_XML implements NitroAPI {
       // construct a signature
       $signature = $this->getSignature();
 
-    // Construct a URL for REST API call user_login to extract Session Key
-    $request = $this->baseURL .
+      // Construct a URL for REST API call user_login to extract Session Key
+      $request = $this->baseURL .
             "?method=user.login" .
             "&apiKey={$this->apiKey}" .
             "&userId={$this->userName}" .
