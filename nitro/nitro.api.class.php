@@ -292,7 +292,7 @@ class NitroAPI_XML implements NitroAPI {
    */
   public function drupalLogin($user, $setPreferences = TRUE) {
     $this->login($user->uid, $user->name, $user->mail);
-    $this->setPreferences($user->roles);
+    $this->setPreferences($user->roles, TRUE);
   }
 
   /**
@@ -340,8 +340,8 @@ class NitroAPI_XML implements NitroAPI {
     
     if ($key_value) {
       
-      $names_list = implode('|', array_keys($names));
-      $values_list = implode('|', array_values($names));
+      $names_list = str_replace(' ', '_', implode('|', array_keys($names)));
+      $values_list = str_replace(' ', '_', implode('|', array_values($names)));
       // Construct a URL for user setPreferences
       $request = "{$this->baseURL}?method=user.setPreferences" .
               "&sessionKey={$this->sessionKey}" .
@@ -350,7 +350,7 @@ class NitroAPI_XML implements NitroAPI {
               "&values=$values_list";
     }
     else {
-      $names_list = implode('|', array_values($names));
+      $names_list = str_replace(' ', '_', implode('|', array_values($names)));
       $request = "{$this->baseURL}?method=user.setPreferences" .
               "&sessionKey={$this->sessionKey}" .
               "&userId={$this->userName}" .
