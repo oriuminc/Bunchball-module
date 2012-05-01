@@ -122,7 +122,6 @@ class NitroAPI_XML implements NitroAPI {
     $unencryptedSignature = $unencryptedSignature . $length;
 
     //MD5 on signature
-    print("Creating a signature... \n");
     $signature = md5($unencryptedSignature);
     return $signature;
   }
