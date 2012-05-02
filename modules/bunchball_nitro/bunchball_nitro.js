@@ -3,6 +3,7 @@
   
   $(document).ready(function() {
     nitro.getUserId(gotCurrentUserId);
+    nitro.showPendingNotifications();
   });  
   
 }) (jQuery);
