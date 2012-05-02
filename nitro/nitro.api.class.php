@@ -302,8 +302,10 @@ class NitroAPI_XML implements NitroAPI {
    *
    * @param $userName
    *    the user name to record info for
+   * 
    * @param $actionTag
    *    The action tag to log
+   * 
    * @param $value
    *    Value associated with the action tag
    *
@@ -369,9 +371,6 @@ class NitroAPI_XML implements NitroAPI {
   /**
    * Return the user point balance for current session.
    *
-   * @param $userName
-   *    the user name to record info for
-   *
    * @return
    *    the user point balance
    */
@@ -394,16 +393,21 @@ class NitroAPI_XML implements NitroAPI {
   /**
    * Retrieve site action leaders.
    *
-   * @param $userName
-   *    the user name to record info for
    * @param $actionTag
    *    action tag to retrieve
+   * 
    * @return
    *    array containing leaders
    */
   public function getSiteActionLeaders($actionTag) {
     // Construct a URL to get action leaders
-    $request = $this->baseURL . "?method=site.getActionLeaders" . "&sessionKey=" . $this->sessionKey . "&tags=" . $actionTag . "&tagsOperator=" . $this->TAGS_OPERATOR_OR . "&criteria=" . $this->CRITERIA_MAX . "&returnCount=" . $this->value;
+    $request = $this->baseURL .
+            "?method=site.getActionLeaders" .
+            "&sessionKey=" . $this->sessionKey .
+            "&tags=" . $actionTag .
+            "&tagsOperator=" . $this->TAGS_OPERATOR_OR .
+            "&criteria=" . $this->CRITERIA_MAX .
+            "&returnCount=" . $this->value;
 
     //Converting XML response attribute and values to array attributes and values
     $arr = $this->my_xml2array($request);
