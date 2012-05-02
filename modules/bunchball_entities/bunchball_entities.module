@@ -3,7 +3,7 @@
 function bunchball_entities_menu() {
   $items = array();
   $items['admin/config/system/bunchball/entities'] = array(
-    'title' => 'Entities',
+    'title' => 'Content',
     'type' => MENU_LOCAL_TASK,
     'callback' => 'drupal_get_form',
     'page arguments' => array('bunchball_entities_admin_form'),
@@ -81,4 +81,8 @@ function bunchball_entities_node_update($node) {
       $class->update($node_type, 'node', $user);
     }
   }
+}
+
+function bunchball_entities_entity_insert($entity, $type) {
+  
 }
