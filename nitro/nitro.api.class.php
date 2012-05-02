@@ -79,6 +79,7 @@ class NitroAPI_XML implements NitroAPI {
   private $apiKey;
   private $userName;
   private $sessionKey;
+  private $user_roles;
 
   // Constants
   private $CRITERIA_MAX = "MAX";
@@ -292,7 +293,8 @@ class NitroAPI_XML implements NitroAPI {
    */
   public function drupalLogin($user, $setPreferences = TRUE) {
     $this->login($user->uid, $user->name, $user->mail);
-    $this->setPreferences($user->roles, TRUE);
+    $roles = $this->formatRoles($user->roles);
+    $this->setPreferences($roles, TRUE);
   }
 
   /**
@@ -358,7 +360,6 @@ class NitroAPI_XML implements NitroAPI {
     }
     //Converting XML response attribute and values to array attributes and values
     $arr = $this->my_xml2array($request);
-
     $responseArray = $this->get_value_by_path($arr, 'Nitro');
     if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
       throw new NitroAPI_LogActionException(t('Nitro API setPreferences failed'));
@@ -412,6 +413,27 @@ class NitroAPI_XML implements NitroAPI {
     return $actionsArray['attributes'];
   }
 
+  /**
+   * Format the roles so that they are consistent and in the format expected by 
+   * nitro.
+   * 
+   * @param $roles
+   *    Drupal user roles array IE: $user->roles
+   * 
+   * @return
+   *    array of user roles for nitro. EG:
+   *      array(['authenticated user'] => 1, ['administrator'] => 1)
+   */
+  private function formatRoles($roles) {
+    $formatted_roles = array();
+    if (empty($this->user_roles)) {
+      // keep the results so we only call once
+      $this->user_roles = user_roles();
+    }
+    $role_names = array_intersect_key($this->user_roles, $roles);
+    $formatted_roles = array_fill_keys($role_names, 1);
+    return $formatted_roles;
+  }
 }
 
 /**
