@@ -1,5 +1,5 @@
-name = bunchball_user_interaction
-description = A module to expose user system interactions and profile updates to bunchball
+name = bunchball User Interaction
+description = Send user system interactions and profile updates to Bunchball
 core = 7.x
 package = Bunchball
 dependencies[] = bunchball

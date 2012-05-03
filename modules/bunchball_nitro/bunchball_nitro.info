@@ -1,6 +1,6 @@
-name = bunchball_nitro
-description = Integration points for the nitro API and drupal
+name = Bunchball Nitro
+description = Include and integrate the Bunchball Nitro Javascript API
 core = 7.x
-package = bunchball
+package = Bunchball
 scripts[] = bunchball_nitro.js
 dependencies[] = bunchball
