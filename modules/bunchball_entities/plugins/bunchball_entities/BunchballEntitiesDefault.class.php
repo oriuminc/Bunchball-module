@@ -67,17 +67,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
    * @param $user
    */
   public function insert($id, $type, $user) {
-    if ($this->checkSend($id, 'insert')) {
-      try {
-        // log in
-        $this->nitro->drupalLogin($user);
-        $action = $this->getActionName($id, 'insert');
-        $this->nitro->logAction($action);
-      }
-      catch (NitroAPI_LogActionException $e) {
-        drupal_set_message($e->getMessage(), 'error');
-      }
-    }
+    $this->register($id, $type, $user, 'insert');
   }
   
   /**
@@ -88,17 +78,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
    * @param $user
    */
   public function comment($id, $type, $user) {
-    if ($this->checkSend($id, 'comment')) {
-      try {
-        // log in
-        $this->nitro->drupalLogin($user);
-        $action = $this->getActionName($id, 'comment');
-        $this->nitro->logAction($action);
-      }
-      catch (NitroAPI_LogActionException $e) {
-        drupal_set_message($e->getMessage(), 'error');
-      }
-    }
+    $this->register($id, $type, $user, 'comment');
   }
   
   /**
@@ -109,11 +89,24 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
    * @param $user
    */
   public function update($id, $type, $user) {
-    if ($this->checkSend($id, 'update')) {
+    $this->register($id, $type, $user, 'update');
+  }
+  
+  /**
+   * Register content actions.
+   *
+   * @param $id
+   * @param $type 
+   * @param $user
+   * @param $op
+   *    operation to register (ie: insert / update / comment) 
+   */
+  private function register($id, $type, $user, $op) {
+    if ($this->checkSend($id, $op)) {
       try {
         // log in
         $this->nitro->drupalLogin($user);
-        $action = $this->getActionName($id, 'update');
+        $action = $this->getActionName($id, $op);
         $this->nitro->logAction($action);
       }
       catch (NitroAPI_LogActionException $e) {

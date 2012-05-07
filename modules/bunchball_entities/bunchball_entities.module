@@ -106,7 +106,7 @@ function bunchball_entities_form_alter($form, $form_state, $form_id) {
   if ($form_id == 'poll_view_voting') {
 //    array_unshift($form['vote']['#submit'], 'bunchball_entities_poll_vote');
     $form['#submit'][] = 'bunchball_entities_poll_vote';
-    dsm($form);
+//    dsm($form);
   }
 }
 
