@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Implements hook_menu().
+ */
 function bunchball_entities_menu() {
   $items = array();
   $items['admin/config/system/bunchball/entities'] = array(
@@ -12,6 +15,7 @@ function bunchball_entities_menu() {
   );
   return $items;
 }
+
 
 function bunchball_entities_get_plugin_instance($id) {
   $instances = &drupal_static(__FUNCTION__);
@@ -44,11 +48,8 @@ function bunchball_entities_ctools_plugin_directory($module, $plugin) {
   }
 }
 
-
 /**
  * Implements hook_node_insert()
- * 
- * @param type $node 
  */
 function bunchball_entities_node_insert($node) {
   global $user;
@@ -66,8 +67,6 @@ function bunchball_entities_node_insert($node) {
 
 /**
  * Implements hook_node_update()
- * 
- * @param type $node 
  */
 function bunchball_entities_node_update($node) {
   global $user;
@@ -83,9 +82,25 @@ function bunchball_entities_node_update($node) {
   }
 }
 
+/**
+ * Implements hook_entity_insert().
+ */
 function bunchball_entities_entity_insert($entity, $type) {
   dsm($entity);
   dsm($type);
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+    if ($type == 'comment') {
+      ctools_include('plugins');
+      $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+      foreach ($plugins as $id => $plugin) {
+        $class = bunchball_entities_get_plugin_instance($id);
+        $node_type = "node_{$node->type}";
+        $class->insert($node_type, 'node', $user);
+      }
+    }
+  }
 }
 
 function bunchball_entities_form_alter($form, $form_state, $form_id) {
