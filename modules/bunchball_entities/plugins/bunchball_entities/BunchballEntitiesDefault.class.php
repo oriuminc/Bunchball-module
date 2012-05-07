@@ -53,6 +53,8 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
       $this->options[$key]['insert_action'] = $value[$key . '_insert_action'];
       $this->options[$key]['update'] = $value[$key . '_update_check'];
       $this->options[$key]['update_action'] = $value[$key . '_update_action'];
+      $this->options[$key]['comment'] = $value[$key . '_comment_check'];
+      $this->options[$key]['comment_action'] = $value[$key . '_comment_action'];
     }
     variable_set('bunchball_entities', $this->options);
   }
@@ -70,6 +72,27 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
         // log in
         $this->nitro->drupalLogin($user);
         $action = $this->getActionName($id, 'insert');
+        $this->nitro->logAction($action);
+      }
+      catch (NitroAPI_LogActionException $e) {
+        drupal_set_message($e->getMessage(), 'error');
+      }
+    }
+  }
+  
+  /**
+   * Register content comment actions.
+   *
+   * @param $id
+   * @param $type 
+   * @param $user
+   */
+  public function comment($id, $type, $user) {
+    if ($this->checkSend($id, 'comment')) {
+      try {
+        // log in
+        $this->nitro->drupalLogin($user);
+        $action = $this->getActionName($id, 'comment');
         $this->nitro->logAction($action);
       }
       catch (NitroAPI_LogActionException $e) {
@@ -157,6 +180,16 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
       '#type' => 'textfield',
       '#title' => t('Action name'),
       '#default_value' => isset($this->options[$id]['update_action']) ? $this->options[$id]['update_action'] : NULL,
+    );
+    $form[$id][$id . '_comment_check'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Comment'),
+      '#default_value' => isset($this->options[$id]['comment']) ? $this->options[$id]['comment'] : NULL,
+    );
+    $form[$id][$id . '_comment_action'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Action name'),
+      '#default_value' => isset($this->options[$id]['comment_action']) ? $this->options[$id]['comment_action'] : NULL,
     );
     return $form;
   }
