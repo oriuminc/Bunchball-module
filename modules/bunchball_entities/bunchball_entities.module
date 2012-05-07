@@ -86,8 +86,6 @@ function bunchball_entities_node_update($node) {
  * Implements hook_entity_insert().
  */
 function bunchball_entities_entity_insert($entity, $type) {
-  dsm($entity);
-  dsm($type);
   global $user;
   if ($user->uid > 0) {
     // authenticated users
