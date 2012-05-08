@@ -60,7 +60,7 @@ function bunchball_entities_node_insert($node) {
     foreach ($plugins as $id => $plugin) {
       $class = bunchball_entities_get_plugin_instance($id);
       $node_type = "node_{$node->type}";
-      $class->insert($node_type, 'node', $user);
+      $class->send($node_type, 'node', $user, 'insert');
     }
   }
 }
@@ -77,7 +77,7 @@ function bunchball_entities_node_update($node) {
     foreach ($plugins as $id => $plugin) {
       $class = bunchball_entities_get_plugin_instance($id);
       $node_type = "node_{$node->type}";
-      $class->update($node_type, 'node', $user);
+      $class->send($node_type, 'node', $user, 'update');
     }
   }
 }
@@ -96,7 +96,7 @@ function bunchball_entities_entity_insert($entity, $type) {
       $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
       foreach ($plugins as $id => $plugin) {
         $class = bunchball_entities_get_plugin_instance($id);
-        $class->comment($comment_type, 'comment', $user);
+        $class->send($comment_type, 'comment', $user, 'comment');
       }
     }
   }

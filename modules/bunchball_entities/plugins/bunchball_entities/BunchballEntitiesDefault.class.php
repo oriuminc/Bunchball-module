@@ -58,39 +58,6 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
     }
     variable_set('bunchball_entities', $this->options);
   }
-
-  /**
-   * Register content insert actions.
-   *
-   * @param $id
-   * @param $type 
-   * @param $user
-   */
-  public function insert($id, $type, $user) {
-    $this->register($id, $type, $user, 'insert');
-  }
-  
-  /**
-   * Register content comment actions.
-   *
-   * @param $id
-   * @param $type 
-   * @param $user
-   */
-  public function comment($id, $type, $user) {
-    $this->register($id, $type, $user, 'comment');
-  }
-  
-  /**
-   * Register content update actions.
-   *
-   * @param $id
-   * @param $type 
-   * @param $user
-   */
-  public function update($id, $type, $user) {
-    $this->register($id, $type, $user, 'update');
-  }
   
   /**
    * Register content actions.
@@ -101,7 +68,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
    * @param $op
    *    operation to register (ie: insert / update / comment) 
    */
-  private function register($id, $type, $user, $op) {
+  public function send($id, $type, $user, $op) {
     if ($this->checkSend($id, $op)) {
       try {
         // log in
