@@ -1,50 +1,33 @@
 <?php
 
-/**
- * Implements hook_menu().
- */
-function bunchball_fivestar_menu() {
-  $items = array();
-  $items['admin/config/system/bunchball/entities'] = array(
-    'title' => 'Content',
-    'type' => MENU_LOCAL_TASK,
-    'callback' => 'drupal_get_form',
-    'page arguments' => array('bunchball_fivestar_admin_form'),
-    'file' => 'bunchball_fivestar.admin.inc',
-    'access arguments' => array('configure bunchball'),
-  );
-  return $items;
-}
-
-
-function bunchball_fivestar_get_plugin_instance($id) {
-  $instances = &drupal_static(__FUNCTION__);
-  if(!isset($instances[$id])) {
-    ctools_include('plugins');
-    $plugin = ctools_get_plugins('bunchball_fivestar', 'bunchball_fivestar', $id);
-    $class = ctools_plugin_get_class($plugin, 'handler');
-    $instances[$id] = new $class;
-  }
-  return $instances[$id];
-}
-
-/**
- * Implement hook_ctools_plugin_type
- */
-function bunchball_fivestar_ctools_plugin_type() {
-  $plugins['bunchball_fivestar'] = array(
-    'use hooks' => FALSE,
-    'child plugins' => TRUE,
-  );
-  return $plugins;
-}
+//function bunchball_fivestar_get_plugin_instance($id) {
+//  $instances = &drupal_static(__FUNCTION__);
+//  if(!isset($instances[$id])) {
+//    ctools_include('plugins');
+//    $plugin = ctools_get_plugins('bunchball_entities', 'bunchball_entities', $id);
+//    $class = ctools_plugin_get_class($plugin, 'handler');
+//    $instances[$id] = new $class;
+//  }
+//  return $instances[$id];
+//}
+//
+///**
+// * Implement hook_ctools_plugin_type
+// */
+//function bunchball_fivestar_ctools_plugin_type() {
+//  $plugins['bunchball_entities'] = array(
+//    'use hooks' => FALSE,
+//    'child plugins' => TRUE,
+//  );
+//  return $plugins;
+//}
 
 /**
  * Implement hook_ctools_plugin_directory
  */
 function bunchball_fivestar_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'bunchball_fivestar' && $plugin == 'bunchball_fivestar') {
-    return 'plugins/bunchball_fivestar';
+  if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
+    return 'plugins/bunchball_entities';
   }
 }
 

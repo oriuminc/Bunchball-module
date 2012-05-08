@@ -1,6 +1,6 @@
 <?php
 
-class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballFivestarPluginInterface {
+class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballEntitiesPluginInterface {
 
   private $options;
   private $nitro;
@@ -47,8 +47,8 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballFi
    */
   public function adminFormSubmit($form, &$form_state) {
     $values = $form_state['values']['bunchball_fivestar']['settings'];
-    $this->options['fivestar']['check'] = $value['fivestar']['check'];
-    $this->options['fivestar']['action'] = $value['fivestar']['action'];
+    $this->options['fivestar']['check'] = $values['fivestar']['check'];
+    $this->options['fivestar']['action'] = $values['fivestar']['action'];
     variable_set('bunchball_fivestar', $this->options);
   }
 
@@ -59,8 +59,8 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballFi
    * @param $type 
    * @param $user
    */
-  private function rate($id, $type, $user) {
-    if ($this->checkSend($id)) {
+  public function send($id, $type, $user, $op) {
+    if ($op == 'rate' && $this->checkSend($id)) {
       try {
         // log in
         $this->nitro->drupalLogin($user);
@@ -91,15 +91,15 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballFi
     $form = array();
     $form['fivestar'] = array(
       '#type' => 'fieldset',
-      '#title' => t($type['name']),
+      '#title' => t('Fivestar'),
       '#collapsible' => FALSE,
     );
-    $form['fivestar']['fivestar_check'] = array(
+    $form['fivestar']['check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Fivestar'),
       '#default_value' => isset($this->options['fivestar']['check']) ? $this->options['fivestar']['check'] : NULL,
     );
-    $form['fivestar']['fivestar_action'] = array(
+    $form['fivestar']['action'] = array(
       '#type' => 'textfield',
       '#title' => t('Action name'),
       '#default_value' => isset($this->options['fivestar']['action']) ? $this->options['fivestar']['action'] : NULL,
