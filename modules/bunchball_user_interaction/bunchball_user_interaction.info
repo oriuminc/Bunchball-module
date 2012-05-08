@@ -4,3 +4,9 @@ core = 7.x
 package = Bunchball
 dependencies[] = bunchball
 files[] = plugins/bunchball_user_interaction/BunchBallUserInteractionInterface.class.php
+
+; Information added by drush on 2012-05-07
+version = "unknown"
+project = "bunchball"
+datestamp = "1336426080"
+

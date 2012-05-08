@@ -42,3 +42,10 @@ configure =  admin/config/bunchball
 #Hidden - make it so your module never shows up on the admin screen (useful for testing code etc.)
 #hidden = false/true
 
+
+
+; Information added by drush on 2012-05-07
+version = "unknown"
+project = "bunchball"
+datestamp = "1336426080"
+

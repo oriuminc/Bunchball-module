@@ -14,8 +14,6 @@ interface BunchballPluginInterface {
   /**
    * Form validation callback for this plugin.
    * 
-   * @todo check that checkboxes and action textboxes are consistent
-   * 
    * @param $form
    * @param $form_state 
    */
