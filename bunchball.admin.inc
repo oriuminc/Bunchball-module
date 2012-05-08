@@ -41,7 +41,7 @@ function bunchball_admin_form($form, &$form_state) {
   $form['bunchball_sandbox_url'] = array(
     '#title' => t('Sandbox server url'),
     '#type' => 'textfield',
-    '#default_value' => isset($form_state['values']['bunchball_sandbox_url']) ? $form_state['values']['bunchball_sandbox_url'] : variable_get('bunchball_sandbox_url', 'http://sandbox.bunchball.com/nitro/xml'),
+    '#default_value' => isset($form_state['values']['bunchball_sandbox_url']) ? $form_state['values']['bunchball_sandbox_url'] : variable_get('bunchball_sandbox_url', 'http://sandbox.bunchball.net/nitro/xml'),
     '#process' => array('ctools_dependent_process'),
     '#dependency' => array('edit-bunchball-environment' => array('sandbox')),
     '#description' => t('The Bunchball sandbox URL. Most likely http://sandbox.bunchball.com/nitro/xml'),
