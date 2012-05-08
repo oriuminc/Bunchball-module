@@ -1,4 +1,4 @@
-name = bunchball
+name = Bunchball
 description = A collection of modules to work with the bunchball api
 core = 7.x
 
@@ -12,40 +12,4 @@ dependencies[] = ctools
 files[] = nitro/nitro.api.class.php
 files[] = BunchballPluginInterface.inc
 
-#Stylesheets - if you want a stylesheet loaded on every single page
-#stylesheets[all][] = somefile.css
-
-#Javascript - if you want a js file loaded on every single page
-#scripts[] = js/somescript.js
-
-#PHP - the version of PHP your module requires to run
-#php = 5.3
-
-#Configuration page - As of version 7.x, the path of the module's (main) configuration page.
-#If a module is enabled, a "Configure" and "Permissions" link appear.
-#This will be the path of the "Configure" link for this particular module
-#on the modules overview page.
-configure =  admin/config/bunchball
-
-#Files - an array of files see below
-#Drupal now supports a dynamic-loading code registry.
-#To support it, all modules must now declare any code files
-#containing class or interface declarations in the .info file
-#When a module is enabled, Drupal will rescan all declared files
-#and index all the classes and interfaces that it finds.
-#Classes will be loaded automatically by PHP when they are first accessed.
-#files[] =
-
-#Required - make it so there is absolutely no way to disable this module (via admin screens)
-#required = false/true
-
-#Hidden - make it so your module never shows up on the admin screen (useful for testing code etc.)
-#hidden = false/true
-
-
-
-; Information added by drush on 2012-05-07
-version = "unknown"
-project = "bunchball"
-datestamp = "1336426080"
-
+configure =  admin/config/system/bunchball
