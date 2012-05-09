@@ -5,4 +5,3 @@ package = Bunchball
 dependencies[] = bunchball
 dependencies[] = bunchball_entities
 dependencies[] = fivestar
-files[] = BunchballFivestarPluginInterface.inc

@@ -74,11 +74,11 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballEn
   }
   
   private function checkSend($id) {
-    return $this->options[$id][$op];
+    return $this->options['fivestar']['check'];
   }
 
   private function getActionName($id, $op) {
-    return $this->options[$id]["{$op}_action"];
+    return $this->options['fivestar']['action'];
   }
   
   /**

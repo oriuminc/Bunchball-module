@@ -1,27 +1,5 @@
 <?php
 
-//function bunchball_fivestar_get_plugin_instance($id) {
-//  $instances = &drupal_static(__FUNCTION__);
-//  if(!isset($instances[$id])) {
-//    ctools_include('plugins');
-//    $plugin = ctools_get_plugins('bunchball_entities', 'bunchball_entities', $id);
-//    $class = ctools_plugin_get_class($plugin, 'handler');
-//    $instances[$id] = new $class;
-//  }
-//  return $instances[$id];
-//}
-//
-///**
-// * Implement hook_ctools_plugin_type
-// */
-//function bunchball_fivestar_ctools_plugin_type() {
-//  $plugins['bunchball_entities'] = array(
-//    'use hooks' => FALSE,
-//    'child plugins' => TRUE,
-//  );
-//  return $plugins;
-//}
-
 /**
  * Implement hook_ctools_plugin_directory
  */
@@ -32,28 +10,14 @@ function bunchball_fivestar_ctools_plugin_directory($module, $plugin) {
 }
 
 function bunchball_fivestar_fivestar_access($entity_type, $id, $tag, $uid){
-  dsm($entity_type);
-  dsm($id);
-  dsm($tag);
-  dsm($uid);
-}
-
-//function bunchball_fivestar_entity_view($entity, $type, $view_mode, $langcode) {
-//  dsm('foo');
-//  dsm($entity);
-//  dsm($type);
-//}
-
-
-function bunchball_fivestar_form_alter($form, $form_state, $form_id) {
-  if ($form_id == 'poll_view_voting') {
-//    array_unshift($form['vote']['#submit'], 'bunchball_fivestar_poll_vote');
-    $form['#submit'][] = 'bunchball_fivestar_poll_vote';
-//    dsm($form);
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+      ctools_include('plugins');
+      $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+      foreach ($plugins as $id => $plugin) {
+        $class = bunchball_entities_get_plugin_instance($id);
+        $class->send($entity_type, 'rate', $user, 'rate');
+      }
   }
-}
-
-
-function bunchball_fivestar_poll_vote($form, &$form_state) {
-  watchdog('bunchball', 'holy fuck');
 }
