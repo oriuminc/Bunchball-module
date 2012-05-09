@@ -69,7 +69,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
    *    operation to register (ie: insert / update / comment) 
    */
   public function send($id, $type, $user, $op) {
-    if ($this->checkSend($id, $op)) {
+    if (in_array($op, array('insert', 'update', 'comment')) && $this->checkSend($id, $op)) {
       try {
         // log in
         $this->nitro->drupalLogin($user);
