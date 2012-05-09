@@ -318,7 +318,7 @@ class NitroAPI_XML implements NitroAPI {
             "&userId={$this->userName}" .
             "&tags=$actionTag" .
             "&value=$value";
-
+    watchdog('bunchball', 'Log Action: %actionTag; value: %value', array('%actionTag' => $actionTag, '%value' => $value), WATCHDOG_INFO);
     //Converting XML response attribute and values to array attributes and values
     $arr = $this->my_xml2array($request);
 
