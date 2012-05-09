@@ -26,7 +26,6 @@ function bunchball_poll_form_alter(&$form, &$form_state, $form_id) {
  */
 function bunchball_poll_poll_vote($form, &$form_state) {
   global $user;
-dsm($form_state);
   if ($user->uid > 0) {
     // authenticated users
       ctools_include('plugins');
