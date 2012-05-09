@@ -292,7 +292,7 @@ class NitroAPI_XML implements NitroAPI {
    *    If TRUE, send the Drupal user roles as prefences.
    */
   public function drupalLogin($user, $setPreferences = TRUE) {
-    $this->login($user->uid, $user->name, $user->mail);
+    $this->login($user->uid, $user->name, md5($user->mail));
     $roles = $this->formatRoles($user->roles);
     $this->setPreferences($roles, TRUE);
   }
