@@ -89,11 +89,6 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballEn
    */
   private function buildFields() {
     $form = array();
-    $form['fivestar'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Fivestar'),
-      '#collapsible' => FALSE,
-    );
     $form['fivestar']['check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Fivestar'),
