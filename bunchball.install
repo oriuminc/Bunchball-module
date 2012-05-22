@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * Implement hook_uninstall()
+ * 
+ * Delete all associated variables.
+ */
+function bunchball_uninstall() {
+  variable_del('bunchball_apikey');
+  variable_del('bunchball_apisecret');
+  variable_del('bunchball_environment');
+  variable_del('bunchball_production_url');
+  variable_del('bunchball_sandbox_url');
+}
