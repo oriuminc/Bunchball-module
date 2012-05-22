@@ -6,7 +6,7 @@
  * module.
  */
 
-class BunchballUserInteractionDefault implements BunchballUserInteractionInterface{
+class BunchballUserInteractionDefault implements BunchballUserInteractionInterface, BunchballPluginInterface{
 
   public $options;
 
