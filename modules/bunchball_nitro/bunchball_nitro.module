@@ -30,7 +30,6 @@ function bunchball_nitro_node_view_alter(&$build) {
 
 function _bunchball_nitro_node_post_render($markup, $element) {
 
-  print_r($element);
   drupal_add_js(array(
     'bunchball_nitro' => array(
       'artist_name' => $element['#node']->title,
