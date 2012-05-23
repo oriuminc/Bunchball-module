@@ -21,9 +21,50 @@ function gotCurrentUserId(inUserId) {
     // we are in a node... 
     userViewedContent();
   }
-  
-  // TODO: bind the actions to functions below
 
+  // TODO: bind the actions to functions below
+  (function ($) {
+//    #LikePluginPagelet a
+//    iframe.twitter-share-button a
+//    #plusone span#button
+//    span.tumblr a
+
+    // Facebook
+//    $('#LikePluginPagelet a').click(function(){
+//      alert('Facebook');
+//      return true;
+//    });
+    
+    // Twitter
+//    $('iframe.twitter-share-button a').click(function(){
+//      alert('twitter');
+//      return true;
+//    });
+    
+    // Pinterest
+    //$('').click(function(){});
+    
+    // Google+
+//    $('span.gplus div#___plusone_0').click(function(){
+//      alert('Google Plus');
+//      return true;
+//    });
+//    $('span.gplus div#___plusone_0').bind("click", function(e){
+//      alert('Google Plus');
+//      return true;
+//    });
+//    $('span.gplus iframe').contents().find("#button").bind("click", function(e){
+//      alert('Google Plus');
+//      return true;
+//    });
+    
+    // Tumblr
+    $('span.tumblr a').click(function(){
+      nitroSocialShareClicked("Tumblr");
+      return true;
+    });
+    
+  }) (jQuery);
 }
 
 // ViewedContent is called because the user is currently viewing content.
@@ -129,6 +170,20 @@ function nitroVideoStateChange(newState) {
   if (action.length > 1) {
     action = action + ",Artist: " + Drupal.settings.bunchball_nitro.artist_name 
       + ", Category: " + Drupal.settings.bunchball_nitro.artist_cat;
+    
+    var inObj = new Object();
+    inObj.uid = _currentUserId;
+    inObj.tags = action;
+    inObj.ses = '';
+    _userCommandsArray.push(inObj);
+    
+    nitroIterateQueue();
+  }
+}
+
+function nitroSocialShareClicked(network) {
+  if(network.length > 0) {
+    var action = "Share_Link, Network: " + network;
     
     var inObj = new Object();
     inObj.uid = _currentUserId;
