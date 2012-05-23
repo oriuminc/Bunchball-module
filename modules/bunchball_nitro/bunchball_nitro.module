@@ -32,8 +32,8 @@ function _bunchball_nitro_node_post_render($markup, $element) {
 
   drupal_add_js(array(
     'bunchball_nitro' => array(
-      'artist_name' => $element['#node']->title,
-      'artist_cat' => $element['#node']->type
+      'artist_name' => isset($element['#node']) ? $element['#node']->title : "",
+      'artist_cat' =>  isset($element['#node']) ? $element['#node']->type : ""
     )
   ), 'setting');
 
