@@ -24,10 +24,23 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
   _bunchball_nitro_initialize();
 }
 
-// TODO: remove this after testing is over..
-//function bunchball_nitro_init() {
-//  _bunchball_nitro_initialize();
-//}
+function bunchball_nitro_node_view_alter(&$build) {
+  $build['#post_render'][] = '_bunchball_nitro_node_post_render';
+}
+
+function _bunchball_nitro_node_post_render($markup, $element) {
+
+  drupal_add_js(array(
+    'bunchball_nitro' => array(
+      'artist_name' => $element['#node']->title,
+      'artist_cat' => $element['#node']->type
+    )
+  ), 'setting');
+
+  
+  $markup = str_replace("feature=oembed", "feature=oembed&enablejsapi=1", $markup);
+  return $markup;
+}
 
 /**
  * Initialize the JavaScript on the page

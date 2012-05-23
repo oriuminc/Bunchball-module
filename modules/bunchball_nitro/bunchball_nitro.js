@@ -10,6 +10,7 @@
 
 var _currentUserId = '';
 var _userCommandsArray = new Array();
+var _thePlayer = '';
 
 // callback function for acquiring the User ID of the current user...
 function gotCurrentUserId(inUserId) {
@@ -22,7 +23,7 @@ function gotCurrentUserId(inUserId) {
   }
   
   // TODO: bind the actions to functions below
-  
+
 }
 
 // ViewedContent is called because the user is currently viewing content.
@@ -67,10 +68,6 @@ function submitNitroAPICall(tags) {
 }
 
 function nitroCallback(data, token) {
-  // this is a stub that can be used later to track responses from the server.
-
-  // alert(JSON.stringify(data));
-  
   // remove from array
   if (_userCommandsArray.length > 0) {
     _userCommandsArray.splice(0, 1);
@@ -107,3 +104,38 @@ function nitroIterateQueue() {
   }
 }
 
+function onYouTubePlayerReady(playerId) {
+  // attach the listener
+  (function ($) {
+    $("div.oembed-video .oembed-content object embed").each(function(i){
+      _thePlayer = this;
+      _thePlayer.addEventListener("onStateChange", "nitroVideoStateChange");
+    });
+  }) (jQuery);
+}
+
+// event listeners
+function nitroVideoStateChange(newState) {
+  // empty action to prevent anything from going forward
+  var action = "";
+  
+  if (newState == 0) { // ended
+    action = "Video_Watch_Finish";
+  } else if (newState == 1) { // playing
+    action = "Video_Watch_Start";
+  }
+  
+  // only continue if there is something in Action
+  if (action.length > 1) {
+    action = action + ",Artist: " + Drupal.settings.bunchball_nitro.artist_name 
+      + ", Category: " + Drupal.settings.bunchball_nitro.artist_cat;
+    
+    var inObj = new Object();
+    inObj.uid = _currentUserId;
+    inObj.tags = action;
+    inObj.ses = '';
+    _userCommandsArray.push(inObj);
+    
+    nitroIterateQueue();
+  }
+}
