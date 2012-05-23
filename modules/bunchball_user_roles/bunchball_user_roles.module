@@ -3,18 +3,9 @@
 /**
  * Implements hook_ctools_plugin_directory()
  */
-function bunchball_poll_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
-    return 'plugins/bunchball_entities';
-  }
-}
-
-/**
- * Implements hook_form_alter().
- */
-function bunchball_poll_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'poll_view_voting') {
-    $form['vote']['#submit'][] = 'bunchball_poll_poll_vote';
+function bunchball_user_roles_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_user_interaction' && $plugin == 'bunchball_user_interaction') {
+    return 'plugins/bunchball_user_interaction';
   }
 }
 
@@ -24,7 +15,7 @@ function bunchball_poll_form_alter(&$form, &$form_state, $form_id) {
  * @param $form
  * @param $form_state 
  */
-function bunchball_poll_poll_vote($form, &$form_state) {
+function bunchball_user_roles_poll_vote($form, &$form_state) {
   global $user;
   if ($user->uid > 0) {
     // authenticated users
@@ -32,7 +23,7 @@ function bunchball_poll_poll_vote($form, &$form_state) {
       $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
       foreach ($plugins as $id => $plugin) {
         $class = bunchball_entities_get_plugin_instance($id);
-        $class->send('poll', 'vote', $user, 'vote');
+        $class->send($user, 'setRole');
       }
   }
 }

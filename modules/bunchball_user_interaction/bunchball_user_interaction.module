@@ -18,39 +18,24 @@ function bunchball_user_interaction_menu() {
  * Implement hook_user_insert()
  */
 function bunchball_user_interaction_user_insert(&$edit, $account, $category) {
-  //@TODO this makes use of one default class configured to be 'the one'
-  //via the UI.  It could be possible to allow for more.
-  //but the code also makes assumptions about how the options are stored
-  //and that could require some refactoring
-  //or more documentation for anyone that wants to create a plugin of this type
-  $plugin_id = variable_get('bunchball_user_interaction_plugin', '');
-  if ($class = bunchball_user_interaction_get_plugin_instance($plugin_id)) {
-    $options = $class->getOptions();
-    if ($options['bunchball_user_register']['enabled']) {
-      $class->$options['bunchball_user_register']['method']($account);
-    }
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $class->send($account, 'register');
   }
-
 }
 
 /**
  * Implement hook_user_save()
  */
 function bunchball_user_interaction_user_update(&$edit, $account, $category){
-  //@TODO this makes use of one default class configured to be 'the one'
-  //via the UI.  It could be possible to allow for more.
-  //but the code also makes assumptions about how the options are stored
-  //and that could require some refactoring
-  //or more documentation for anyone that wants to create a plugin of this type
-  $plugin_id = variable_get('bunchball_user_interaction_plugin', '');
-  if ($class = bunchball_user_interaction_get_plugin_instance($plugin_id)) {
-    $options = $class->getOptions();
-    if ($options['bunchball_user_profile_complete']['enabled']) {
-      $class->$options['bunchball_user_profile_complete']['method']($account);
-    }
-    if ($options['bunchball_user_profile_picture']['enabled']) {
-      $class->$options['bunchball_user_profile_picture']['method']($account);
-    }
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $class->send($account, 'profileComplete');
+    $class->send($account, 'profilePicture');
   }
 }
 
@@ -58,17 +43,11 @@ function bunchball_user_interaction_user_update(&$edit, $account, $category){
  * Implement hook_user_login
  */
 function bunchball_user_interaction_user_login(&$edit, $account) {
-  //@TODO this makes use of one default class configured to be 'the one'
-  //via the UI.  It could be possible to allow for more.
-  //but the code also makes assumptions about how the options are stored
-  //and that could require some refactoring
-  //or more documentation for anyone that wants to create a plugin of this type
-  $plugin_id = variable_get('bunchball_user_interaction_plugin', '');
-  if ($class = bunchball_user_interaction_get_plugin_instance($plugin_id)) {
-    $options = $class->getOptions();
-    if ($options['bunchball_user_login']['enabled']) {
-      $class->$options['bunchball_user_login']['method']($account);
-    }
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $class->send($account, 'register');
   }
 }
 

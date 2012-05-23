@@ -52,6 +52,14 @@ interface NitroAPI {
    */
   public function getSiteActionLeaders($actionTag);
   
+  /**
+   * Retrieve the user's current level.
+   * 
+   * @return
+   *    user's level
+   */
+  public function getLevel();
+  
 }
 
 class NitroAPI_Factory {
@@ -365,6 +373,30 @@ class NitroAPI_XML implements NitroAPI {
     $responseArray = $this->get_value_by_path($arr, 'Nitro');
     if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
       throw new NitroAPI_LogActionException(t('Nitro API setPreferences failed'));
+    }
+  }
+  
+  /**
+   * Get the current user's level.
+   * 
+   * @return
+   *    user's level
+   */
+  public function getLevel() {
+    // Construct a URL for user logAction
+    $request = "{$this->baseURL}?method=user.getLevel" .
+            "&sessionKey={$this->sessionKey}";
+    watchdog('bunchball', 'Get level - user: %username.', array('%username' => $this->userName), WATCHDOG_INFO);
+    //Converting XML response attribute and values to array attributes and values
+    $arr = $this->my_xml2array($request);
+    $responseArray = $this->get_value_by_path($arr, 'Nitro');
+    if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
+      throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
+    }
+    $levelArray = $this->get_value_by_path($arr, 'Nitro/users/User/SiteLevel');
+    $level = '';
+    if (isset($levelArray['attributes']['name'])) {
+      return $levelArray['attributes']['name'];
     }
   }
 

@@ -60,11 +60,11 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballEn
    * @param $user
    */
   public function send($id, $type, $user, $op) {
-    if ($op == 'rate' && $this->checkSend($id)) {
+    if ($op == 'rate' && $this->checkSend()) {
       try {
         // log in
         $this->nitro->drupalLogin($user);
-        $action = $this->getActionName($id, $op);
+        $action = $this->getActionName() . ",entity:$id";
         $this->nitro->logAction($action);
       }
       catch (NitroAPI_LogActionException $e) {
@@ -73,11 +73,11 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballEn
     }
   }
   
-  private function checkSend($id) {
+  private function checkSend() {
     return $this->options['fivestar']['check'];
   }
 
-  private function getActionName($id, $op) {
+  private function getActionName() {
     return $this->options['fivestar']['action'];
   }
   

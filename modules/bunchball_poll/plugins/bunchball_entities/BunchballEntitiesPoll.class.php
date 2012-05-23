@@ -60,11 +60,11 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
    * @param $user
    */
   public function send($id, $type, $user, $op) {
-    if ($op == 'vote' && $this->checkSend($id)) {
+    if ($op == 'vote' && $this->checkSend()) {
       try {
         // log in
         $this->nitro->drupalLogin($user);
-        $action = $this->getActionName($id, $op);
+        $action = $this->getActionName();
         $this->nitro->logAction($action);
       }
       catch (NitroAPI_LogActionException $e) {
@@ -73,11 +73,11 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
     }
   }
   
-  private function checkSend($id) {
+  private function checkSend() {
     return $this->options['poll']['check'];
   }
 
-  private function getActionName($id, $op) {
+  private function getActionName() {
     return $this->options['poll']['action'];
   }
   

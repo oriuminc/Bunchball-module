@@ -1,12 +1,12 @@
 <?php
 
-class BunchballUserRoles implements BunchballPluginInterface {
+class BunchballEntitiesWebform implements BunchballPluginInterface, BunchballEntitiesPluginInterface {
 
   private $options;
   private $nitro;
   
   function __construct() {
-    $this->options = variable_get('bunchball_user_roles');
+    $this->options = variable_get('bunchball_webform');
     $this->nitro = NitroAPI_Factory::getInstance();
   }
 
@@ -19,13 +19,13 @@ class BunchballUserRoles implements BunchballPluginInterface {
    *    form to be rendered
    */
   public function adminForm($form, &$form_state) {
-    $form['bunchball_user_roles'] = array(
+    $form['bunchball_webform'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Poll user roles'),
+        '#title' => t('Webform'),
         '#collapsible' => TRUE,
         '#tree' => TRUE,
     );
-    $form['bunchball_user_roles']['settings'] = $this->buildFields();
+    $form['bunchball_webform']['settings'] = $this->buildFields();
     return $form;
   }
 
@@ -46,10 +46,10 @@ class BunchballUserRoles implements BunchballPluginInterface {
    * @param $form_state 
    */
   public function adminFormSubmit($form, &$form_state) {
-    $values = $form_state['values']['bunchball_user_roles']['settings'];
-    $this->options['roles']['check'] = $values['roles']['check'];
-    $this->options['roles']['whitelist'] = $values['roles']['whitelist'];
-    variable_set('bunchball_user_roles', $this->options);
+    $values = $form_state['values']['bunchball_webform']['settings'];
+    $this->options['webform']['check'] = $values['webform']['check'];
+    $this->options['webform']['action'] = $values['webform']['action'];
+    variable_set('bunchball_webform', $this->options);
   }
 
   /**
@@ -60,11 +60,11 @@ class BunchballUserRoles implements BunchballPluginInterface {
    * @param $user
    */
   public function send($id, $type, $user, $op) {
-    if ($op == 'vote' && $this->checkSend($id)) {
+    if ($op == 'webform' && $this->checkSend()) {
       try {
         // log in
         $this->nitro->drupalLogin($user);
-        $action = $this->getActionName($id, $op);
+        $action = $this->getActionName();
         $this->nitro->logAction($action);
       }
       catch (NitroAPI_LogActionException $e) {
@@ -73,12 +73,12 @@ class BunchballUserRoles implements BunchballPluginInterface {
     }
   }
   
-  private function checkSend($id) {
-    return $this->options['roles']['check'];
+  private function checkSend() {
+    return $this->options['webform']['check'];
   }
 
-  private function getActionName($id, $op) {
-    return $this->options['roles']['whitelist'];
+  private function getActionName() {
+    return $this->options['webform']['action'];
   }
   
   /**
@@ -89,16 +89,15 @@ class BunchballUserRoles implements BunchballPluginInterface {
    */
   private function buildFields() {
     $form = array();
-    $form['roles']['check'] = array(
+    $form['webform']['check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Update user role based on Bunchball level'),
-      '#default_value' => isset($this->options['role']['check']) ? $this->options['role']['check'] : NULL,
+      '#title' => t('Webform submit'),
+      '#default_value' => isset($this->options['webform']['check']) ? $this->options['webform']['check'] : NULL,
     );
-    $form['roles']['whitelist'] = array(
+    $form['webform']['action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Whitelist roles'),
-      '#description' => t(),
-      '#default_value' => isset($this->options['role']['whitelist']) ? $this->options['role']['whitelist'] : NULL,
+      '#title' => t('Action name'),
+      '#default_value' => isset($this->options['webform']['action']) ? $this->options['webform']['action'] : NULL,
     );
     return $form;
   }

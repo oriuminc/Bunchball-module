@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * Implements hook_ctools_plugin_directory()
+ */
+function bunchball_webform_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
+    return 'plugins/bunchball_entities';
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function bunchball_webform_form_alter(&$form, &$form_state, $form_id) {
+  if (substr($form_id, 0, 19) == 'webform_client_form') {
+    dsm($form);
+    $form['vote']['#submit'][] = 'bunchball_webform_post_submit';
+  }
+}
+
+function bunchball_webform_post_submit($form, &$form_state) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+      ctools_include('plugins');
+      $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+      foreach ($plugins as $id => $plugin) {
+        $class = bunchball_entities_get_plugin_instance($id);
+        $class->send('webform', 'submit', $user, 'submit');
+      }
+  }
+}
