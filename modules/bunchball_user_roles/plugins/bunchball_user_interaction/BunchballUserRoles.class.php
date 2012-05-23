@@ -1,6 +1,6 @@
 <?php
 
-class BunchballUserRoles implements BunchballPluginInterface {
+class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInteractionInterface {
 
   private $options;
   private $nitro;
@@ -21,11 +21,12 @@ class BunchballUserRoles implements BunchballPluginInterface {
   public function adminForm($form, &$form_state) {
     $form['bunchball_user_roles'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Poll user roles'),
+        '#title' => t('User roles'),
         '#collapsible' => TRUE,
         '#tree' => TRUE,
     );
     $form['bunchball_user_roles']['settings'] = $this->buildFields();
+
     return $form;
   }
 
@@ -52,19 +53,13 @@ class BunchballUserRoles implements BunchballPluginInterface {
     variable_set('bunchball_user_roles', $this->options);
   }
 
-  /**
-   * Register rating actions.
-   *
-   * @param $id
-   * @param $type 
-   * @param $user
-   */
-  public function send($id, $type, $user, $op) {
-    if ($op == 'vote' && $this->checkSend($id)) {
+  
+  public function send($user, $op) {
+    if ($op == 'setRole' && $this->checkSend()) {
       try {
         // log in
         $this->nitro->drupalLogin($user);
-        $action = $this->getActionName($id, $op);
+        $action = $this->getActionName();
         $this->nitro->logAction($action);
       }
       catch (NitroAPI_LogActionException $e) {
@@ -72,12 +67,12 @@ class BunchballUserRoles implements BunchballPluginInterface {
       }
     }
   }
-  
-  private function checkSend($id) {
+
+  private function checkSend() {
     return $this->options['roles']['check'];
   }
 
-  private function getActionName($id, $op) {
+  private function getActionName() {
     return $this->options['roles']['whitelist'];
   }
   
@@ -92,13 +87,17 @@ class BunchballUserRoles implements BunchballPluginInterface {
     $form['roles']['check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Update user role based on Bunchball level'),
-      '#default_value' => isset($this->options['role']['check']) ? $this->options['role']['check'] : NULL,
+      '#default_value' => isset($this->options['roles']['check']) ? $this->options['roles']['check'] : NULL,
     );
+    $blacklist_roles = array('anonymous user', 'authenticated user', 'administrator');
+    $all_roles = user_roles();
+    $role_list = drupal_map_assoc(array_diff($all_roles, $blacklist_roles));
     $form['roles']['whitelist'] = array(
-      '#type' => 'textfield',
+      '#type' => 'checkboxes',
       '#title' => t('Whitelist roles'),
-      '#description' => t(),
-      '#default_value' => isset($this->options['role']['whitelist']) ? $this->options['role']['whitelist'] : NULL,
+      '#description' => t('Bunchball can add checked roles to user accounts. Avoid roles with security implications.'),
+      '#options' => $role_list,
+      '#default_value' => isset($this->options['roles']['whitelist']) ? $this->options['roles']['whitelist'] : NULL,
     );
     return $form;
   }
