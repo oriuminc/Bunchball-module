@@ -8,7 +8,7 @@
 
 class BunchballUserInteractionDefault implements BunchballUserInteractionInterface, BunchballPluginInterface{
 
-  public $options;
+  private $options;
 
   /**
    * @param $api a class implmenting the NitroAPI interface (could be json or xml)
@@ -176,7 +176,7 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
    * @param $user - a valid drupal user object
    */
   private function userLogin($user) {
-    if ($options['bunchball_user_login']['enabled']) {
+    if ($this->options['bunchball_user_login']['enabled']) {
       try {
         // Get a create a user and/or get a bunchball session
         // with the user currently logging in
@@ -261,7 +261,7 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
    * @param $user - a valid drupal user object
    */
   private function userProfilePicture($user) {
-    if ($options['bunchball_user_profile_picture']['enabled']) {
+    if ($this->options['bunchball_user_profile_picture']['enabled']) {
       try {
         $this->apiUserLogin($user);
         if (isset($user->picture_upload)) {

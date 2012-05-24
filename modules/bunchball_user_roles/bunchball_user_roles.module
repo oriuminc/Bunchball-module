@@ -1,5 +1,19 @@
 <?php
 
+
+function bunchball_user_roles_init() {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+    ctools_include('plugins');
+    $plugin = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction', 'BunchballUserRoles');
+    $class = ctools_plugin_get_class($plugin, 'handler');
+    $instance = new $class;
+  }
+    
+}
+
+
 /**
  * Implements hook_ctools_plugin_directory()
  */
@@ -20,7 +34,7 @@ function bunchball_user_roles_poll_vote($form, &$form_state) {
   if ($user->uid > 0) {
     // authenticated users
       ctools_include('plugins');
-      $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+      $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
       foreach ($plugins as $id => $plugin) {
         $class = bunchball_entities_get_plugin_instance($id);
         $class->send($user, 'setRole');

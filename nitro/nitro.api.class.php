@@ -60,6 +60,20 @@ interface NitroAPI {
    */
   public function getLevel();
   
+  /**
+   * Register callbacks to be run at various events.
+   * 
+   * @param $object
+   *    the object on which to run the callback.
+   * 
+   * @param $event
+   *    the event on which to run the callback. eg. 'postLogin'
+   * 
+   * @param $function
+   *    the callback function to call
+   */
+  public function registerCallback($object, $event, $function);
+  
 }
 
 class NitroAPI_Factory {
@@ -88,12 +102,14 @@ class NitroAPI_XML implements NitroAPI {
   private $userName;
   private $sessionKey;
   private $user_roles;
+  private $callbacks;
 
   // Constants
   private $CRITERIA_MAX = "MAX";
   private $CRITERIA_CREDITS = "credits";
   private $POINT_CATEGORY_ALL = "all";
   private $TAGS_OPERATOR_OR = "OR";
+  private $DEFINED_CALLBACKS = array('postLogin');
 
   /**
    * Constructor
@@ -114,6 +130,7 @@ class NitroAPI_XML implements NitroAPI {
     }
     $this->apiKey = variable_get('bunchball_apikey');
     $this->secretKey = variable_get('bunchball_apisecret');
+    $this->callbacks = array();
   }
 
   /**
@@ -287,6 +304,9 @@ class NitroAPI_XML implements NitroAPI {
       // Accessing the sessionKey through XPATH
       $sessionKeyArray = $this->get_value_by_path($arr, 'Nitro/Login/sessionKey');
       $this->sessionKey = $sessionKeyArray['value'];
+      foreach ($this->callbacks['postLogin'] as $callback) {
+        $callback['object']->$callback['function']();
+      }
     }
   }
 
@@ -470,14 +490,40 @@ class NitroAPI_XML implements NitroAPI {
     $formatted_roles = array_fill_keys($role_names, 1);
     return $formatted_roles;
   }
+  
+  /**
+   * Register callbacks to be run at various events.
+   * 
+   * @param $object
+   *    the object on which to run the callback.
+   * 
+   * @param $event
+   *    the event on which to run the callback. eg. 'postLogin'
+   * 
+   * @param $function
+   *    the callback function to call
+   */
+  public function registerCallback($object, $event, $function) {
+    if (in_array($event, $this->DEFINED_CALLBACKS)) {
+      $this->callbacks[$event][] = array('object' => $object, 'function' => $function);
+    }
+    else {
+      throw new NitroAPI_Exception(t('Undefined callback: %function', array('%function', $function)));
+    }
+  }
 }
+
+/**
+ * General Nitro API exception.
+ */
+class NitroAPI_Exception extends Exception {}
 
 /**
  * Exception to be thrown when log action is unsuccessful.
  */
-class NitroAPI_LogActionException extends Exception {}
+class NitroAPI_LogActionException extends NitroAPI_Exception {}
 
 /**
  * Exception to be thrown on HTTP error
  */
-class NitroAPI_HttpException extends Exception {}
+class NitroAPI_HttpException extends NitroAPI_Exception {}

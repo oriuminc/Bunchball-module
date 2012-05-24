@@ -8,6 +8,7 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
   function __construct() {
     $this->options = variable_get('bunchball_user_roles');
     $this->nitro = NitroAPI_Factory::getInstance();
+    $this->nitro->registerCallback($this, 'postLogin', 'postLogin');
   }
 
   /**
@@ -100,6 +101,22 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
       '#default_value' => isset($this->options['roles']['whitelist']) ? $this->options['roles']['whitelist'] : NULL,
     );
     return $form;
+  }
+  
+  /**
+   * Update user roles on post-login.
+   */
+  public function postLogin() {
+    $level = $this->nitro->getLevel();
+    global $user;
+    if (in_array($level, $this->options['roles']['whitelist'])) {
+      // add role to user
+      if ($role = user_role_load_by_name($level)) {
+        $user->roles[$role->rid] = $role->name;
+        user_save($user);
+        
+      }
+    }
   }
 
 }

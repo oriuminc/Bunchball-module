@@ -14,7 +14,6 @@ function bunchball_webform_ctools_plugin_directory($module, $plugin) {
  */
 function bunchball_webform_form_alter(&$form, &$form_state, $form_id) {
   if (substr($form_id, 0, 19) == 'webform_client_form') {
-    dsm($form);
     $form['vote']['#submit'][] = 'bunchball_webform_post_submit';
   }
 }
