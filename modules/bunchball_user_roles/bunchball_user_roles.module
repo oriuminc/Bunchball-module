@@ -1,6 +1,13 @@
 <?php
 
 
+/**
+ * Implements hook_init().
+ * 
+ *  - instantiate plugin so that callbacks are initiated.
+ * 
+ * @global $user
+ */
 function bunchball_user_roles_init() {
   global $user;
   if ($user->uid > 0) {
@@ -20,24 +27,5 @@ function bunchball_user_roles_init() {
 function bunchball_user_roles_ctools_plugin_directory($module, $plugin) {
   if ($module == 'bunchball_user_interaction' && $plugin == 'bunchball_user_interaction') {
     return 'plugins/bunchball_user_interaction';
-  }
-}
-
-/**
- * Submit callback for poll vote.
- * 
- * @param $form
- * @param $form_state 
- */
-function bunchball_user_roles_poll_vote($form, &$form_state) {
-  global $user;
-  if ($user->uid > 0) {
-    // authenticated users
-      ctools_include('plugins');
-      $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
-      foreach ($plugins as $id => $plugin) {
-        $class = bunchball_entities_get_plugin_instance($id);
-        $class->send($user, 'setRole');
-      }
   }
 }
