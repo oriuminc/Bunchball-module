@@ -60,6 +60,14 @@ interface NitroAPI {
    */
   public function getLevel();
   
+    /**
+   * Add user to a group.
+   * 
+   * @param $group 
+   *    Group to which user is added.
+   */
+  public function addUserToGroups($group);
+
   /**
    * Register callbacks to be run at various events.
    * 
@@ -417,6 +425,28 @@ class NitroAPI_XML implements NitroAPI {
     $level = '';
     if (isset($levelArray['attributes']['name'])) {
       return $levelArray['attributes']['name'];
+    }
+  }
+
+  /**
+   * Add user to a group.
+   * 
+   * @param $group 
+   *    Group to which user is added.
+   */
+  public function addUserToGroups($group) {
+    // Construct a URL for user logAction
+    $request = "{$this->baseURL}?method=site.addUsersToGroup" .
+            "&sessionKey={$this->sessionKey}" .
+            "&groupName=$group" .
+            "&userIds={$this->userName}";
+    watchdog('bunchball', 'Add user to group - user: %username group: %group.',
+            array('%username' => $this->userName, '%group' => $group), WATCHDOG_INFO);
+    //Converting XML response attribute and values to array attributes and values
+    $arr = $this->my_xml2array($request);
+    $responseArray = $this->get_value_by_path($arr, 'Nitro');
+    if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
+      throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
   }
 
