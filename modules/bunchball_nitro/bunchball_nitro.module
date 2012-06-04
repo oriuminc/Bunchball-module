@@ -55,11 +55,35 @@ function _bunchball_nitro_initialize() {
   }
   
   global $user;
+  
+  $environment = variable_get('bunchball_environment', 'sandbox');
+  if (strlen($environment) == 0) {
+    $endpoint_url = 'sandbox';
+  }
 
-  // TODO: change this so that debug mode is reflected in the environment.
-  $in_debug_mode = true;
-  // TODO: change this so that the customer url is proper.
-  $customer_subdomain = 'fakecustomer';
+  // change this so that debug mode is reflected in the environment.
+  $in_debug_mode = ($environment == 'sandbox');
+  
+  // parse domain from the variables
+  $endpoint_url = variable_get('bunchball_production_url', 'http://sandbox.bunchball.net/nitro/json');
+  if (strlen($endpoint_url) == 0) {
+    $endpoint_url = 'http://sandbox.bunchball.net/nitro/json';
+  }
+  
+  $parsed_url = parse_url($endpoint_url);
+
+  // default value for the customer subdomain
+  $customer_subdomain = 'sandbox';
+  if (isset ($parsed_url['host'])) {
+    $exploded_domain = explode(".", $parsed_url['host']);
+    
+    if (count($exploded_domain) > 2) {
+      array_pop($exploded_domain);
+      array_pop($exploded_domain);
+      
+      $customer_subdomain = implode(".", $exploded_domain);
+    }
+  }
 
   // instantiate the variables for the JS
   $server_url = $in_debug_mode ? 
