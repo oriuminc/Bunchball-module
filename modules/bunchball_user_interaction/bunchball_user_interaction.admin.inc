@@ -1,13 +1,12 @@
 <?php
 
 /**
- * Administration form for which of the user / profile interactions
- * should be communicated to bunch ball
+ * Administration form for which of the user / profile interactions should be
+ * communicated to bunch ball.
  */
 function bunchball_user_interaction_admin_form($form, &$form_state) {
   ctools_include('plugins');
   $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
-  $options = array();
 
   foreach ($plugins as $id => $plugin) {
     $class = bunchball_user_interaction_get_plugin_instance($id);
