@@ -209,7 +209,6 @@ class NitroAPI_XML implements NitroAPI {
           if (isset($data['value']) && trim($data['value']))
             $new_tag['value'] = trim($data['value']);
 
-          $last_count = count($last_tag_ar) - 1;
           $last_tag_ar[$last_counter_in_tag[$data['level']]++] = $new_tag;
           break;
         case 'close':
@@ -422,7 +421,6 @@ class NitroAPI_XML implements NitroAPI {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
     $levelArray = $this->get_value_by_path($arr, 'Nitro/users/User/SiteLevel');
-    $level = '';
     if (isset($levelArray['attributes']['name'])) {
       return $levelArray['attributes']['name'];
     }
