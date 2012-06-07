@@ -421,7 +421,6 @@ class NitroAPI_XML implements NitroAPI {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
     $levelArray = $this->get_value_by_path($arr, 'Nitro/users/User/SiteLevel');
-    $level = '';
     if (isset($levelArray['attributes']['name'])) {
       return $levelArray['attributes']['name'];
     }
