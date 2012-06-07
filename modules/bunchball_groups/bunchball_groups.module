@@ -11,7 +11,7 @@ function bunchball_groups_ctools_plugin_directory($module, $plugin) {
 
 
 /**
- * Implement hook_user_update().
+ * Implements hook_user_update().
  */
 function bunchball_groups_user_update(&$edit, $account, $category){
   global $user;
