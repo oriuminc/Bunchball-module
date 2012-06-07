@@ -1,4 +1,3 @@
-// JavaScript closure. Defined jQuery $.
 (function($) {
   Drupal.behaviors.bunchball = {
     attach: function (context, settings) {
@@ -8,7 +7,6 @@
       }
     }
   };
-
 }) (jQuery);
 
 var _currentUserId = '';
