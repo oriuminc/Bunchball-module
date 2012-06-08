@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Plugin for sending fivestar ratings to Bunchball.
+ */
 
 class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballEntitiesPluginInterface {
 

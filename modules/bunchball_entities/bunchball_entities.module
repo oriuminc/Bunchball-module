@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Main functions for bunchball_entities and plugins.
+ */
 
 /**
  * Implements hook_menu().

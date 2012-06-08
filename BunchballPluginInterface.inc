@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Define base interface for Bunchball plugins.
+ */
 
 interface BunchballPluginInterface {
   /**

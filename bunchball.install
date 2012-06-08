@@ -1,7 +1,11 @@
 <?php
+/**
+ * @file
+ *    Install / uninstall functions for bunchball module.
+ */
 
 /**
- * Implement hook_uninstall()
+ * Implements hook_uninstall().
  * 
  * Delete all associated variables.
  */

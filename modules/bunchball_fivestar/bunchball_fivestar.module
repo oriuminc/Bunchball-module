@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ *    Main functions for bunchball fivestar plugin module. Send fivestar rating
+ *    events to bunchball.
+ */
 
 /**
  * Implement hook_ctools_plugin_directory

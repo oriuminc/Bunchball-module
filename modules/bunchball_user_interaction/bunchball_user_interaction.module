@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Main functions for bunchball_user_interaction module and related plugins.
+ */
 
 function bunchball_user_interaction_menu() {
   $items = array();

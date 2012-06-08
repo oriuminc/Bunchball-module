@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Plugin class for bunchball_entities module.
+ */
 
 class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEntitiesPluginInterface {
 

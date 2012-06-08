@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Admin screens for bunchball user-related plugins.
+ */
 
 /**
  * Administration form for which of the user / profile interactions should be

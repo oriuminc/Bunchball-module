@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @file
+ *    Bunchball user roles module. Add user to Drupal role based on bunchball
+ *    level.
+ */
 
 /**
  * Implements hook_init().

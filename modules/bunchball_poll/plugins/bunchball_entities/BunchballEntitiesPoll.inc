@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Define ctools plugin parameters for bunchball poll plugin.
+ */
 
 $plugin = array(
   'BunchballEntitiesPoll' => array(

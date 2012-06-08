@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ *    Main functions for bunchball poll module. Send poll voting events to
+ *    bunchball.
+ */
 
 /**
  * Implements hook_ctools_plugin_directory()

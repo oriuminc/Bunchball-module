@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Plugin for bunchball groups module. Add user to bunchball group based on profile fields.
+ */
 
 class BunchballGroups implements BunchballPluginInterface, BunchballUserInteractionInterface {
 

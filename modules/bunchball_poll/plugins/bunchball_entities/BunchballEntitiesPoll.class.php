@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ *    Ctools plugin for Bunchball Poll module. Send poll voting events to
+ *    bunchball.
+ */
 
 class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntitiesPluginInterface {
 

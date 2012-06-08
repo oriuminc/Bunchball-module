@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Define ctools plugin parameters for bunchball user interaction plugin.
+ */
 
 $plugin = array(
   'BunchballUserInteractionDefault' => array(

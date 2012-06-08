@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Bunchball webform module. Send webform submit event to bunchball.
+ */
 
 /**
  * Implements hook_ctools_plugin_directory()

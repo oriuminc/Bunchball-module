@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Install / uninstall functions for bunchball groups module.
+ */
 
 /**
  * Implement hook_uninstall()

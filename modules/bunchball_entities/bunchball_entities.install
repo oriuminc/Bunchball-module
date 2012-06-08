@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Install / uninstall actions.
+ */
 
 /**
  * Implement hook_uninstall()

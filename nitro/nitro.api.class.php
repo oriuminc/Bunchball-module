@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Bunchball API classes.
+ */
 
 interface NitroAPI {
   /**

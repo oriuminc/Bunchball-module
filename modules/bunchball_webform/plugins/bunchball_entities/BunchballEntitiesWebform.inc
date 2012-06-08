@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Define ctools plugin parameters for bunchball webform plugin.
+ */
 
 $plugin = array(
   'BunchballEntitiesWebform' => array(

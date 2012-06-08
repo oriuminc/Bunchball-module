@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ *    Main functions for bunchball_groups module. Adds user to bunchball group
+ *    based on profile field values.
+ */
 
 /**
  * Implements hook_ctools_plugin_directory()

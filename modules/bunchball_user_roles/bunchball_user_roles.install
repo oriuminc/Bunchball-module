@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Install / uninstall functions for bunchball_user_roles module.
+ */
 
 /**
  * Implement hook_uninstall()

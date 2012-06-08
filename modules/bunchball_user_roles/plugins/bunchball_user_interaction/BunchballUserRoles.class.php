@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ *    Ctools plugin for Bunchball user roles.  Set Drupal role for user based
+ *    on bunchball level.
+ */
 
 class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInteractionInterface {
 

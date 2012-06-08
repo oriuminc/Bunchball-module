@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Define ctools plugin parameters for bunchball groups plugin.
+ */
 
 $plugin = array(
   'BunchballGroups' => array(

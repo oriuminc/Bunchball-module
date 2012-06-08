@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Ctools plugin parameters for bunchball user roles plugin.
+ */
 
 $plugin = array(
   'BunchballUserRoles' => array(

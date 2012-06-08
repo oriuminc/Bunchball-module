@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Plugin parameters for bunchball fivestar plugin.
+ */
 
 $plugin = array(
   'BunchballEntitiesFivestar' => array(

@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *    Define ctools plugin parameters.
+ */
 
 $plugin = array(
   'BunchballEntitiesDefault' => array(

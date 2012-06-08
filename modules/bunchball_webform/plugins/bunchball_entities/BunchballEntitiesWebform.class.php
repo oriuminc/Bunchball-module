@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ *    Ctools plugin for Bunchball Webforms. Send webform submit event to
+ *    bunchball.
+ */
 
 class BunchballEntitiesWebform implements BunchballPluginInterface, BunchballEntitiesPluginInterface {
 

@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @file 
+ *    Bunchball module. Define api, configuration and architecture for Bunchball
+ *    modules and plugins.
+ */
 
 /**
  * Implement hook_menu().

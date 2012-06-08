@@ -1,5 +1,12 @@
 <?php
+/**
+ * @file 
+ *    Main admin form for bunchball module.
+ */
 
+/**
+ * Form callback for admin form.
+ */
 function bunchball_admin_form($form, &$form_state) {
 
   ctools_include('dependent');

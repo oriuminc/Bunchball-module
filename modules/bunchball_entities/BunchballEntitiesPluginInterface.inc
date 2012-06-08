@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *   Define Interface for Bunchball entity plugins.
+ */
 
 interface BunchballEntitiesPluginInterface {
   

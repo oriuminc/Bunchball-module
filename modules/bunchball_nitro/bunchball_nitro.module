@@ -1,4 +1,9 @@
 <?php 
+/**
+ * @file
+ *    Main functions for bunchball client side JS module. Send events to
+ *    bunchball from client side JS.
+ */
 
 /**
  * Implement hook_view($node, $view_mode)
