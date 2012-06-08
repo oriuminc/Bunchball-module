@@ -9,7 +9,7 @@ function bunchball_fivestar_ctools_plugin_directory($module, $plugin) {
   }
 }
 
-function bunchball_fivestar_fivestar_access($entity_type, $id, $tag, $uid){
+function bunchball_fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
   global $user;
   if ($user->uid > 0) {
     // authenticated users

@@ -51,7 +51,7 @@ function bunchball_admin_form($form, &$form_state) {
   // choose which one to make use of.
   ctools_include('plugins');
   if ($plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction')) {
-    foreach($plugins as $id => $plugin) {
+    foreach ($plugins as $id => $plugin) {
       $options[$id] = $plugin['label'];
     }
     $form['bunchball_user_interaction_plugin'] = array(

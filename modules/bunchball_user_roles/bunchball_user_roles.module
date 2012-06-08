@@ -15,7 +15,7 @@ function bunchball_user_roles_init() {
     ctools_include('plugins');
     $plugin = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction', 'BunchballUserRoles');
     $class = ctools_plugin_get_class($plugin, 'handler');
-    $instance = new $class;
+    $instance = new $class; //initiate callback
   }
     
 }

@@ -19,7 +19,7 @@ function bunchball_entities_menu() {
 
 function bunchball_entities_get_plugin_instance($id) {
   $instances = &drupal_static(__FUNCTION__);
-  if(!isset($instances[$id])) {
+  if (!isset($instances[$id])) {
     ctools_include('plugins');
     $plugin = ctools_get_plugins('bunchball_entities', 'bunchball_entities', $id);
     $class = ctools_plugin_get_class($plugin, 'handler');
