@@ -1,11 +1,12 @@
-// JavaScript closure. Defined jQuery $.
-(function ($) {
-  
-  $(document).ready(function() {
-    nitro.getUserId(gotCurrentUserId);
-    nitro.showPendingNotifications();
-  });  
-  
+(function($) {
+  Drupal.behaviors.bunchball = {
+    attach: function (context, settings) {
+      if (typeof nitro !== "undefined") {
+        nitro.getUserId(gotCurrentUserId);
+        nitro.showPendingNotifications();
+      }
+    }
+  };
 }) (jQuery);
 
 var _currentUserId = '';
