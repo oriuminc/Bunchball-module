@@ -315,8 +315,10 @@ class NitroAPI_XML implements NitroAPI {
       // Accessing the sessionKey through XPATH
       $sessionKeyArray = $this->get_value_by_path($arr, 'Nitro/Login/sessionKey');
       $this->sessionKey = $sessionKeyArray['value'];
-      foreach ($this->callbacks['postLogin'] as $callback) {
-        $callback['object']->$callback['function']();
+      if (isset($this->callbacks['postLogin']) && is_array($this->callbacks['postLogin'])) {
+        foreach ($this->callbacks['postLogin'] as $callback) {
+          $callback['object']->$callback['function']();
+        }
       }
     }
   }

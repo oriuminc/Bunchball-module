@@ -30,7 +30,7 @@ function bunchball_webform_post_submit($form, &$form_state) {
       $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
       foreach ($plugins as $id => $plugin) {
         $class = bunchball_entities_get_plugin_instance($id);
-        $class->send('webform', 'submit', $user, 'submit');
+        $class->send('webform', 'submit', $user, 'webform');
       }
   }
 }
