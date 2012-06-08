@@ -13,7 +13,7 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
     'bunchball_nitro' => array(
         'node_id' => $node->nid,
         'node_uid' => $node->uid,
-        'node_title' => $node->title,
+        'node_title' => filter_xss($node->title, array()),
         'node_cat' => $node->type,
         'node_type' => $node->type
         )
@@ -32,8 +32,12 @@ function _bunchball_nitro_node_post_render($markup, $element) {
 
   drupal_add_js(array(
     'bunchball_nitro' => array(
-      'artist_name' => isset($element['#node']) ? $element['#node']->title : "N/A",
-      'artist_cat' =>  isset($element['#node']) ? $element['#node']->type : "N/A"
+      'artist_name' => isset($element['#node']) ? 
+        filter_xss($element['#node']->title, array()) : 
+        "N/A",
+      'artist_cat' =>  isset($element['#node']) ? 
+        $element['#node']->type : 
+        "N/A"
     )
   ), 'setting');
 
@@ -50,7 +54,7 @@ function _bunchball_nitro_initialize() {
   $api_key = variable_get('bunchball_apikey', '');
   
   if ($api_key == '') {
-    watchdog('bunchball_nitro', t('API Key not set'), array());
+    watchdog('bunchball_nitro', 'API Key not set', array());
     return;
   }
   
@@ -88,7 +92,7 @@ function _bunchball_nitro_initialize() {
   // instantiate the variables for the JS
   $server_url = $in_debug_mode ? 
       'http://sandbox.bunchball.net/nitro/json' : 
-      'http://'.$customer_subdomain.'.nitro.bunchball.net/nitro/json/';
+      'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
   $user_id = $user->uid;
   $timestamp = time();
   $nitro = NitroAPI_Factory::getInstance();
@@ -138,6 +142,6 @@ EOD;
   
   // add jQuery functions file
   drupal_add_js(
-      drupal_get_path('module','bunchball_nitro') . '/bunchball_nitro.js'
+      drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.js'
   );
 }

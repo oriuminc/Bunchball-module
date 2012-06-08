@@ -12,6 +12,7 @@
 var _currentUserId = '';
 var _userCommandsArray = new Array();
 var _thePlayer = '';
+var _playerPlayed = 0;
 
 // callback function for acquiring the User ID of the current user...
 function gotCurrentUserId(inUserId) {
@@ -23,41 +24,8 @@ function gotCurrentUserId(inUserId) {
     userViewedContent();
   }
 
-  // TODO: bind the actions to functions below
+  // bind the actions to functions below
   (function ($) {
-//    #LikePluginPagelet a
-//    iframe.twitter-share-button a
-//    #plusone span#button
-//    span.tumblr a
-
-    // Facebook
-//    $('#LikePluginPagelet a').click(function(){
-//      alert('Facebook');
-//      return true;
-//    });
-    
-    // Twitter
-//    $('iframe.twitter-share-button a').click(function(){
-//      alert('twitter');
-//      return true;
-//    });
-    
-    // Pinterest
-    //$('').click(function(){});
-    
-    // Google+
-//    $('span.gplus div#___plusone_0').click(function(){
-//      alert('Google Plus');
-//      return true;
-//    });
-//    $('span.gplus div#___plusone_0').bind("click", function(e){
-//      alert('Google Plus');
-//      return true;
-//    });
-//    $('span.gplus iframe').contents().find("#button").bind("click", function(e){
-//      alert('Google Plus');
-//      return true;
-//    });
     
     // Tumblr
     $('span.tumblr a').click(function(){
@@ -73,7 +41,7 @@ function userViewedContent() {
   var title    = Drupal.settings.bunchball_nitro.node_title;
   var type     = Drupal.settings.bunchball_nitro.node_type;
   var cat      = Drupal.settings.bunchball_nitro.node_cat;
-  var sentTags = 'View_'+type+', Title: '+title+', Category: ' +cat;
+  var sentTags = 'View_' + type + ', Title: ' + title + ', Category: ' + cat;
   
   // add requests for all players into the array to walk through.
   var inObj = new Object();
@@ -105,7 +73,8 @@ function submitNitroAPICall(tags) {
   queryString += _userCommandsArray[0].ses + '&tags=';
   queryString += tags;
 
-  // alert(queryString + ' was called with user ' + _userCommandsArray[0].uid);
+  //alert(queryString + ' was called with user ' + _userCommandsArray[0].uid);
+  //nitroCallback("data", "token");
   nitro.callAPI(queryString, "nitroCallback"); 
 }
 
@@ -122,9 +91,9 @@ function nitroLogin(userId) {
   
   // build the login request
   var loginQuery = "method=user.login&";
-  loginQuery += "apiKey="+connectionParams.apiKey+"&";
-  loginQuery += "userId="+userId+"&";
-  loginQuery += "ts="+connectionParams.timeStamp+"&";
+  loginQuery += "apiKey=" + connectionParams.apiKey + "&";
+  loginQuery += "userId=" + userId + "&";
+  loginQuery += "ts=" + connectionParams.timeStamp + "&";
   loginQuery += "sig=" + connectionParams.signature;
   
   nitro.callAPI(loginQuery, "nitroLoginCallback");
@@ -163,8 +132,10 @@ function nitroVideoStateChange(newState) {
   
   if (newState == 0) { // ended
     action = "Video_Watch_Finish";
-  } else if (newState == 1) { // playing
+    _playerPlayed = 0;
+  } else if (newState == 1 && _playerPlayed == 0) { // playing not started
     action = "Video_Watch_Start";
+    _playerPlayed = 1;
   }
   
   // only continue if there is something in Action
