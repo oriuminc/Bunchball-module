@@ -27,7 +27,7 @@ function bunchball_user_interaction_admin_form($form, &$form_state) {
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save settings'),
+    '#value' => t('Save'),
   );
 
   return $form;
