@@ -29,56 +29,56 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
    * Form callback for plugin.
    */
   public function adminForm($form, &$form_state) {
-    $form['user_interaction'] = array(
+    $form['bunchball_user_interaction'] = array(
       '#type' => 'fieldset',
       '#title' => t('User Interaction'),
       '#collapsible' => TRUE,
       '#tree' => TRUE,
     );
 
-    $form['user_interaction']['bunchball_user_login'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_login_check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Communicate user login'),
       '#default_value' => $this->options['bunchball_user_login']['enabled'],
     );
 
-    $form['user_interaction']['bunchball_user_login_action'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_login_action'] = array(
       '#type' => 'textfield',
       '#title' => t('Action'),
       '#default_value' => $this->options['bunchball_user_login']['method'],
     );
 
-    $form['user_interaction']['bunchball_user_register'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_register_check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Communicate new user registration'),
       '#default_value' => $this->options['bunchball_user_register']['enabled'],
     );
 
-    $form['user_interaction']['bunchball_user_register_action'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_register_action'] = array(
       '#type' => 'textfield',
       '#title' => t('Action'),
       '#default_value' => $this->options['bunchball_user_register']['method'],
     );
 
-    $form['user_interaction']['bunchball_user_profile_complete'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_profile_complete_check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Communicate the number of user profile fields completed when a user saves their account.'),
       '#default_value' => $this->options['bunchball_user_profile_complete']['enabled'],
     );
 
-    $form['user_interaction']['bunchball_user_profile_complete_action'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_profile_complete_action'] = array(
       '#type' => 'textfield',
       '#title' => t('Action'),
       '#default_value' => $this->options['bunchball_user_profile_complete']['method'],
     );
 
-    $form['user_interaction']['bunchball_user_profile_picture'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_profile_picture_check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Communicate whether a user has uploaded a profile picture'),
       '#default_value' => $this->options['bunchball_user_profile_picture']['enabled'],
     );
 
-    $form['user_interaction']['bunchball_user_profile_picture_action'] = array(
+    $form['bunchball_user_interaction']['bunchball_user_profile_picture_action'] = array(
       '#type' => 'textfield',
       '#title' => t('Action'),
       '#default_value' => $this->options['bunchball_user_profile_picture']['method'],
@@ -97,40 +97,40 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
    */
   public function adminFormSubmit($form, &$form_state) {
     $values = $form_state['values'];
-    if ($values['user_interaction']['bunchball_user_login']) {
+    if ($values['bunchball_user_interaction']['bunchball_user_login_check']) {
       $login_value = array(
           'enabled'=>1, 
-          'method' => $values['user_interaction']['bunchball_user_login_action'],
+          'method' => $values['bunchball_user_interaction']['bunchball_user_login_action'],
           );
       variable_set('bunchball_user_login', $login_value);
     }
     else {
       variable_set('bunchball_user_login', array('enabled'=> 0, 'method' => ''));
     }
-    if ($values['user_interaction']['bunchball_user_register']) {
+    if ($values['bunchball_user_interaction']['bunchball_user_register_check']) {
       $register_value = array(
           'enabled' => 1,
-          'method' => $values['user_interaction']['bunchball_user_register_action'],
+          'method' => $values['bunchball_user_interaction']['bunchball_user_register_action'],
           );
       variable_set('bunchball_user_register', $register_value);
     }
     else {
       variable_set('bunchball_user_register', array('enabled'=> 0, 'method' => ''));
     }
-    if ($values['user_interaction']['bunchball_user_profile_complete']) {
+    if ($values['bunchball_user_interaction']['bunchball_user_profile_complete_check']) {
       $profile_value = array(
           'enabled' => 1,
-          'method'  => $values['user_interaction']['bunchball_user_profile_complete_action'],
+          'method'  => $values['bunchball_user_interaction']['bunchball_user_profile_complete_action'],
           );
       variable_set('bunchball_user_profile_complete', $profile_value);
     }
     else {
       variable_set('bunchball_user_profile_complete', array('enabled'=> 0, 'method' => ''));
     }
-    if ($values['user_interaction']['bunchball_user_profile_picture']) {
+    if ($values['bunchball_user_interaction']['bunchball_user_profile_picture_check']) {
       $picture_value = array(
           'enabled' => 1,
-          'method'  => $values['user_interaction']['bunchball_user_profile_picture_action']
+          'method'  => $values['bunchball_user_interaction']['bunchball_user_profile_picture_action']
           );
       variable_set('bunchball_user_profile_picture', $picture_value);
     }

@@ -12,6 +12,14 @@ function bunchball_entities_admin_form($form, &$form_state) {
   ctools_include('plugins');
   $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
 
+  $form['#attached']['js'] = array(
+    drupal_get_path('module', 'bunchball') . '/bunchball.admin.js',
+  );
+  
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'bunchball') . '/bunchball.admin.css',
+  );
+  
   foreach ($plugins as $id => $plugin) {
     $class = bunchball_entities_get_plugin_instance($id);
     $form += $class->adminForm($form, $form_state);

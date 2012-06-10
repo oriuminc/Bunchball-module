@@ -12,6 +12,14 @@ function bunchball_user_interaction_admin_form($form, &$form_state) {
   ctools_include('plugins');
   $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
 
+    $form['#attached']['js'] = array(
+    drupal_get_path('module', 'bunchball') . '/bunchball.admin.js',
+  );
+  
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'bunchball') . '/bunchball.admin.css',
+  );
+  
   foreach ($plugins as $id => $plugin) {
     $class = bunchball_user_interaction_get_plugin_instance($id);
     $form += $class->adminForm($form, $form_state);
