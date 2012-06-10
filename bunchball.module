@@ -15,7 +15,7 @@ function bunchball_menu() {
   $items = array();
 
   $items['admin/config/people/bunchball'] = array(
-    'title' => 'Bunchball',
+    'title' => 'Bunchball gamification',
     'description' => 'The main configuration screen for the bunchball api modules',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('bunchball_admin_form'),
