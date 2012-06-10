@@ -48,10 +48,19 @@ function bunchball_permission() {
 
 
 /**
- * Implement hook_help()
+ * Implements hook_help()
  */
 function bunchball_help($path, $arg) {
    if ($path == 'admin/help#bunchball') {
     return t("Here is a stub help page.  We'll need one eventually.");
   }
+}
+
+/**
+ * Implements hook_form_alter().
+ * 
+ * Change submit button trim.
+ */
+function bunchball_form_bunchball_admin_form_alter(&$form, $form_state, $form_id) {
+  $form['actions']['submit']['#value'] = t('Save');
 }
