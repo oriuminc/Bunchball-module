@@ -12,4 +12,4 @@ dependencies[] = ctools
 files[] = nitro/nitro.api.class.php
 files[] = BunchballPluginInterface.inc
 
-configure =  admin/config/system/bunchball
+configure =  admin/config/people/bunchball

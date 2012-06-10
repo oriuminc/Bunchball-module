@@ -14,7 +14,7 @@
 function bunchball_menu() {
   $items = array();
 
-  $items['admin/config/system/bunchball'] = array(
+  $items['admin/config/people/bunchball'] = array(
     'title' => 'Bunchball',
     'description' => 'The main configuration screen for the bunchball api modules',
     'page callback' => 'drupal_get_form',
@@ -25,7 +25,7 @@ function bunchball_menu() {
     'weight' => -10,
   );
 
-  $items['admin/config/system/bunchball/main'] = array(
+  $items['admin/config/people/bunchball/main'] = array(
     'title' => 'Configuration',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,

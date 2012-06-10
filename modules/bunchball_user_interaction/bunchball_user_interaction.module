@@ -6,7 +6,7 @@
 
 function bunchball_user_interaction_menu() {
   $items = array();
-  $items['admin/config/system/bunchball/user-interaction'] = array(
+  $items['admin/config/people/bunchball/user-interaction'] = array(
     'title' => 'Users',
     'type' => MENU_LOCAL_TASK,
     'callback' => 'drupal_get_form',

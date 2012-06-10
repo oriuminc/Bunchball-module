@@ -9,7 +9,7 @@
  */
 function bunchball_entities_menu() {
   $items = array();
-  $items['admin/config/system/bunchball/entities'] = array(
+  $items['admin/config/people/bunchball/entities'] = array(
     'title' => 'Content',
     'type' => MENU_LOCAL_TASK,
     'callback' => 'drupal_get_form',
