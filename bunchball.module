@@ -57,7 +57,7 @@ function bunchball_help($path, $arg) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter().
  * 
  * Change submit button trim.
  */
