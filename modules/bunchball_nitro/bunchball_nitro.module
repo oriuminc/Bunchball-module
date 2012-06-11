@@ -29,10 +29,16 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
   _bunchball_nitro_initialize();
 }
 
+/**
+ * Implementation of hook_node_view_alter(&$build)
+ */
 function bunchball_nitro_node_view_alter(&$build) {
   $build['#post_render'][] = '_bunchball_nitro_node_post_render';
 }
 
+/**
+ * Function used for post render of the HTML to modify youtube URLs
+ */
 function _bunchball_nitro_node_post_render($markup, $element) {
 
   drupal_add_js(array(
@@ -46,7 +52,8 @@ function _bunchball_nitro_node_post_render($markup, $element) {
     )
   ), 'setting');
 
-  
+  // Enable JS API for youtube videos found on the page through the oembed 
+  // module.
   $markup = str_replace("feature=oembed", "feature=oembed&enablejsapi=1", $markup);
   return $markup;
 }
@@ -55,7 +62,7 @@ function _bunchball_nitro_node_post_render($markup, $element) {
  * Initialize the JavaScript on the page
  */
 function _bunchball_nitro_initialize() {
-  // variable_get('bunchball_apikey',0); will get the API key from server side
+  // will get the API key from server side
   $api_key = variable_get('bunchball_apikey', '');
   
   if ($api_key == '') {
@@ -65,6 +72,7 @@ function _bunchball_nitro_initialize() {
   
   global $user;
   
+  // detect whether the environment is production or debug (sandbox)
   $environment = variable_get('bunchball_environment', 'sandbox');
   if (strlen($environment) == 0) {
     $endpoint_url = 'sandbox';
