@@ -1,0 +1,202 @@
+<?php 
+/**
+ * @file
+ *    Main functions for bunchball client side JS module. Send events to
+ *    bunchball from client side JS.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function bunchball_nitro_menu() {
+  $items = array();
+  $items['admin/config/people/bunchball/nitro'] = array(
+    'title' => 'Client Side',
+    'type' => MENU_LOCAL_TASK,
+    'callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_nitro_admin_form'),
+    'file' => 'bunchball_nitro.admin.inc',
+    'access arguments' => array('configure bunchball'),
+  );
+  return $items;
+}
+
+/**
+ * Implement hook_view($node, $view_mode)
+ */
+function bunchball_nitro_node_view($node, $view_mode, $langcode) { 
+  // make sure the user is currently viewing in full content mode
+  if ($view_mode != 'full') {
+    return;
+  }
+  
+  $nitro_ct_enabled = variable_get('bunchball_nitro_admin', array());
+  
+  // the user needs to set their settings..
+  if (!isset($nitro_ct_enabled[$node->type])) {
+    return;
+  }
+  
+  drupal_add_js(array(
+    'bunchball_nitro' => array(
+        'node_id' => $node->nid,
+        'node_uid' => $node->uid,
+        'node_title' => filter_xss($node->title, array()),
+        'node_cat' => $node->type,
+        'node_type' => $node->type,
+        'node_action' => $nitro_ct_enabled[$node->type],
+        )
+    ), 'setting');
+
+
+  // initialize the JS
+  _bunchball_nitro_initialize();
+}
+
+/**
+ * Implementation of hook_node_view_alter(&$build)
+ */
+function bunchball_nitro_node_view_alter(&$build) {
+  $build['#post_render'][] = '_bunchball_nitro_node_post_render';
+}
+
+/**
+ * Function used for post render of the HTML to modify youtube URLs
+ */
+function _bunchball_nitro_node_post_render($markup, $element) {
+
+  // make sure there is a youtube video in here..
+  if (strpos($markup, "feature=oembed") === false) {
+    return;
+  }
+  
+  _bunchball_nitro_initialize();
+  
+  $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
+  drupal_add_js(array(
+    'bunchball_nitro' => array(
+      'artist_name' => isset($element['#node']) ? 
+        filter_xss($element['#node']->title, array()) : 
+        "N/A",
+      'artist_cat' =>  isset($element['#node']) ? 
+        $element['#node']->type : 
+        "N/A",
+      'artist_start' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : 'youtube_start',
+      'artist_end' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : 'youtube_end',
+    )
+  ), 'setting');
+
+  // Enable JS API for youtube videos found on the page through the oembed 
+  // module.
+  $markup = str_replace("feature=oembed", "feature=oembed&enablejsapi=1", $markup);
+  return $markup;
+}
+
+/**
+ * Initialize the JavaScript on the page
+ */
+function _bunchball_nitro_initialize() {
+  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
+
+  // if the nitro_js_url is already in the SESSION variable, then this
+  // has already run..
+  $current_js_array = drupal_add_js();
+  if (isset ($current_js_array[$nitro_js_url])) {
+    return;
+  }
+  
+  // will get the API key from server side
+  $api_key = variable_get('bunchball_apikey', '');
+  
+  if ($api_key == '') {
+    watchdog('bunchball_nitro', 'API Key not set', array());
+    return;
+  }
+  
+  global $user;
+  
+  // detect whether the environment is production or debug (sandbox)
+  $environment = variable_get('bunchball_environment', 'sandbox');
+  if (strlen($environment) == 0) {
+    $endpoint_url = 'sandbox';
+  }
+
+  // change this so that debug mode is reflected in the environment.
+  $in_debug_mode = ($environment == 'sandbox');
+  
+  // parse domain from the variables
+  $endpoint_url = variable_get('bunchball_production_url', 'http://sandbox.bunchball.net/nitro/json');
+  if (strlen($endpoint_url) == 0) {
+    $endpoint_url = 'http://sandbox.bunchball.net/nitro/json';
+  }
+  
+  $parsed_url = parse_url($endpoint_url);
+
+  // default value for the customer subdomain
+  $customer_subdomain = 'sandbox';
+  if (isset ($parsed_url['host'])) {
+    $exploded_domain = explode(".", $parsed_url['host']);
+    
+    if (count($exploded_domain) > 2) {
+      array_pop($exploded_domain);
+      array_pop($exploded_domain);
+      
+      $customer_subdomain = implode(".", $exploded_domain);
+    }
+  }
+
+  // instantiate the variables for the JS
+  $server_url = $in_debug_mode ? 
+      'http://sandbox.bunchball.net/nitro/json' : 
+      'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
+  $user_id = $user->uid;
+  $timestamp = time();
+  $nitro = NitroAPI_Factory::getInstance();
+  $signature = $nitro->getSignature();
+  $debug = $in_debug_mode ? 'true' : 'false';
+  
+  // Build the Nitro Object in JS to be added at the bottom of the file.
+  $embedded_js = <<<EOD
+var connectionParams={};
+connectionParams.apiKey = "$api_key";
+connectionParams.server = "$server_url";
+connectionParams.timeStamp = "$timestamp";
+connectionParams.signature = "$signature";
+EOD;
+
+  // if the user is logged in....
+  if ($user_id > 0) {
+    $embedded_js .= <<<EOD
+
+connectionParams.userId = escape("$user_id");
+EOD;
+    
+  }
+  
+  $embedded_js .= <<<EOD
+
+connectionParams.debug = $debug;
+
+var nitro = new Nitro(connectionParams);
+
+EOD;
+  
+  // To include nitro.js, first put the following code into your HTML page as a 
+  // direct child of the <body> element or after the </body> tag.
+  drupal_add_js($nitro_js_url, array(
+      'type' => 'external',
+      'weight' => -10,
+      'scope' => 'footer'
+  ));
+
+  drupal_add_js($embedded_js, array(
+      'type' => 'inline',
+      'weight' => -9,
+      'scope' => 'footer'
+  ));
+  
+  // add jQuery functions file
+  drupal_add_js(
+      drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.js'
+  );
+}

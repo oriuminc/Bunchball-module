@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ *    Main functions for bunchball fivestar plugin module. Send fivestar rating
+ *    events to bunchball.
+ */
+
+/**
+ * Implement hook_ctools_plugin_directory
+ */
+function bunchball_fivestar_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
+    return 'plugins/bunchball_entities';
+  }
+}
+
+function bunchball_fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+      ctools_include('plugins');
+      $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+      foreach ($plugins as $id => $plugin) {
+        $class = bunchball_entities_get_plugin_instance($id);
+        $class->send($entity_type, 'rate', $user, 'rate');
+      }
+  }
+}

@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ *    Install / uninstall actions.
+ */
+
+/**
+ * Implement hook_uninstall()
+ * 
+ * Delete all associated variables.
+ */
+function bunchball_entities_uninstall() {
+  variable_del('bunchball_entities');
+}

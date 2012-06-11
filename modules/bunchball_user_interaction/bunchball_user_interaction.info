@@ -1,0 +1,7 @@
+name = Bunchball user interaction
+description = Send user system interactions and profile updates to Bunchball
+core = 7.x
+package = Bunchball
+dependencies[] = bunchball
+files[] = BunchBallUserInteractionInterface.class.php
+

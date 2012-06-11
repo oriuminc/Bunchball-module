@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ *   Install / uninstall functions for bunchball_fivestar module.
+ */
+
+/**
+ * Implement hook_uninstall()
+ * 
+ * Delete all associated variables.
+ */
+function bunchball_fivestar_uninstall() {
+  variable_del('bunchball_fivestar');
+}

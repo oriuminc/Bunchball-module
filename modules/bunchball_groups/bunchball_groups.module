@@ -1,0 +1,71 @@
+<?php
+/**
+ * @file
+ *    Main functions for bunchball_groups module. Adds user to bunchball group
+ *    based on profile field values.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory()
+ */
+function bunchball_groups_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_user_interaction' && $plugin == 'bunchball_user_interaction') {
+    return 'plugins/bunchball_user_interaction';
+  }
+}
+
+
+/**
+ * Implements hook_user_update().
+ */
+function bunchball_groups_user_update(&$edit, $account, $category) {
+  global $user;
+  if ($user->uid > 0) {
+    ctools_include('plugins');
+    $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+    foreach ($plugins as $id => $plugin) {
+      $class = bunchball_user_interaction_get_plugin_instance($id);
+      $class->send($account, 'addUserToGroup');
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function bunchball_groups_theme() {
+  return array(
+    'bunchball_groups_admin' => array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Theme function for groups table.
+ * 
+ * @param $variables
+ * 
+ * @return rendered HTML 
+ */
+function theme_bunchball_groups_admin($variables) {
+  $rows = array();
+  foreach ($variables['form']['settings'] as $key => $value) {
+    if (is_int($key)) {
+      $rows[] = array(
+          drupal_render($value['group']['field']),
+          drupal_render($value['group']['value']),
+          drupal_render($value['group']['group']),
+          drupal_render($value['group']['delete']),
+        );
+    }
+  }
+  $header = array(
+      t('Field'),
+      t('Value'),
+      t('Group'),
+      t('Delete'),
+    );
+  $output = theme('table', array('header' => $header, 'rows' => $rows));
+  return $output;
+}

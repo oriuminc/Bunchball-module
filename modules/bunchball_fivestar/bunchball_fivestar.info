@@ -1,0 +1,7 @@
+name = Bunchball Fivestar
+description = Expose Fivestar rating to Bunchball.
+core = 7.x
+package = Bunchball
+dependencies[] = bunchball
+dependencies[] = bunchball_entities
+dependencies[] = fivestar

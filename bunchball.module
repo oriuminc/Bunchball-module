@@ -1,0 +1,66 @@
+<?php
+/**
+ * @file 
+ *    Bunchball module. Define api, configuration and architecture for Bunchball
+ *    modules and plugins.
+ */
+
+/**
+ * Implement hook_menu().
+ *
+ * @return
+ *   An array of menu items.
+ */
+function bunchball_menu() {
+  $items = array();
+
+  $items['admin/config/people/bunchball'] = array(
+    'title' => 'Bunchball gamification',
+    'description' => 'The main configuration screen for the bunchball api modules',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_admin_form'),
+    'access arguments' => array('configure bunchball'),
+    'file' => 'bunchball.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => -10,
+  );
+
+  $items['admin/config/people/bunchball/main'] = array(
+    'title' => 'Configuration',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  return $items;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function bunchball_permission() {
+  return array(
+    'configure bunchball' => array(
+      'title' => t('Configure Bunchball settings'),
+      'description' => t('Configure the bunchball module including Bunchball API keys.'),
+    ),
+  );
+}
+
+
+/**
+ * Implements hook_help()
+ */
+function bunchball_help($path, $arg) {
+   if ($path == 'admin/help#bunchball') {
+    return t("Here is a stub help page.  We'll need one eventually.");
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * 
+ * Change submit button trim.
+ */
+function bunchball_form_bunchball_admin_form_alter(&$form, $form_state, $form_id) {
+  $form['actions']['submit']['#value'] = t('Save');
+}

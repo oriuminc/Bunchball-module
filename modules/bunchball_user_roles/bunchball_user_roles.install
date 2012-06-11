@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ *    Install / uninstall functions for bunchball_user_roles module.
+ */
+
+/**
+ * Implement hook_uninstall()
+ * 
+ * Delete all associated variables.
+ */
+function bunchball_user_roles_uninstall() {
+  variable_del('bunchball_user_roles');
+}

@@ -1,0 +1,107 @@
+<?php
+/**
+ * @file
+ *    Main functions for bunchball_entities and plugins.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function bunchball_entities_menu() {
+  $items = array();
+  $items['admin/config/people/bunchball/entities'] = array(
+    'title' => 'Content',
+    'type' => MENU_LOCAL_TASK,
+    'callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_entities_admin_form'),
+    'file' => 'bunchball_entities.admin.inc',
+    'access arguments' => array('configure bunchball'),
+  );
+  return $items;
+}
+
+
+function bunchball_entities_get_plugin_instance($id) {
+  $instances = &drupal_static(__FUNCTION__);
+  if (!isset($instances[$id])) {
+    ctools_include('plugins');
+    $plugin = ctools_get_plugins('bunchball_entities', 'bunchball_entities', $id);
+    $class = ctools_plugin_get_class($plugin, 'handler');
+    $instances[$id] = new $class;
+  }
+  return $instances[$id];
+}
+
+/**
+ * Implement hook_ctools_plugin_type
+ */
+function bunchball_entities_ctools_plugin_type() {
+  $plugins['bunchball_entities'] = array(
+    'use hooks' => FALSE,
+    'child plugins' => TRUE,
+  );
+  return $plugins;
+}
+
+/**
+ * Implement hook_ctools_plugin_directory
+ */
+function bunchball_entities_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
+    return 'plugins/bunchball_entities';
+  }
+}
+
+/**
+ * Implements hook_node_insert()
+ */
+function bunchball_entities_node_insert($node) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+    ctools_include('plugins');
+    $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+    foreach ($plugins as $id => $plugin) {
+      $class = bunchball_entities_get_plugin_instance($id);
+      $node_type = "node_{$node->type}";
+      $class->send($node_type, 'node', $user, 'insert');
+    }
+  }
+}
+
+/**
+ * Implements hook_node_update()
+ */
+function bunchball_entities_node_update($node) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+    ctools_include('plugins');
+    $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+    foreach ($plugins as $id => $plugin) {
+      $class = bunchball_entities_get_plugin_instance($id);
+      $node_type = "node_{$node->type}";
+      $class->send($node_type, 'node', $user, 'update');
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function bunchball_entities_entity_insert($entity, $type) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+    if ($type == 'comment') {
+      ctools_include('plugins');
+      $node_type = $entity->node_type;
+      $comment_type = (substr($node_type, 0, 8) == 'comment_') ? substr($node_type, 8) : '';
+      $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+      foreach ($plugins as $id => $plugin) {
+        $class = bunchball_entities_get_plugin_instance($id);
+        $class->send($comment_type, 'comment', $user, 'comment');
+      }
+    }
+  }
+}

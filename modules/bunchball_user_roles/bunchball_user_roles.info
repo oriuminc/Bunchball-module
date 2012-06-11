@@ -1,0 +1,6 @@
+name = Bunchball user roles
+description = Expose Poll voting to Bunchball.
+core = 7.x
+package = Bunchball
+dependencies[] = bunchball
+dependencies[] = bunchball_user_interaction

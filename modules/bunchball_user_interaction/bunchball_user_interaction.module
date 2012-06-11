@@ -1,0 +1,87 @@
+<?php
+/**
+ * @file
+ *    Main functions for bunchball_user_interaction module and related plugins.
+ */
+
+function bunchball_user_interaction_menu() {
+  $items = array();
+  $items['admin/config/people/bunchball/user-interaction'] = array(
+    'title' => 'Users',
+    'type' => MENU_LOCAL_TASK,
+    'callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_user_interaction_admin_form'),
+    'file' => 'bunchball_user_interaction.admin.inc',
+    'access arguments' => array('configure bunchball'),
+  );
+  return $items;
+}
+
+
+/**
+ * Implement hook_user_insert()
+ */
+function bunchball_user_interaction_user_insert(&$edit, $account, $category) {
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $class->send($account, 'register');
+  }
+}
+
+/**
+ * Implement hook_user_save()
+ */
+function bunchball_user_interaction_user_update(&$edit, $account, $category) {
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $class->send($account, 'profileComplete');
+    $class->send($account, 'profilePicture');
+  }
+}
+
+/**
+ * Implement hook_user_login
+ */
+function bunchball_user_interaction_user_login(&$edit, $account) {
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
+  foreach ($plugins as $id => $plugin) {
+    $class = bunchball_user_interaction_get_plugin_instance($id);
+    $class->send($account, 'register');
+  }
+}
+
+function bunchball_user_interaction_get_plugin_instance($id) {
+  $instances = &drupal_static(__FUNCTION__);
+  if (!isset($instances[$id])) {
+    ctools_include('plugins');
+    $plugin = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction', $id);
+    $class = ctools_plugin_get_class($plugin, 'handler');
+    $instances[$id] = new $class(NitroAPI_Factory::getInstance());
+  }
+  return $instances[$id];
+}
+
+/**
+ * Implement hook_ctools_plugin_type
+ */
+function bunchball_user_interaction_ctools_plugin_type() {
+  $plugins['bunchball_user_interaction'] = array(
+    'use hooks' => FALSE,
+    'child plugins' => TRUE,
+  );
+  return $plugins;
+}
+
+/**
+ * Implement hook_ctools_plugin_directory
+ */
+function bunchball_user_interaction_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_user_interaction' && $plugin == 'bunchball_user_interaction') {
+    return 'plugins/bunchball_user_interaction';
+  }
+}

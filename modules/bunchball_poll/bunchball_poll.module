@@ -1,0 +1,43 @@
+<?php
+/**
+ * @file
+ *    Main functions for bunchball poll module. Send poll voting events to
+ *    bunchball.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory()
+ */
+function bunchball_poll_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'bunchball_entities' && $plugin == 'bunchball_entities') {
+    return 'plugins/bunchball_entities';
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function bunchball_poll_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'poll_view_voting') {
+    $form['vote']['#submit'][] = 'bunchball_poll_poll_vote';
+  }
+}
+
+/**
+ * Submit callback for poll vote.
+ * 
+ * @param $form
+ * @param $form_state 
+ */
+function bunchball_poll_poll_vote($form, &$form_state) {
+  global $user;
+  if ($user->uid > 0) {
+    // authenticated users
+      ctools_include('plugins');
+      $plugins = ctools_get_plugins('bunchball_entities', 'bunchball_entities');
+      foreach ($plugins as $id => $plugin) {
+        $class = bunchball_entities_get_plugin_instance($id);
+        $class->send('poll', 'vote', $user, 'vote');
+      }
+  }
+}
