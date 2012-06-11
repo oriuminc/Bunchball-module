@@ -41,7 +41,8 @@ function userViewedContent() {
   var title    = Drupal.settings.bunchball_nitro.node_title;
   var type     = Drupal.settings.bunchball_nitro.node_type;
   var cat      = Drupal.settings.bunchball_nitro.node_cat;
-  var sentTags = 'View_' + type + ', Title: ' + title + ', Category: ' + cat;
+  var bb_tag   = Drupal.settings.bunchball_nitro.node_action;
+  var sentTags = bb_tag + ', Title: ' + title + ', Category: ' + cat;
   
   // add requests for all players into the array to walk through.
   var inObj = new Object();
@@ -73,9 +74,9 @@ function submitNitroAPICall(tags) {
   queryString += _userCommandsArray[0].ses + '&tags=';
   queryString += tags;
 
-  //alert(queryString + ' was called with user ' + _userCommandsArray[0].uid);
-  //nitroCallback("data", "token");
-  nitro.callAPI(queryString, "nitroCallback"); 
+  alert(queryString + ' was called with user ' + _userCommandsArray[0].uid);
+  nitroCallback("data", "token");
+  //nitro.callAPI(queryString, "nitroCallback"); 
 }
 
 function nitroCallback(data, token) {
@@ -131,10 +132,10 @@ function nitroVideoStateChange(newState) {
   var action = "";
   
   if (newState == 0) { // ended
-    action = "Video_Watch_Finish";
+    action = Drupal.settings.bunchball_nitro.artist_end;
     _playerPlayed = 0;
   } else if (newState == 1 && _playerPlayed == 0) { // playing not started
-    action = "Video_Watch_Start";
+    action = Drupal.settings.bunchball_nitro.artist_start;
     _playerPlayed = 1;
   }
   

@@ -6,11 +6,34 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function bunchball_nitro_menu() {
+  $items = array();
+  $items['admin/config/people/bunchball/nitro'] = array(
+    'title' => 'Client Side',
+    'type' => MENU_LOCAL_TASK,
+    'callback' => 'drupal_get_form',
+    'page arguments' => array('bunchball_nitro_admin_form'),
+    'file' => 'bunchball_nitro.admin.inc',
+    'access arguments' => array('configure bunchball'),
+  );
+  return $items;
+}
+
+/**
  * Implement hook_view($node, $view_mode)
  */
 function bunchball_nitro_node_view($node, $view_mode, $langcode) { 
   // make sure the user is currently viewing in full content mode
   if ($view_mode != 'full') {
+    return;
+  }
+  
+  $nitro_ct_enabled = variable_get('bunchball_nitro_admin', array());
+  
+  // the user needs to set their settings..
+  if (!isset($nitro_ct_enabled[$node->type])) {
     return;
   }
   
@@ -20,7 +43,8 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
         'node_uid' => $node->uid,
         'node_title' => filter_xss($node->title, array()),
         'node_cat' => $node->type,
-        'node_type' => $node->type
+        'node_type' => $node->type,
+        'node_action' => $nitro_ct_enabled[$node->type],
         )
     ), 'setting');
 
@@ -41,6 +65,14 @@ function bunchball_nitro_node_view_alter(&$build) {
  */
 function _bunchball_nitro_node_post_render($markup, $element) {
 
+  // make sure there is a youtube video in here..
+  if (strpos($markup, "feature=oembed") === false) {
+    return;
+  }
+  
+  _bunchball_nitro_initialize();
+  
+  $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
   drupal_add_js(array(
     'bunchball_nitro' => array(
       'artist_name' => isset($element['#node']) ? 
@@ -48,7 +80,9 @@ function _bunchball_nitro_node_post_render($markup, $element) {
         "N/A",
       'artist_cat' =>  isset($element['#node']) ? 
         $element['#node']->type : 
-        "N/A"
+        "N/A",
+      'artist_start' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : 'youtube_start',
+      'artist_end' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : 'youtube_end',
     )
   ), 'setting');
 
@@ -62,6 +96,15 @@ function _bunchball_nitro_node_post_render($markup, $element) {
  * Initialize the JavaScript on the page
  */
 function _bunchball_nitro_initialize() {
+  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
+
+  // if the nitro_js_url is already in the SESSION variable, then this
+  // has already run..
+  $current_js_array = drupal_add_js();
+  if (isset ($current_js_array[$nitro_js_url])) {
+    return;
+  }
+  
   // will get the API key from server side
   $api_key = variable_get('bunchball_apikey', '');
   
@@ -140,7 +183,6 @@ EOD;
   
   // To include nitro.js, first put the following code into your HTML page as a 
   // direct child of the <body> element or after the </body> tag.
-  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
   drupal_add_js($nitro_js_url, array(
       'type' => 'external',
       'weight' => -10,
