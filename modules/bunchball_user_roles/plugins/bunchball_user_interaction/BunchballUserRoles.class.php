@@ -57,7 +57,22 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
     variable_set('bunchball_user_roles', $this->options);
   }
 
+  /**
+   * AJAX callback.
+   * 
+   * @param $form
+   * @param $form_state
+   * @param $op
+   * @param $data 
+   */
+  public function adminFormAjax($form, &$form_state, $op, $data) {}
   
+  /**
+   * Send command to Bunchball.
+   * 
+   * @param $user
+   * @param $op 
+   */
   public function send($user, $op) {
     if ($op == 'setRole') {
       try {

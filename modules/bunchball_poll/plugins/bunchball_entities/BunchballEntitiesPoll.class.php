@@ -58,6 +58,16 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
   }
 
   /**
+   * AJAX callback.
+   * 
+   * @param $form
+   * @param $form_state
+   * @param $op
+   * @param $data 
+   */
+  public function adminFormAjax($form, &$form_state, $op, $data) {}
+  
+  /**
    * Register rating actions.
    *
    * @param $id

@@ -64,6 +64,16 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
   }
   
   /**
+   * AJAX callback.
+   * 
+   * @param $form
+   * @param $form_state
+   * @param $op
+   * @param $data 
+   */
+  public function adminFormAjax($form, &$form_state, $op, $data) {}
+  
+  /**
    * Register content actions.
    *
    * @param $id

@@ -140,6 +140,16 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
   }
 
   /**
+   * AJAX callback.
+   * 
+   * @param $form
+   * @param $form_state
+   * @param $op
+   * @param $data 
+   */
+  public function adminFormAjax($form, &$form_state, $op, $data) {}
+  
+  /**
    * Callback for user interactions. Send user data to server for specified operation
    * 
    * @param $user

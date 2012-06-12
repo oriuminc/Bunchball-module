@@ -23,14 +23,35 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
    *    form to be rendered
    */
   public function adminForm($form, &$form_state) {
+    if (isset($form_state['bunchball_groups_num_rows'])) {
+      $num_rows = $form_state['bunchball_groups_num_rows'];
+    }
+    else {
+      if (isset($this->options['groups'])) {
+        $num_rows = count($this->options['groups']) + 1;
+        $form_state['bunchball_groups_num_rows'] = $num_rows;
+      }
+    }
+    
     $form['bunchball_groups'] = array(
         '#type' => 'fieldset',
         '#title' => t('Bunchball groups'),
         '#collapsible' => TRUE,
         '#theme' => 'bunchball_groups_admin',
+        '#prefix' => '<div id="bunchball-groups-table">',
+        '#suffix' => '</div>',
         '#tree' => TRUE,
     );
-    $form['bunchball_groups']['settings'] = $this->buildFields();
+    $form['bunchball_groups']['settings'] = $this->buildFields($num_rows);
+    $form['bunchball_groups']['add-button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add another row'),
+        '#submit' => array('bunchball_groups_ajax_add_one'),
+        '#ajax' => array(
+            'callback' => 'bunchball_groups_ajax_callback',
+            'wrapper' => 'bunchball-groups-table',
+        ),
+    );
 
     return $form;
   }
@@ -62,7 +83,32 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
     variable_set('bunchball_groups', $this->options);
   }
 
+  /**
+   * AJAX callback.
+   * 
+   * @param $form
+   * @param $form_state
+   * @param $op
+   * @param $data 
+   */
+  public function adminFormAjax($form, &$form_state, $op, $data = NULL) {
+    if ($op == 'addOneRow') {
+      $form_state['bunchball_groups_num_rows']++;
+      $form_state['rebuild'] = TRUE;
+//      $this->options['groups'][] = array(
+//        'field' => '',
+//        'value' => '',
+//        'group' => '',
+//      );
+    }
+  }
   
+  /**
+   * Send action to Bunchball.
+   * 
+   * @param $user
+   * @param $op 
+   */
   public function send($user, $op) {
     if ($op == 'addUserToGroup') {
       try {
@@ -97,10 +143,13 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
   /**
    * Build the form fields for a content type.
    * 
+   * @param $num_rows
+   *    Number of rows in the table of rules.
+   * 
    * @return array
    *    form field elements for one content type
    */
-  private function buildFields() {
+  private function buildFields($num_rows) {
     $form = array();
     $profile_fields = array();
     // get array of profile fields to display as select options
@@ -110,9 +159,12 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
     if (isset($this->options['groups'])) {
       foreach ($this->options['groups'] as $key => $group) {
         $form[$key] = $this->buildRow($profile_fields, $group);
+        $num_rows--;
       }
     }
-    $form[] = $this->buildRow($profile_fields);
+    for (;$num_rows >0; $num_rows--) {
+      $form[] = $this->buildRow($profile_fields);
+    }
     
     return $form;
   }

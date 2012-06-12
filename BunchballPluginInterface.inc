@@ -31,4 +31,14 @@ interface BunchballPluginInterface {
    */
   public function adminFormSubmit($form, &$form_state);
   
+  /**
+   * AJAX callback for plugin.
+   * 
+   * @param $form
+   * @param $form_state
+   * @param $op
+   * @param $data
+   */
+  public function adminFormAjax($form, &$form_state, $op, $data);
+  
 }

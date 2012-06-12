@@ -10,7 +10,7 @@
  * 
  * Delete all associated variables.
  */
-function bunchball_entities_uninstall() {
+function bunchball_nitro_uninstall() {
   variable_del('bunchball_nitro_admin');
   variable_del('bunchball_nitro_admin_youtube');
 }
