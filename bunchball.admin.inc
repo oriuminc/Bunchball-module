@@ -22,14 +22,14 @@ function bunchball_admin_form($form, &$form_state) {
   $form['bunchball_apikey'] = array(
     '#type' => 'textfield',
     '#default_value' => isset($form_state['values']['bunchball_apikey']) ? $form_state['values']['bunchball_apikey'] : variable_get('bunchball_apikey', ''),
-    '#title' => t('Bunchball API Key'),
+    '#title' => t('API Key'),
     '#required' => TRUE,
   );
 
   $form['bunchball_apisecret'] = array(
     '#type' => 'textfield',
     '#default_value' => isset($form_state['values']['bunchball_apisecret']) ? $form_state['values']['bunchball_apisecret'] : variable_get('bunchball_apisecret', ''),
-    '#title' => t('Bunchball API Secret'),
+    '#title' => t('API Secret'),
     '#required' => TRUE,
   );
 
