@@ -11,6 +11,14 @@ function bunchball_admin_form($form, &$form_state) {
 
   ctools_include('dependent');
   
+  $links = array(
+      '!content_actions' => l('content actions', 'admin/config/people/bunchball/entities'),
+      '!user_actions' => l('user actions', 'admin/config/people/bunchball/user-interaction'),
+  );
+  $form['description'] = array(
+    '#markup' => t('Connection to Bunchball Nitro requires a subscription. Once subscribed, use the values on the Nitro Admin console to complete the fields below to connect the service.  Then configure the !content_actions and !user_actions to track.', $links),
+  );
+  
   $form['bunchball_apikey'] = array(
     '#type' => 'textfield',
     '#default_value' => isset($form_state['values']['bunchball_apikey']) ? $form_state['values']['bunchball_apikey'] : variable_get('bunchball_apikey', ''),
@@ -27,6 +35,7 @@ function bunchball_admin_form($form, &$form_state) {
 
   $form['bunchball_environment'] = array(
     '#type' => 'select',
+    '#description' => t('Point to Sandbox for testing and Production for your live environment.'),
     '#options' => array(
        0 => ' ',
        'production' => t('Production'),

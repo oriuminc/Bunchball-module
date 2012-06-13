@@ -137,32 +137,38 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
     );
     $form[$id][$id . '_insert_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Insert'),
+      '#title' => t('Create'),
+      '#description' => t('Notify the Bunchball service when a user creates this content type.'),
       '#default_value' => isset($this->options[$id]['insert']) ? $this->options[$id]['insert'] : NULL,
     );
     $form[$id][$id . '_insert_action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action name'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options[$id]['insert_action']) ? $this->options[$id]['insert_action'] : NULL,
     );
     $form[$id][$id . '_update_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Update'),
+      '#title' => t('Edit'),
+      '#description' => t('Notify the Bunchball service when a user edits this content type.'),
       '#default_value' => isset($this->options[$id]['update']) ? $this->options[$id]['update'] : NULL,
     );
     $form[$id][$id . '_update_action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action name'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options[$id]['update_action']) ? $this->options[$id]['update_action'] : NULL,
     );
     $form[$id][$id . '_comment_check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Comment'),
+      '#description' => t('Notify the Bunchball service when a user comments on this content type.'),
       '#default_value' => isset($this->options[$id]['comment']) ? $this->options[$id]['comment'] : NULL,
     );
     $form[$id][$id . '_comment_action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action name'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options[$id]['comment_action']) ? $this->options[$id]['comment_action'] : NULL,
     );
     return $form;

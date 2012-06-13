@@ -31,56 +31,65 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
   public function adminForm($form, &$form_state) {
     $form['bunchball_user_interaction'] = array(
       '#type' => 'fieldset',
-      '#title' => t('User Interaction'),
+      '#title' => t('User Actions'),
       '#collapsible' => TRUE,
+      '#description' => t('Enable the user actions to track, which maps them to the Bunchball Nitro console.'),
       '#tree' => TRUE,
     );
 
     $form['bunchball_user_interaction']['bunchball_user_login_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Communicate user login'),
+      '#title' => t('User login'),
+      '#description' => t('Notify the Bunchball service when a user logs into the site'),
       '#default_value' => $this->options['bunchball_user_login']['enabled'],
     );
 
     $form['bunchball_user_interaction']['bunchball_user_login_action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_login']['method'],
     );
 
     $form['bunchball_user_interaction']['bunchball_user_register_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Communicate new user registration'),
+      '#title' => t('User registration'),
+      '#description' => t('Notify the Bunchball service when a user registers on the site.'),
       '#default_value' => $this->options['bunchball_user_register']['enabled'],
     );
 
     $form['bunchball_user_interaction']['bunchball_user_register_action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_register']['method'],
     );
 
     $form['bunchball_user_interaction']['bunchball_user_profile_complete_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Communicate the number of user profile fields completed when a user saves their account.'),
+      '#title' => t('Profile completion'),
+      '#description' => t('Notify the Bunchball service with the number of fields a user has completed on their profile.'),
       '#default_value' => $this->options['bunchball_user_profile_complete']['enabled'],
     );
 
     $form['bunchball_user_interaction']['bunchball_user_profile_complete_action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_profile_complete']['method'],
     );
 
     $form['bunchball_user_interaction']['bunchball_user_profile_picture_check'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Communicate whether a user has uploaded a profile picture'),
+      '#title' => t('Profile picture upload'),
+      '#description' => t('Notify the Bunchball service when a user uploads a profile picture.'),
       '#default_value' => $this->options['bunchball_user_profile_picture']['enabled'],
     );
 
     $form['bunchball_user_interaction']['bunchball_user_profile_picture_action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_profile_picture']['method'],
     );
 

@@ -107,11 +107,13 @@ class BunchballEntitiesWebform implements BunchballPluginInterface, BunchballEnt
     $form['webform']['check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Webform submit'),
+      '#description' => t('Notify the Bunchball service when a user submits a webform.'),
       '#default_value' => isset($this->options['webform']['check']) ? $this->options['webform']['check'] : NULL,
     );
     $form['webform']['action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action name'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options['webform']['action']) ? $this->options['webform']['action'] : NULL,
     );
     return $form;

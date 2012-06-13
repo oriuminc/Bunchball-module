@@ -35,7 +35,7 @@ function bunchball_nitro_admin_form($form, &$form_state) {
     );
     $form['element_' . $machine]['name_' . $machine] = array(
       '#type' => 'textfield', 
-      '#title' => t('Action name'), 
+      '#title' => t('Nitro action name'), 
       '#default_value' => isset($nitro_ct_enabled[$machine]) ? $nitro_ct_enabled[$machine] : '', 
       '#size' => 60, 
       '#maxlength' => 128, 

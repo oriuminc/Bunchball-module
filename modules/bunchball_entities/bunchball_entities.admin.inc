@@ -20,6 +20,8 @@ function bunchball_entities_admin_form($form, &$form_state) {
     drupal_get_path('module', 'bunchball') . '/bunchball.admin.css',
   );
   
+  $form['help']['#markup'] = t('<div class="form-item">Enable the content types and actions to track, and assign a name to map them to the Bunchball Nitro console.</div>');
+
   foreach ($plugins as $id => $plugin) {
     $class = bunchball_entities_get_plugin_instance($id);
     $form += $class->adminForm($form, $form_state);

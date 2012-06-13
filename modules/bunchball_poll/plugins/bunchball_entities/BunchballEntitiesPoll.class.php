@@ -107,11 +107,13 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
     $form['poll']['check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Poll vote'),
+      '#description' => t('Notify the Bunchball service when a user votes in a poll.'),
       '#default_value' => isset($this->options['poll']['check']) ? $this->options['poll']['check'] : NULL,
     );
     $form['poll']['action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action name'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options['poll']['action']) ? $this->options['poll']['action'] : NULL,
     );
     return $form;

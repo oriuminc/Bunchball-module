@@ -1,5 +1,5 @@
 name = Bunchball
-description = A collection of modules to work with the bunchball api
+description = Reward user behavior using the Bunchball Nitro service.
 core = 7.x
 
 version = "7.x-1.0"

@@ -106,11 +106,13 @@ class BunchballEntitiesFivestar implements BunchballPluginInterface, BunchballEn
     $form['fivestar']['check'] = array(
       '#type' => 'checkbox',
       '#title' => t('Fivestar'),
+      '#description' => t('Notify the Bunchball service when a user rates content.'),
       '#default_value' => isset($this->options['fivestar']['check']) ? $this->options['fivestar']['check'] : NULL,
     );
     $form['fivestar']['action'] = array(
       '#type' => 'textfield',
-      '#title' => t('Action name'),
+      '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options['fivestar']['action']) ? $this->options['fivestar']['action'] : NULL,
     );
     return $form;

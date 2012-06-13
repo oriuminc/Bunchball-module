@@ -104,8 +104,8 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
     $role_list = drupal_map_assoc(array_diff($all_roles, $blacklist_roles));
     $form['roles']['whitelist'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Whitelist roles'),
-      '#description' => t('Bunchball can add checked roles to Drupal user accounts. Avoid roles with security implications.'),
+      '#title' => t('Approved user roles'),
+      '#description' => t('Indicate the roles Bunchball can automatically apply to users when they are promoted.'),
       '#options' => $role_list,
       '#default_value' => isset($this->options['roles']['whitelist']) ? $this->options['roles']['whitelist'] : NULL,
     );

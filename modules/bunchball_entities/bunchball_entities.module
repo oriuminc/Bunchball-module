@@ -10,7 +10,7 @@
 function bunchball_entities_menu() {
   $items = array();
   $items['admin/config/people/bunchball/entities'] = array(
-    'title' => 'Content',
+    'title' => 'Content actions',
     'type' => MENU_LOCAL_TASK,
     'callback' => 'drupal_get_form',
     'page arguments' => array('bunchball_entities_admin_form'),
