@@ -51,7 +51,7 @@ function bunchball_admin_form($form, &$form_state) {
     '#default_value' => isset($form_state['values']['bunchball_production_url']) ? $form_state['values']['bunchball_production_url'] : variable_get('bunchball_production_url', ''),
     '#process' => array('ctools_dependent_process'),
     '#dependency' => array('edit-bunchball-environment' => array('production')),
-    '#description' => t('The Buncball production URL. Most likely http://<domain>.bunchball.com/nitro/xml'),
+    '#description' => t('The Buncball production URL. Most likely http://<domain>.bunchball.net/nitro/xml'),
   );
 
   $form['bunchball_sandbox_url'] = array(
