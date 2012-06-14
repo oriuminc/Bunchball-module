@@ -467,7 +467,7 @@ class NitroAPI_XML implements NitroAPI {
             "&sessionKey=" . $this->sessionKey .
             "&start=0" . "&pointCategory=" .
             $this->POINT_CATEGORY_ALL . "&criteria=" .
-            $this->CRITERIA_CREDITS . "&userId=Suraj";
+            $this->CRITERIA_CREDITS . '&userId=' . $this->userName;
 
     //Converting XML response attribute and values to array attributes and values
     $arr = $this->my_xml2array($request);
