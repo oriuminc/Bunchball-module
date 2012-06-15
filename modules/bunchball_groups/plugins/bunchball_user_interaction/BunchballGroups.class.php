@@ -91,15 +91,10 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
    * @param $op
    * @param $data 
    */
-  public function adminFormAjax($form, &$form_state, $op, $data = NULL) {
+  public function adminFormAjax($form, &$form_state, $op, $data) {
     if ($op == 'addOneRow') {
       $form_state['bunchball_groups_num_rows']++;
       $form_state['rebuild'] = TRUE;
-//      $this->options['groups'][] = array(
-//        'field' => '',
-//        'value' => '',
-//        'group' => '',
-//      );
     }
   }
   
