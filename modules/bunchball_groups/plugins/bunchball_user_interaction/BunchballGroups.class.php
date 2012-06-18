@@ -100,11 +100,11 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
   
   /**
    * Send action to Bunchball.
-   * 
-   * @param $user
-   * @param $op 
+   *
+   * @param $account
+   * @param $op
    */
-  public function send($user, $op) {
+  public function send($account, $op) {
     if ($op == 'addUserToGroup') {
       try {
         // log in
@@ -113,7 +113,7 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
           $field_name = $group['field'];
           $check_value = $group['value'];
           $add_group = $group['group'];
-          
+
           $value = field_get_items('user', $account, $field_name);
           $field_info = field_info_field($field_name);
           if (array_key_exists('value', $field_info['columns'])) {
@@ -122,8 +122,8 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
               // the field has cardinality 1 -- only case we can handle
               $value_single = (is_array($value) && array_key_exists(0, $value)) ? $value[0]['value'] : NULL;
               if ($value_single == $check_value) {
-                $this->nitro->drupalLogin($user);
-                $this->nitro->addUserToGroup($add_group);
+                $this->nitro->drupalLogin($account);
+                $this->nitro->addUserToGroups($add_group);
               }
             }
           }
