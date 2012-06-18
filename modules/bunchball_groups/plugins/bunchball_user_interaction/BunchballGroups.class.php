@@ -123,7 +123,7 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
               $value_single = (is_array($value) && array_key_exists(0, $value)) ? $value[0]['value'] : NULL;
               if ($value_single == $check_value) {
                 $this->nitro->drupalLogin($account);
-                $this->nitro->addUserToGroups($add_group);
+                $this->nitro->addUserToGroup($add_group);
               }
             }
           }
