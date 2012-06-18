@@ -47,10 +47,6 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
         'node_action' => $nitro_ct_enabled[$node->type],
         )
     ), 'setting');
-
-
-  // initialize the JS
-  _bunchball_nitro_initialize();
 }
 
 /**
@@ -69,9 +65,7 @@ function _bunchball_nitro_node_post_render($markup, $element) {
   if (strpos($markup, "feature=oembed") === false) {
     return;
   }
-  
-  _bunchball_nitro_initialize();
-  
+
   $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
   drupal_add_js(array(
     'bunchball_nitro' => array(
@@ -93,9 +87,11 @@ function _bunchball_nitro_node_post_render($markup, $element) {
 }
 
 /**
- * Initialize the JavaScript on the page
+ * Implements hook_init().
+ *
+ * Initialize the JavaScript on the page.
  */
-function _bunchball_nitro_initialize() {
+function bunchball_nitro_init() {
   $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
 
   // if the nitro_js_url is already in the SESSION variable, then this
