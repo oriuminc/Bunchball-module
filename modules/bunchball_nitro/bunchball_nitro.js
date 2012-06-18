@@ -14,26 +14,15 @@ var _userCommandsArray = new Array();
 var _thePlayer = '';
 var _playerPlayed = 0;
 
-// callback function for acquiring the User ID of the current user...
+// Callback function for acquiring the User ID of the current user.
 function gotCurrentUserId(inUserId) {
   _currentUserId = inUserId;
-  
-  // user viewed content...
-  if (typeof Drupal.settings.bunchball_nitro.node_id != 'undefined') {
-    // we are in a node... 
+
+  // User viewed content.
+  if (typeof Drupal.settings.bunchball_nitro.node_id !== 'undefined') {
+    // We are in a node.
     userViewedContent();
   }
-
-  // bind the actions to functions below
-  (function ($) {
-    
-    // Tumblr
-    $('span.tumblr a').click(function(){
-      nitroSocialShareClicked("Tumblr");
-      return true;
-    });
-    
-  }) (jQuery);
 }
 
 // ViewedContent is called because the user is currently viewing content.
