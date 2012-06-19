@@ -74,9 +74,8 @@ function submitNitroAPICall(tags) {
   queryString += _userCommandsArray[0].ses + '&tags=';
   queryString += tags;
 
-  alert(queryString + ' was called with user ' + _userCommandsArray[0].uid);
   nitroCallback("data", "token");
-  //nitro.callAPI(queryString, "nitroCallback"); 
+  nitro.callAPI(queryString, "nitroCallback"); 
 }
 
 function nitroCallback(data, token) {
