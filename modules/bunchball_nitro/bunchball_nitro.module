@@ -67,7 +67,7 @@ function _bunchball_nitro_node_post_render($markup, $element) {
 
   // make sure there is a youtube video in here..
   if (strpos($markup, "feature=oembed") === false) {
-    return;
+    return $markup;
   }
   
   _bunchball_nitro_initialize();
