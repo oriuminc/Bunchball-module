@@ -70,7 +70,7 @@ interface NitroAPI {
    * @param $group 
    *    Group to which user is added.
    */
-  public function addUserToGroups($group);
+  public function addUserToGroup($group);
 
   /**
    * Register callbacks to be run at various events.
@@ -179,7 +179,7 @@ class NitroAPI_XML implements NitroAPI {
     $contents = $result->data;
     $parser = xml_parser_create('');
     if (!$parser)
-      return false;
+      return FALSE;
 
     xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, 'UTF-8');
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
@@ -237,16 +237,16 @@ class NitroAPI_XML implements NitroAPI {
     $tmp_arr = & $xml_tree;
     $tag_path_array = explode('/', $tag_path);
     foreach ($tag_path_array as $tag_name) {
-      $res = false;
+      $res = FALSE;
       foreach ($tmp_arr as $key => $node) {
         if (is_int($key) && $node['name'] == $tag_name) {
           $tmp_arr = $node;
-          $res = true;
+          $res = TRUE;
           break;
         }
       }
       if (!$res)
-        return false;
+        return FALSE;
     }
     return $tmp_arr;
   }
@@ -434,11 +434,11 @@ class NitroAPI_XML implements NitroAPI {
 
   /**
    * Add user to a group.
-   * 
-   * @param $group 
+   *
+   * @param $group
    *    Group to which user is added.
    */
-  public function addUserToGroups($group) {
+  public function addUserToGroup($group) {
     // Construct a URL for user logAction
     $request = "{$this->baseURL}?method=site.addUsersToGroup" .
             "&sessionKey={$this->sessionKey}" .
