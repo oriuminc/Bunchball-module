@@ -213,7 +213,8 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
             $identity_provider = $user->data['rpx_data']['profile']['providerName'];
           }
         }
-        $this->bunchballApi->logAction('Login, Identity Provider: '. $identity_provider);
+        $action = $this->options['bunchball_user_login']['method'];
+        $this->bunchballApi->logAction("$action, Identity Provider: $identity_provider");
       }
       catch (NitroAPI_LogActionException $e) {
         drupal_set_message($e->getMessage(), 'error');
@@ -233,7 +234,8 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
         // Get a create a user and/or get a bunchball session
         // with the user currently logging in
         $this->apiUserLogin($user);
-        $this->bunchballApi->logAction('Register');
+        $action = $this->options['bunchball_user_register']['method'];
+        $this->bunchballApi->logAction($action);
         $this->userProfileComplete($user);
       }
       catch (NitroAPI_LogActionException $e) {
@@ -263,7 +265,8 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
             $count++;
           }
         }
-        $this->bunchballApi->logAction('Profile_Fields_Entered', $count);
+        $action = $this->options['bunchball_user_profile_complete']['method'];
+        $this->bunchballApi->logAction($action, $count);
 
       }
       catch (NitroAPI_LogActionException $e) {
@@ -284,7 +287,8 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       try {
         $this->apiUserLogin($user);
         if (isset($user->picture_upload)) {
-          $this->bunchballApi->logAction('Profile_Photo_Added');
+          $action = $this->options['bunchball_user_profile_picture']['method'];
+          $this->bunchballApi->logAction($action);
         }
       }
       catch (NitroAPI_LogActionException $e) {
