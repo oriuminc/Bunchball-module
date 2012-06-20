@@ -51,7 +51,7 @@ function bunchball_user_interaction_user_login(&$edit, $account) {
   $plugins = ctools_get_plugins('bunchball_user_interaction', 'bunchball_user_interaction');
   foreach ($plugins as $id => $plugin) {
     $class = bunchball_user_interaction_get_plugin_instance($id);
-    $class->send($account, 'register');
+    $class->send($account, 'login');
   }
 }
 
