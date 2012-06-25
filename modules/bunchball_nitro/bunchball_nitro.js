@@ -1,9 +1,8 @@
 (function($) {
-  Drupal.behaviors.bunchball = {
+  Drupal.behaviors.bunchballNitroContent = {
     attach: function (context, settings) {
       if (typeof nitro !== "undefined") {
         nitro.getUserId(gotCurrentUserId);
-        nitro.showPendingNotifications();
       }
     }
   };

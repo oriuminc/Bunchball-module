@@ -51,6 +51,7 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
 
   // initialize the JS
   _bunchball_nitro_initialize();
+  _bunchball_nitro_add_content_actions_js();
 }
 
 /**
@@ -66,27 +67,24 @@ function bunchball_nitro_node_view_alter(&$build) {
 function _bunchball_nitro_node_post_render($markup, $element) {
 
   // make sure there is a youtube video in here..
-  if (strpos($markup, "feature=oembed") === false) {
+  if (strpos($markup, "feature=oembed") === FALSE) {
     return $markup;
   }
-  
+
   _bunchball_nitro_initialize();
-  
+  _bunchball_nitro_add_content_actions_js();
+
   $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
   drupal_add_js(array(
     'bunchball_nitro' => array(
-      'artist_name' => isset($element['#node']) ? 
-        filter_xss($element['#node']->title, array()) : 
-        "N/A",
-      'artist_cat' =>  isset($element['#node']) ? 
-        $element['#node']->type : 
-        "N/A",
+      'artist_name' => isset($element['#node']) ? filter_xss($element['#node']->title, array()) : "N/A",
+      'artist_cat' =>  isset($element['#node']) ? $element['#node']->type : "N/A",
       'artist_start' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : 'youtube_start',
       'artist_end' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : 'youtube_end',
     )
   ), 'setting');
 
-  // Enable JS API for youtube videos found on the page through the oembed 
+  // Enable JS API for youtube videos found on the page through the oembed
   // module.
   $markup = str_replace("feature=oembed", "feature=oembed&enablejsapi=1", $markup);
   return $markup;
@@ -194,9 +192,62 @@ EOD;
       'weight' => -9,
       'scope' => 'footer'
   ));
-  
-  // add jQuery functions file
+}
+
+/**
+ * Implements hook_rdf_namespaces().
+ *
+ * Enables usage of NML (Nitro Markup Language) by adding the nitro namespace.
+ */
+function bunchball_nitro_rdf_namespaces() {
+  return array(
+    'nitro' => 'http://www.bunchball.com/nitro',
+  );
+}
+
+/**
+ * Implements hook_init().
+ */
+function bunchball_nitro_init() {
+  _bunchball_nitro_initialize();
+  _bunchball_nitro_add_nml_js();
+  _bunchball_nitro_add_notification_js();
+}
+
+function _bunchball_nitro_add_content_actions_js() {
   drupal_add_js(
-      drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.js'
+    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.js'
+  );
+}
+
+function _bunchball_nitro_add_notification_js() {
+  drupal_add_js(array(
+    'bunchball_nitro' => array(
+      'notificationInterval' => variable_get('bunchball_nitro_notification_interval', 10000),
+    )
+  ), 'setting');
+
+  drupal_add_js(
+    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.notification.js',
+    array(
+      'type' => 'file',
+      'scope' => 'footer',
+      'group' => JS_LIBRARY,
+      'weight' => 1,
+      'every_page' => TRUE,
+    )
+  );
+}
+
+function _bunchball_nitro_add_nml_js() {
+  drupal_add_js(
+    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.nml.js',
+    array(
+      'type' => 'file',
+      'scope' => 'footer',
+      'group' => JS_LIBRARY,
+      'weight' => 0,
+      'every_page' => TRUE,
+    )
   );
 }
