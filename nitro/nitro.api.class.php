@@ -175,7 +175,27 @@ class NitroAPI_XML implements NitroAPI {
    */
   private function my_xml2array($url) {
     $xml_values = array();
-    $result = drupal_http_request($url);
+    //$result = drupal_http_request($url);
+    
+    $result = '';
+    // Setup callback options array; call drupal_http_request in the background.
+    $callback_options = array(
+      array(
+        'function' => 'drupal_http_request',
+        'return' => &$result,
+      ),
+      $url,
+    );
+    // Queue up the request.
+    httprl_queue_background_callback($callback_options);
+
+    // Execute request.
+    httprl_send_request();
+    
+    if (gettype($result) != "object") {
+      return array();
+    }
+    
     $contents = $result->data;
     $parser = xml_parser_create('');
     if (!$parser)
