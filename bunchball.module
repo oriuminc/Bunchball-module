@@ -103,7 +103,7 @@ function bunchball_get_bunchball_uid($uid) {
   }
 
   if ($include_site_hash) {
-    $unique_id += '_' . drupal_get_private_key();
+    $unique_id .= '_' . drupal_get_private_key();
   }
 
   return $unique_id;
