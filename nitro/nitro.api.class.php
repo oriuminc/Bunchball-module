@@ -8,22 +8,20 @@ interface NitroAPI {
   /**
    * Log in to set session.
    *
-   * @param $userName
-   *    User name
+   * @param int $uid
+   *   Drupal user id.
    *
-   *  @param $firstName
-   *    optional.  Does not need to be the user's real first name
+   *  @param string $firstName
+   *   Optional.  Does not need to be the user's real first name.
    *
-   *  @param $lastName
-   *    option. Does not need to be the user's real last name
+   *  @param string $lastName
+   *   Optional. Does not need to be the user's real last name.
    */
-  public function login($userName, $firstName ='', $lastName = '');
-  
+  public function login($uid, $firstName = '', $lastName = '');
+
   /**
    * Log an action for the established session.
    *
-   * @param $userName
-   *    the user name to record info for
    * @param $actionTag
    *    The action tag to log
    * @param $value
@@ -254,26 +252,14 @@ class NitroAPI_XML implements NitroAPI {
   /**
    * Log in to set session.
    *
-   * @param $userName
-   *    Do I use the user's GUID, or username, or email, or what?
-   *    All of these can be stored in bunchball as user preferences, so you can
-   *    always look them up.  But you still have to pick one to be the userId in
-   *    our (bunchball) system.  This is what you will use to make API calls, so
-   *    you should use the one that you will always have access to wherever you
-   *    need to make an API call from.
-   *
-   *    For Drupal and the bunchball module, the default plugins for interacting
-   *    with bunchball will assume a Drupal user id as the $userName.
-   *
-   *    If you need to use another ID (e.g. Janrain or other SSO id), then a
-   *    plugin can extend the base plugin class and override the actual calls to
-   *    the api
+   * @param int $uid
+   *   Drupal user identifier.
    *
    *  @param $firstName
-   *    optional.  Does not need to be the user's real first name
+   *    Optional.  Does not need to be the user's real first name
    *
    *  @param $lastName
-   *    option. Does not need to be the user's real last name
+   *    Optional. Does not need to be the user's real last name
    *
    *    You can pass in optional firstName and lastName information for a user.
    *    These become stored as preferences (named 'firstName' and 'lastName')
@@ -286,16 +272,13 @@ class NitroAPI_XML implements NitroAPI {
    *
    *    For Drupal 'firstName' is going to be the Drupal user name and 'lastName'
    *    user email.
-   *
-   *    As with 'userName' if different values are required, then the base plugin
-   *    class can be overriden to pass different values (e.g. Actual first and
-   *    last names as defined by fields added to the user entity)
-   *
    */
-  public function login($userName, $firstName ='', $lastName = '') {
-    if (empty($this->sessionKey) || empty ($this->userName) || $userName != $this->userName) {
+  public function login($uid, $firstName ='', $lastName = '') {
+    $bunchball_uid = bunchball_get_bunchball_uid($uid);
+
+    if (empty($this->sessionKey) || empty ($this->userName) || $bunchball_uid != $this->userName) {
       // perform the login only if needed
-      $this->userName = $userName;
+      $this->userName = $bunchball_uid;
       // construct a signature
       $signature = $this->getSignature();
 
