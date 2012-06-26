@@ -18,7 +18,7 @@ interface NitroAPI {
    *    option. Does not need to be the user's real last name
    */
   public function login($userName, $firstName ='', $lastName = '');
-  
+
   /**
    * Log an action for the established session.
    *
@@ -32,7 +32,7 @@ interface NitroAPI {
    * @throws NitroAPI_NoSessionException
    */
   public function logAction($actionTag, $value = '');
-  
+
   /**
    * Return the user point balance for current session.
    *
@@ -43,7 +43,7 @@ interface NitroAPI {
    *    the user point balance
    */
   public function getUserPointsBalance();
-  
+
   /**
    * Retrieve site action leaders.
    *
@@ -55,37 +55,37 @@ interface NitroAPI {
    *    array containing leaders
    */
   public function getSiteActionLeaders($actionTag);
-  
+
   /**
    * Retrieve the user's current level.
-   * 
+   *
    * @return
    *    user's level
    */
   public function getLevel();
-  
+
     /**
    * Add user to a group.
-   * 
-   * @param $group 
+   *
+   * @param $group
    *    Group to which user is added.
    */
   public function addUserToGroup($group);
 
   /**
    * Register callbacks to be run at various events.
-   * 
+   *
    * @param $object
    *    the object on which to run the callback.
-   * 
+   *
    * @param $event
    *    the event on which to run the callback. eg. 'postLogin'
-   * 
+   *
    * @param $function
    *    the callback function to call
    */
   public function registerCallback($object, $event, $function);
-  
+
 }
 
 class NitroAPI_Factory {
@@ -166,110 +166,16 @@ class NitroAPI_XML implements NitroAPI {
   }
 
   /**
-   *  Parse Nitro XML response as array of attributes and values.
-   *
-   * @param $url
-   *   XML to parse
-   *
-   * @return
-   *   Array of values
+   * Undocumented as this is only here until the pluggable solution is in place ...
    */
-  private function my_xml2array($url) {
-    $xml_values = array();
-    //$result = drupal_http_request($url);
-    
-    $result = '';
-    // Setup callback options array; call drupal_http_request in the background.
-    $callback_options = array(
-      array(
-        'function' => 'drupal_http_request',
-        'return' => &$result,
-      ),
-      $url,
-    );
-    // Queue up the request.
-    httprl_queue_background_callback($callback_options);
-
-    // Execute request.
-    httprl_send_request();
-    
-    if (gettype($result) != "object") {
-      return array();
+  private function request($url) {
+    $response = drupal_http_request($url);
+    if ($response->code == 200) {
+      return new SimpleXMLElement($response->data);
     }
-    
-    $contents = $result->data;
-    $parser = xml_parser_create('');
-    if (!$parser)
-      return FALSE;
-
-    xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, 'UTF-8');
-    xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
-    xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-    xml_parse_into_struct($parser, trim($contents), $xml_values);
-    xml_parser_free($parser);
-    if (!$xml_values)
-      return array();
-
-    $xml_array = array();
-    $last_tag_ar = & $xml_array;
-    $parents = array();
-    $last_counter_in_tag = array(1 => 0);
-    foreach ($xml_values as $data) {
-      switch ($data['type']) {
-        case 'open':
-          $last_counter_in_tag[$data['level'] + 1] = 0;
-          $new_tag = array('name' => $data['tag']);
-          if (isset($data['attributes']))
-            $new_tag['attributes'] = $data['attributes'];
-          if (isset($data['value']) && trim($data['value']))
-            $new_tag['value'] = trim($data['value']);
-          $last_tag_ar[$last_counter_in_tag[$data['level']]] = $new_tag;
-          $parents[$data['level']] = & $last_tag_ar;
-          $last_tag_ar = & $last_tag_ar[$last_counter_in_tag[$data['level']]++];
-          break;
-        case 'complete':
-          $new_tag = array('name' => $data['tag']);
-          if (isset($data['attributes']))
-            $new_tag['attributes'] = $data['attributes'];
-          if (isset($data['value']) && trim($data['value']))
-            $new_tag['value'] = trim($data['value']);
-
-          $last_tag_ar[$last_counter_in_tag[$data['level']]++] = $new_tag;
-          break;
-        case 'close':
-          $last_tag_ar = & $parents[$data['level']];
-          break;
-        default:
-          break;
-      };
+    else {
+      throw new NitroAPI_HttpException();
     }
-    return $xml_array;
-  }
-
-  /**
-   *  Access the attribute values like XPATH
-   *
-   * @param $xml_tree
-   * @param $tag_path
-   * @return
-   *    values
-   */
-  private function get_value_by_path($xml_tree, $tag_path) {
-    $tmp_arr = & $xml_tree;
-    $tag_path_array = explode('/', $tag_path);
-    foreach ($tag_path_array as $tag_name) {
-      $res = FALSE;
-      foreach ($tmp_arr as $key => $node) {
-        if (is_int($key) && $node['name'] == $tag_name) {
-          $tmp_arr = $node;
-          $res = TRUE;
-          break;
-        }
-      }
-      if (!$res)
-        return FALSE;
-    }
-    return $tmp_arr;
   }
 
   /**
@@ -337,12 +243,9 @@ class NitroAPI_XML implements NitroAPI {
         "&firstName=$firstName" .
         "&lastName=$lastName";
 
-      // Converting XML response attribute and values to array attributes and values
-      $arr = $this->my_xml2array($request);
+      $xml = $this->request($request);
 
-      // Accessing the sessionKey through XPATH
-      $sessionKeyArray = $this->get_value_by_path($arr, 'Nitro/Login/sessionKey');
-      $this->sessionKey = $sessionKeyArray['value'];
+      $this->sessionKey = strval(reset($xml->xpath('/Nitro/Login/sessionKey')));
 
       // Cache expires in 72 hours - 1 minute.
       $expiration_time = REQUEST_TIME + ((72 * 60 * 60) - 60);
@@ -362,11 +265,11 @@ class NitroAPI_XML implements NitroAPI {
 
   /**
    * For convenience log in using Drupal user.
-   * 
+   *
    * @param $user
    *    Drupal global $user object
-   * 
-   * @param $setPreferences 
+   *
+   * @param $setPreferences
    *    If TRUE, send the Drupal user roles as prefences.
    */
   public function drupalLogin($user, $setPreferences = TRUE) {
@@ -380,10 +283,10 @@ class NitroAPI_XML implements NitroAPI {
    *
    * @param $userName
    *    the user name to record info for
-   * 
+   *
    * @param $actionTag
    *    The action tag to log
-   * 
+   *
    * @param $value
    *    Value associated with the action tag
    *
@@ -398,20 +301,19 @@ class NitroAPI_XML implements NitroAPI {
             "&value=$value";
     watchdog('bunchball', 'Log Action: %actionTag; value: %value', array('%actionTag' => $actionTag, '%value' => $value), WATCHDOG_INFO);
     //Converting XML response attribute and values to array attributes and values
-    $arr = $this->my_xml2array($request);
+    $xml = $this->request($request);
 
-    $responseArray = $this->get_value_by_path($arr, 'Nitro');
-    if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
+    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
   }
-  
+
   /**
    * Set preferences for current session.
-   * 
+   *
    * @param $names
    *    Array of preferences to send EG: array("Key1" => "Value1", "Key2" => "Value2")
-   * 
+   *
    * @param $key_value
    *    Treat array as key-value pairs if TRUE.
    *    EG:
@@ -419,9 +321,9 @@ class NitroAPI_XML implements NitroAPI {
    *      FALSE: send &names=Value1|Value2
    */
   public function setPreferences($names, $key_value = FALSE) {
-    
+
     if ($key_value) {
-      
+
       $names_list = str_replace(' ', '_', implode('|', array_keys($names)));
       $values_list = str_replace(' ', '_', implode('|', array_values($names)));
       // Construct a URL for user setPreferences
@@ -438,17 +340,15 @@ class NitroAPI_XML implements NitroAPI {
               "&userId={$this->userName}" .
               "&names=$names_list";
     }
-    //Converting XML response attribute and values to array attributes and values
-    $arr = $this->my_xml2array($request);
-    $responseArray = $this->get_value_by_path($arr, 'Nitro');
-    if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
+    $xml = $this->request($request);
+    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API setPreferences failed'));
     }
   }
-  
+
   /**
    * Get the current user's level.
-   * 
+   *
    * @return
    *    user's level
    */
@@ -458,15 +358,11 @@ class NitroAPI_XML implements NitroAPI {
             "&sessionKey={$this->sessionKey}";
     watchdog('bunchball', 'Get level - user: %username.', array('%username' => $this->userName), WATCHDOG_INFO);
     //Converting XML response attribute and values to array attributes and values
-    $arr = $this->my_xml2array($request);
-    $responseArray = $this->get_value_by_path($arr, 'Nitro');
-    if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
+    $xml = $this->request($request);
+    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
-    $levelArray = $this->get_value_by_path($arr, 'Nitro/users/User/SiteLevel');
-    if (isset($levelArray['attributes']['name'])) {
-      return $levelArray['attributes']['name'];
-    }
+    return strval(reset($xml->xpath('Nitro/users/User/SiteLevel/@name')));
   }
 
   /**
@@ -483,10 +379,9 @@ class NitroAPI_XML implements NitroAPI {
             "&userIds={$this->userName}";
     watchdog('bunchball', 'Add user to group - user: %username group: %group.',
             array('%username' => $this->userName, '%group' => $group), WATCHDOG_INFO);
-    //Converting XML response attribute and values to array attributes and values
-    $arr = $this->my_xml2array($request);
-    $responseArray = $this->get_value_by_path($arr, 'Nitro');
-    if (! strcmp($responseArray['attributes']['res'], "ok") == 0) {
+
+    $xml = $this->request($request);
+    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
   }
@@ -506,11 +401,9 @@ class NitroAPI_XML implements NitroAPI {
             $this->POINT_CATEGORY_ALL . "&criteria=" .
             $this->CRITERIA_CREDITS . '&userId=' . $this->userName;
 
-    //Converting XML response attribute and values to array attributes and values
-    $arr = $this->my_xml2array($request);
+    $xml = $this->request($request);
 
-    //Accessing the Balance attributes through XPATH and extracting points information
-    return $this->get_value_by_path($arr, 'Nitro/Balance');
+    return reset($xml->xpath('/Nitro/Balance'));
   }
 
   /**
@@ -518,7 +411,7 @@ class NitroAPI_XML implements NitroAPI {
    *
    * @param $actionTag
    *    action tag to retrieve
-   * 
+   *
    * @return
    *    array containing leaders
    */
@@ -532,21 +425,18 @@ class NitroAPI_XML implements NitroAPI {
             "&criteria=" . $this->CRITERIA_MAX .
             "&returnCount=" . $this->value;
 
-    //Converting XML response attribute and values to array attributes and values
-    $arr = $this->my_xml2array($request);
+    $xml = $this->request($request);
 
-    //Accessing the Actions attributes through XPATH and extracting action leaders information
-    $actionsArray = $this->get_value_by_path($arr, 'Nitro/actions/Action');
-    return $actionsArray['attributes'];
+    return reset($xml->xpath('/Nitro/actions/Action'))->attributes();
   }
 
   /**
-   * Format the roles so that they are consistent and in the format expected by 
+   * Format the roles so that they are consistent and in the format expected by
    * nitro.
-   * 
+   *
    * @param $roles
    *    Drupal user roles array IE: $user->roles
-   * 
+   *
    * @return
    *    array of user roles for nitro. EG:
    *      array(['authenticated user'] => 1, ['administrator'] => 1)
@@ -561,16 +451,16 @@ class NitroAPI_XML implements NitroAPI {
     $formatted_roles = array_fill_keys($role_names, 1);
     return $formatted_roles;
   }
-  
+
   /**
    * Register callbacks to be run at various events.
-   * 
+   *
    * @param $object
    *    the object on which to run the callback.
-   * 
+   *
    * @param $event
    *    the event on which to run the callback. eg. 'postLogin'
-   * 
+   *
    * @param $function
    *    the callback function to call
    */
