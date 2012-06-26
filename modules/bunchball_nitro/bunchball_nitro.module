@@ -149,7 +149,7 @@ function _bunchball_nitro_initialize() {
   $server_url = $in_debug_mode ? 
       'http://sandbox.bunchball.net/nitro/json' : 
       'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
-  $user_id = $user->uid;
+  $user_id = bunchball_get_bunchball_uid($user->uid);
   $timestamp = time();
   $nitro = NitroAPI_Factory::getInstance();
   $signature = $nitro->getSignature();
@@ -165,7 +165,7 @@ connectionParams.signature = "$signature";
 EOD;
 
   // if the user is logged in....
-  if ($user_id > 0) {
+  if (user_is_logged_in()) {
     $embedded_js .= <<<EOD
 
 connectionParams.userId = escape("$user_id");
