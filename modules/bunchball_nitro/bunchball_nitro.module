@@ -48,9 +48,6 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
         )
     ), 'setting');
 
-
-  // initialize the JS
-  _bunchball_nitro_initialize();
   _bunchball_nitro_add_content_actions_js();
 }
 
@@ -71,7 +68,6 @@ function _bunchball_nitro_node_post_render($markup, $element) {
     return $markup;
   }
 
-  _bunchball_nitro_initialize();
   _bunchball_nitro_add_content_actions_js();
 
   $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
@@ -121,77 +117,74 @@ function _bunchball_nitro_initialize() {
 
   // change this so that debug mode is reflected in the environment.
   $in_debug_mode = ($environment == 'sandbox');
-  
+
   // parse domain from the variables
   $endpoint_url = variable_get('bunchball_production_url', 'http://sandbox.bunchball.net/nitro/json');
   if (strlen($endpoint_url) == 0) {
     $endpoint_url = 'http://sandbox.bunchball.net/nitro/json';
   }
-  
+
   $parsed_url = parse_url($endpoint_url);
 
   // default value for the customer subdomain
   $customer_subdomain = 'sandbox';
   if (isset ($parsed_url['host'])) {
     $exploded_domain = explode(".", $parsed_url['host']);
-    
+
     if (count($exploded_domain) > 2) {
       array_pop($exploded_domain);
       array_pop($exploded_domain);
-      
+
       $customer_subdomain = implode(".", $exploded_domain);
     }
   }
 
   // instantiate the variables for the JS
-  $server_url = $in_debug_mode ? 
-      'http://sandbox.bunchball.net/nitro/json' : 
+  $server_url = $in_debug_mode ?
+      'http://sandbox.bunchball.net/nitro/json' :
       'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
   $user_id = $user->uid;
   $timestamp = time();
   $nitro = NitroAPI_Factory::getInstance();
   $signature = $nitro->getSignature();
   $debug = $in_debug_mode ? 'true' : 'false';
-  
-  // Build the Nitro Object in JS to be added at the bottom of the file.
-  $embedded_js = <<<EOD
-var connectionParams={};
-connectionParams.apiKey = "$api_key";
-connectionParams.server = "$server_url";
-connectionParams.timeStamp = "$timestamp";
-connectionParams.signature = "$signature";
-EOD;
 
-  // if the user is logged in....
-  if ($user_id > 0) {
-    $embedded_js .= <<<EOD
-
-connectionParams.userId = escape("$user_id");
-EOD;
-    
-  }
-  
-  $embedded_js .= <<<EOD
-
-connectionParams.debug = $debug;
-
-var nitro = new Nitro(connectionParams);
-
-EOD;
-  
-  // To include nitro.js, first put the following code into your HTML page as a 
+  // To include nitro.js, first put the following code into your HTML page as a
   // direct child of the <body> element or after the </body> tag.
   drupal_add_js($nitro_js_url, array(
       'type' => 'external',
       'weight' => -10,
-      'scope' => 'footer'
+      'scope' => 'footer',
+      'group' => JS_LIBRARY,
+      'every_page' => TRUE,
   ));
 
-  drupal_add_js($embedded_js, array(
-      'type' => 'inline',
+  // Include settings for initializing the Nitro connection on the client side.
+  drupal_add_js(array(
+    'bunchballNitroConnection' => array(
+      'connectionParams' => array(
+        'apiKey' => $api_key,
+        'server' => $server_url,
+        'timeStamp' => $timestamp,
+        'signature' => $signature,
+        'userId' => $user_id,
+        'debug' => $debug,
+      ),
+    ),
+  ), 'setting');
+
+  // Include the javascript file that makes use of the settings above and
+  // handles the initialization of the Nitro connection object.
+  drupal_add_js(
+    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.connection.js',
+    array(
+      'type' => 'file',
       'weight' => -9,
-      'scope' => 'footer'
-  ));
+      'scope' => 'footer',
+      'group' => JS_LIBRARY,
+      'every_page' => TRUE,
+    )
+  );
 }
 
 /**
@@ -216,7 +209,12 @@ function bunchball_nitro_init() {
 
 function _bunchball_nitro_add_content_actions_js() {
   drupal_add_js(
-    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.js'
+    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.content.js',
+    array(
+      'type' => 'file',
+      'scope' => 'footer',
+      'weight' => 10,
+    )
   );
 }
 

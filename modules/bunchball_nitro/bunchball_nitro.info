@@ -2,7 +2,6 @@ name = Bunchball Nitro
 description = Include and integrate the Bunchball Nitro Javascript API
 core = 7.x
 package = Bunchball
-scripts[] = bunchball_nitro.js
 dependencies[] = bunchball
 
 ; Information added by drush on 2012-05-07
