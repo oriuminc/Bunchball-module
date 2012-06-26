@@ -115,6 +115,7 @@ class NitroAPI_XML implements NitroAPI {
   private $sessionKey;
   private $user_roles;
   private $callbacks;
+  protected $is_logged_in = FALSE;
 
   // Constants
   private $CRITERIA_MAX = "MAX";
@@ -292,22 +293,29 @@ class NitroAPI_XML implements NitroAPI {
    *    last names as defined by fields added to the user entity)
    *
    */
-  public function login($userName, $firstName ='', $lastName = '') {
-    if (empty($this->sessionKey) || empty ($this->userName) || $userName != $this->userName) {
-      // perform the login only if needed
-      $this->userName = $userName;
-      // construct a signature
+  public function login($userName, $firstName = '', $lastName = '') {
+    $this->userName = $userName;
+
+    // Try retrieving the session from cache.
+    $unique_id_type = variable_get('bunchball_unique_id', 'email');
+    $cache_key = "$unique_id_type:$userName:$firstName:$lastName";
+    $cache_entry = cache_get($cache_key, 'cache_bunchball_session');
+
+    if ($cache_entry && $cache_entry->data && $cache_entry->expire < REQUEST_TIME) {
+      $this->sessionKey = $cache_entry->data;
+    }
+    else {
       $signature = $this->getSignature();
 
       // Construct a URL for REST API call user_login to extract Session Key
       $request = $this->baseURL .
-            "?method=user.login" .
-            "&apiKey={$this->apiKey}" .
-            "&userId={$this->userName}" .
-            "&ts=" . time() .
-            "&sig=$signature" .
-            "&firstName=$firstName" .
-            "&lastName=$lastName";
+        "?method=user.login" .
+        "&apiKey={$this->apiKey}" .
+        "&userId={$this->userName}" .
+        "&ts=" . time() .
+        "&sig=$signature" .
+        "&firstName=$firstName" .
+        "&lastName=$lastName";
 
       // Converting XML response attribute and values to array attributes and values
       $arr = $this->my_xml2array($request);
@@ -315,11 +323,20 @@ class NitroAPI_XML implements NitroAPI {
       // Accessing the sessionKey through XPATH
       $sessionKeyArray = $this->get_value_by_path($arr, 'Nitro/Login/sessionKey');
       $this->sessionKey = $sessionKeyArray['value'];
+
+      // Cache expires in 72 hours - 1 minute.
+      $expiration_time = REQUEST_TIME + ((72 * 60 * 60) - 60);
+      cache_set($cache_key, $this->sessionKey, 'cache_bunchball_session', $expiration_time);
+    }
+
+    // Execute the postLogin callbacks for the first time.
+    if (!$this->is_logged_in) {
       if (isset($this->callbacks['postLogin']) && is_array($this->callbacks['postLogin'])) {
         foreach ($this->callbacks['postLogin'] as $callback) {
           $callback['object']->$callback['function']();
         }
       }
+      $this->is_logged_in = TRUE;
     }
   }
 
