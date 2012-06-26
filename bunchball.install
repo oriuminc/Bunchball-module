@@ -1,12 +1,12 @@
 <?php
 /**
  * @file
- *    Install / uninstall functions for bunchball module.
+ * Install / uninstall functions for bunchball module.
  */
 
 /**
  * Implements hook_uninstall().
- * 
+ *
  * Delete all associated variables.
  */
 function bunchball_uninstall() {
@@ -15,4 +15,16 @@ function bunchball_uninstall() {
   variable_del('bunchball_environment');
   variable_del('bunchball_production_url');
   variable_del('bunchball_sandbox_url');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function bunchball_schema() {
+  $schema = array();
+
+  $schema['cache_bunchball_session'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_bunchball_session']['description'] = 'Bunchball session cache.';
+
+  return $schema;
 }
