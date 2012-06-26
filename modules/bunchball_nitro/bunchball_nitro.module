@@ -216,6 +216,11 @@ function bunchball_nitro_rdf_namespaces() {
  * Implements hook_init().
  */
 function bunchball_nitro_init() {
+  _bunchball_nitro_add_nml_js();
+}
+
+
+function _bunchball_nitro_add_nml_js() {
   drupal_add_js(
     drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.nml.js',
     array(
