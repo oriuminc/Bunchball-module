@@ -220,7 +220,7 @@ function _bunchball_nitro_add_content_actions_js() {
 
 function _bunchball_nitro_add_notification_js() {
   drupal_add_js(array(
-    'bunchball_nitro' => array(
+    'bunchball_nitro_notification' => array(
       'notificationInterval' => variable_get('bunchball_nitro_notification_interval', 10000),
     )
   ), 'setting');
