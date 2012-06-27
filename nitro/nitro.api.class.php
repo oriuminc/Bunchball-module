@@ -116,6 +116,7 @@ class NitroAPI_XML implements NitroAPI {
   private $user_roles;
   private $callbacks;
   protected $is_logged_in = FALSE;
+  protected $is_session_from_cache = FALSE;
 
   // Constants
   private $CRITERIA_MAX = "MAX";
@@ -321,8 +322,9 @@ class NitroAPI_XML implements NitroAPI {
     $cache_key = "$unique_id_type:$userName:$firstName:$lastName";
     $cache_entry = cache_get($cache_key, 'cache_bunchball_session');
 
-    if ($cache_entry && $cache_entry->data && $cache_entry->expire < REQUEST_TIME) {
+    if ($cache_entry && $cache_entry->data && $cache_entry->expire > REQUEST_TIME) {
       $this->sessionKey = $cache_entry->data;
+      $this->is_session_from_cache = TRUE;
     }
     else {
       $signature = $this->getSignature();
@@ -361,18 +363,19 @@ class NitroAPI_XML implements NitroAPI {
   }
 
   /**
-   * For convenience log in using Drupal user.
-   * 
-   * @param $user
-   *    Drupal global $user object
-   * 
-   * @param $setPreferences 
-   *    If TRUE, send the Drupal user roles as prefences.
+   * Log in using Drupal user.
+   *
+   * Setting Drupal roles is only happening if the user is not cached.
+   *
+   * @param $account
+   *    Drupal user.
    */
-  public function drupalLogin($user, $setPreferences = TRUE) {
-    $this->login($user->uid, $user->name, md5($user->mail));
-    $roles = $this->formatRoles($user->roles);
-    $this->setPreferences($roles, TRUE);
+  public function drupalLogin($account) {
+    $this->login($account->uid, $account->name, md5($account->mail));
+    if (!$this->is_session_from_cache) {
+      $roles = $this->formatRoles($account->roles);
+      $this->setPreferences($roles, TRUE);
+    }
   }
 
   /**
