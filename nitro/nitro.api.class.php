@@ -321,7 +321,7 @@ class NitroAPI_XML implements NitroAPI {
     $cache_key = "$unique_id_type:$userName:$firstName:$lastName";
     $cache_entry = cache_get($cache_key, 'cache_bunchball_session');
 
-    if ($cache_entry && $cache_entry->data && $cache_entry->expire < REQUEST_TIME) {
+    if ($cache_entry && $cache_entry->data && $cache_entry->expire > REQUEST_TIME) {
       $this->sessionKey = $cache_entry->data;
     }
     else {
