@@ -279,3 +279,35 @@ EOD;
       drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.js'
   );
 }
+
+/**
+ * Implements hook_rdf_namespaces().
+ *
+ * Enables usage of NML (Nitro Markup Language) by adding the nitro namespace.
+ */
+function bunchball_nitro_rdf_namespaces() {
+  return array(
+    'nitro' => 'http://www.bunchball.com/nitro',
+  );
+}
+
+/**
+ * Implements hook_init().
+ */
+function bunchball_nitro_init() {
+  _bunchball_nitro_add_nml_js();
+}
+
+
+function _bunchball_nitro_add_nml_js() {
+  drupal_add_js(
+    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.nml.js',
+    array(
+      'type' => 'file',
+      'scope' => 'footer',
+      'group' => JS_LIBRARY,
+      'weight' => 0,
+      'every_page' => TRUE,
+    )
+  );
+}
