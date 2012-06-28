@@ -7,10 +7,11 @@
 
 /**
  * Implement hook_uninstall()
- * 
+ *
  * Delete all associated variables.
  */
 function bunchball_nitro_uninstall() {
   variable_del('bunchball_nitro_admin');
   variable_del('bunchball_nitro_admin_youtube');
+  variable_del('bunchball_nitro_notification_interval');
 }
