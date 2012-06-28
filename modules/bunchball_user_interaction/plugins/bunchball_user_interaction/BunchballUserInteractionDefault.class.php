@@ -49,6 +49,11 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_login']['method'],
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="bunchball_user_login_check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
 
     $form['bunchball_user_interaction']['bunchball_user_register_check'] = array(
@@ -63,6 +68,11 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_register']['method'],
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="bunchball_user_register_check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
 
     $form['bunchball_user_interaction']['bunchball_user_profile_complete_check'] = array(
@@ -77,6 +87,11 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_profile_complete']['method'],
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="bunchball_user_profile_complete_check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
 
     $form['bunchball_user_interaction']['bunchball_user_profile_picture_check'] = array(
@@ -91,6 +106,11 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => $this->options['bunchball_user_profile_picture']['method'],
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="bunchball_user_profile_picture_check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
 
     return $form;
