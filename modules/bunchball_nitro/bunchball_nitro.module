@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * @file
  *    Main functions for bunchball client side JS module. Send events to
@@ -9,92 +9,91 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
   // get all the content types
   $node_types = node_type_get_names();
   $nitro_ct_enabled = variable_get('bunchball_nitro_admin', array());
-  
+
   $form['#attached']['js'] = array(
     drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.admin.js',
   );
-  
+
   $form['bunchball_nitro'] = array(
-    '#type' => 'fieldset', 
-    '#title' => t('Nitro Javascript'), 
-    '#collapsible' => FALSE, 
+    '#type' => 'fieldset',
+    '#title' => t('Nitro Javascript'),
+    '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#weight' => 1,
   );
-  
+
   $form['submit']['#weight'] = 2;
   $form['#submit'][] = 'bunchball_nitro_admin_form_submit';
 
   // build form
   foreach ($node_types as $machine => $human) {
     $form['bunchball_nitro']['element_' . $machine] = array(
-      '#type' => 'fieldset', 
-      '#title' => $human, 
-      '#collapsible' => FALSE, 
+      '#type' => 'fieldset',
+      '#title' => $human,
+      '#collapsible' => FALSE,
       '#collapsed' => FALSE,
     );
     $form['bunchball_nitro']['element_' . $machine]['checkbox_' . $machine] = array(
-      '#type' => 'checkbox', 
+      '#type' => 'checkbox',
       '#title' => t('Enabled'),
       '#default_value' => isset($nitro_ct_enabled[$machine]) ? 1 : 0,
     );
     $form['bunchball_nitro']['element_' . $machine]['name_' . $machine] = array(
-      '#type' => 'textfield', 
-      '#title' => t('Nitro action name'), 
-      '#default_value' => isset($nitro_ct_enabled[$machine]) ? $nitro_ct_enabled[$machine] : '', 
-      '#size' => 60, 
-      '#maxlength' => 128, 
+      '#type' => 'textfield',
+      '#title' => t('Nitro action name'),
+      '#default_value' => isset($nitro_ct_enabled[$machine]) ? $nitro_ct_enabled[$machine] : '',
+      '#size' => 60,
+      '#maxlength' => 128,
     );
   }
-  
+
   // youtube element..
   $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
-  
+
   $form['bunchball_nitro']['element_youtube'] = array(
-    '#type' => 'fieldset', 
-    '#title' => t('YouTube'), 
-    '#collapsible' => FALSE, 
+    '#type' => 'fieldset',
+    '#title' => t('YouTube'),
+    '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
   $form['bunchball_nitro']['element_youtube']['checkbox_youtube'] = array(
-    '#type' => 'checkbox', 
+    '#type' => 'checkbox',
     '#title' => t('Enabled'),
-    '#default_value' => isset($nitro_youtube_enabled['start']) && 
+    '#default_value' => isset($nitro_youtube_enabled['start']) &&
       isset($nitro_youtube_enabled['end']) ? 1 : 0,
   );
   $form['bunchball_nitro']['element_youtube']['youtube_start'] = array(
-    '#type' => 'textfield', 
-    '#title' => t('Start action name'), 
-    '#default_value' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : '', 
-    '#size' => 60, 
-    '#maxlength' => 128, 
+    '#type' => 'textfield',
+    '#title' => t('Start action name'),
+    '#default_value' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : '',
+    '#size' => 60,
+    '#maxlength' => 128,
   );
   $form['bunchball_nitro']['element_youtube']['youtube_end'] = array(
-    '#type' => 'textfield', 
-    '#title' => t('End action name'), 
-    '#default_value' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : '', 
-    '#size' => 60, 
-    '#maxlength' => 128, 
+    '#type' => 'textfield',
+    '#title' => t('End action name'),
+    '#default_value' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : '',
+    '#size' => 60,
+    '#maxlength' => 128,
   );
 }
-
 
 /**
  * Implement hook_view($node, $view_mode)
  */
-function bunchball_nitro_node_view($node, $view_mode, $langcode) { 
+function bunchball_nitro_node_view($node, $view_mode, $langcode) {
   // make sure the user is currently viewing in full content mode
   if ($view_mode != 'full') {
     return;
   }
-  
+
   $nitro_ct_enabled = variable_get('bunchball_nitro_admin', array());
-  
+
   // the user needs to set their settings..
   if (!isset($nitro_ct_enabled[$node->type])) {
     return;
   }
-  
+
   drupal_add_js(array(
     'bunchball_nitro' => array(
         'node_id' => $node->nid,
@@ -156,17 +155,17 @@ function _bunchball_nitro_initialize() {
   if (isset ($current_js_array[$nitro_js_url])) {
     return;
   }
-  
+
   // will get the API key from server side
   $api_key = variable_get('bunchball_apikey', '');
-  
+
   if ($api_key == '') {
     watchdog('bunchball_nitro', 'API Key not set', array());
     return;
   }
-  
+
   global $user;
-  
+
   // detect whether the environment is production or debug (sandbox)
   $environment = variable_get('bunchball_environment', 'sandbox');
   if (strlen($environment) == 0) {
@@ -251,6 +250,7 @@ function _bunchball_nitro_initialize() {
 function bunchball_nitro_init() {
   _bunchball_nitro_initialize();
   _bunchball_nitro_add_notification_js();
+  _bunchball_nitro_add_nml_js();
 }
 
 function _bunchball_nitro_add_content_actions_js() {
@@ -292,13 +292,6 @@ function bunchball_nitro_rdf_namespaces() {
   return array(
     'nitro' => 'http://www.bunchball.com/nitro',
   );
-}
-
-/**
- * Implements hook_init().
- */
-function bunchball_nitro_init() {
-  _bunchball_nitro_add_nml_js();
 }
 
 
