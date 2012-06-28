@@ -10,10 +10,6 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
   $node_types = node_type_get_names();
   $nitro_ct_enabled = variable_get('bunchball_nitro_admin', array());
 
-  $form['#attached']['js'] = array(
-    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.admin.js',
-  );
-
   $form['bunchball_nitro'] = array(
     '#type' => 'fieldset',
     '#title' => t('Nitro Javascript'),
