@@ -108,7 +108,7 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
     $values = $form_state['values'];
     if ($values['bunchball_user_interaction']['bunchball_user_login_check']) {
       $login_value = array(
-          'enabled'=>1, 
+          'enabled'=>1,
           'method' => $values['bunchball_user_interaction']['bunchball_user_login_action'],
           );
       variable_set('bunchball_user_login', $login_value);
@@ -150,21 +150,21 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
 
   /**
    * AJAX callback.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @param $op
-   * @param $data 
+   * @param $data
    */
   public function adminFormAjax($form, &$form_state, $op, $data) {}
-  
+
   /**
    * Callback for user interactions. Send user data to server for specified operation
-   * 
+   *
    * @param $user
    *    Drupal user object
-   * 
-   * @param $op 
+   *
+   * @param $op
    *    Operation to send. EG: login, register
    */
   public function send($user, $op) {
@@ -187,11 +187,11 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
 
     }
   }
-  
+
   /**
    * A plugin callback that can take a user object and communicate login to
    * bunchball passing whichever arguments the implementer would like.
-   * 
+   *
    * @param $user - a valid drupal user object
    */
   private function userLogin($user) {
@@ -219,13 +219,16 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       catch (NitroAPI_LogActionException $e) {
         drupal_set_message($e->getMessage(), 'error');
       }
+      catch(NitroAPI_HttpException $e) {
+        drupal_set_message($e->getMessage(), 'error');
+      }
     }
   }
 
   /**
    * A plugin callback that can take a user object and communicate regsitration to
    * bunchball passing whichever arguments the implementer would like.
-   * 
+   *
    * @param $user - a valid drupal user object
    */
   private function userRegister($user) {
@@ -248,7 +251,7 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
    * A plugin callback that can take a user object and communicate information
    * about the number of profile fields that have been completed to bunchball
    * passing whichever additional arguments the implementer would like.
-   * 
+   *
    * @param $user - a valid drupal user object
    */
   private function userProfileComplete($user) {
@@ -279,7 +282,7 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
    * A plugin callback that can take a user object and communicate that a
    * profile picture has been uploaded to bunchball passing whichever arguments
    * the implementer would like.
-   * 
+   *
    * @param $user - a valid drupal user object
    */
   private function userProfilePicture($user) {
@@ -309,6 +312,9 @@ class BunchballUserInteractionDefault implements BunchballUserInteractionInterfa
       $this->bunchballApi->drupalLogin($user);
     }
     catch (NitroAPI_LogActionException $e) {
+      drupal_set_message($e->getMessage(), 'error');
+    }
+    catch (NitroAPI_HttpException $e) {
       drupal_set_message($e->getMessage(), 'error');
     }
   }
