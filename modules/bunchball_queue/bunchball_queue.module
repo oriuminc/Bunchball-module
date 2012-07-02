@@ -23,9 +23,8 @@ function bunchball_queue_cron_queue_info() {
  *       may change along with the backend HTTP client.
  */
 function bunchball_queue_request_queue_worker($job) {
-  // @todo filter options to apt keys
-  // @todo add defaults to options
-  $options = $job['options'];
+  $valid_options = array_fill_keys(array('headers', 'method', 'data', 'max_redirects', 'timeout', 'context'), 0);
+  $options = array_intersect_key($job['options'], $valid_options);
 
   $options += array(
     // default timeout of 5 seconds - relatively short so processes don't hang,
