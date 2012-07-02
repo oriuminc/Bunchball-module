@@ -63,5 +63,35 @@ function bunchball_admin_form($form, &$form_state) {
     '#description' => t('The Bunchball sandbox URL. Most likely http://sandbox.bunchball.net/nitro/xml'),
   );
 
+  $form['bunchball_unique_id_fieldset'] = array(
+    '#title' => t('Unique id configuration'),
+    '#type' => 'fieldset',
+    '#description' => t('This id will identify a user in Bunchball.'),
+  );
+
+  $unique_id_options = array(
+    'userid' => t('Drupal userid'),
+    'email' => t('Email address'),
+  );
+
+  if (module_exists('janrain_capture')) {
+    $unique_id_options['janrain_uuid'] = t('Janrain UUID');
+  }
+
+  $form['bunchball_unique_id_fieldset']['bunchball_unique_id'] = array(
+    '#title' => t('Unique id'),
+    '#type' => 'select',
+    '#options' => $unique_id_options,
+    '#default_value' => variable_get('bunchball_unique_id', 'email'),
+  );
+
+  $form['bunchball_unique_id_fieldset']['bunchball_unique_id_include_site_hash'] = array(
+    '#title' => t('Include site hash'),
+    '#type' => 'checkbox',
+    '#description' => t('Enabling this will make sure that users are separated site-by-site.')
+      . ' ' . t('Uncheck it if you want to track users across multiple sites.'),
+    '#default_value' => variable_get('bunchball_unique_id_include_site_hash', FALSE),
+  );
+
   return system_settings_form($form);
 }

@@ -58,9 +58,53 @@ function bunchball_help($path, $arg) {
 
 /**
  * Implements hook_form_FORM_ID_alter().
- * 
+ *
  * Change submit button trim.
  */
 function bunchball_form_bunchball_admin_form_alter(&$form, $form_state, $form_id) {
   $form['actions']['submit']['#value'] = t('Save');
+}
+
+/**
+ * Get the Bunchball uuid from a Drupal user id.
+ *
+ * @see bunchball_admin_form()
+ *
+ * @param int $uid
+ *   Drupal user id.
+ *
+ * @return string
+ *   Bunchball uuid.
+ */
+function bunchball_get_bunchball_uid($uid) {
+  $unique_id_type = variable_get('bunchball_unique_id', 'email');
+  $include_site_hash = variable_get('bunchball_unique_id_include_site_hash', FALSE);
+
+  // Make sure Janrain capture is enabled if we want to use it for generating
+  // uuids, else fall back to email.
+  if ($unique_id_type === 'janrain_uuid' && !module_exists('janrain_capture')) {
+    $unique_id_type = 'email';
+  }
+
+  $unique_id = '';
+  switch ($unique_id_type) {
+    case 'userid':
+      $unique_id = $uid;
+      break;
+
+    case 'email':
+      $account = user_load($uid);
+      $unique_id = $account->mail;
+      break;
+
+    case 'janrain_uuid':
+      // @todo
+      break;
+  }
+
+  if ($include_site_hash) {
+    $unique_id .= '_' . drupal_get_private_key();
+  }
+
+  return $unique_id;
 }

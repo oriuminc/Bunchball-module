@@ -205,9 +205,9 @@ function _bunchball_nitro_initialize() {
 
   // Instantiate the variables for the JS.
   $server_url = $in_debug_mode ?
-    'http://sandbox.bunchball.net/nitro/json' :
-    'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
-  $user_id = $user->uid;
+      'http://sandbox.bunchball.net/nitro/json' :
+      'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
+  $user_id = bunchball_get_bunchball_uid($user->uid);
   $timestamp = time();
   $nitro = NitroAPI_Factory::getInstance();
   $signature = $nitro->getSignature();
