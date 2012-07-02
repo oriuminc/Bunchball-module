@@ -97,6 +97,10 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
  * Implement hook_view($node, $view_mode)
  */
 function bunchball_nitro_node_view($node, $view_mode, $langcode) {
+  if (user_is_anonymous()) {
+    return;
+  }
+
   // make sure the user is currently viewing in full content mode
   if ($view_mode != 'full') {
     return;
@@ -134,6 +138,9 @@ function bunchball_nitro_node_view_alter(&$build) {
  * Function used for post render of the HTML to modify youtube URLs
  */
 function _bunchball_nitro_node_post_render($markup, $element) {
+  if (user_is_anonymous()) {
+    return $markup;
+  }
 
   // make sure there is a youtube video in here..
   if (strpos($markup, "feature=oembed") === FALSE) {
@@ -255,9 +262,11 @@ function _bunchball_nitro_initialize() {
  * Implements hook_init().
  */
 function bunchball_nitro_init() {
-  _bunchball_nitro_initialize();
-  _bunchball_nitro_add_notification_js();
-  _bunchball_nitro_add_nml_js();
+  if (user_is_logged_in()) {
+    _bunchball_nitro_initialize();
+    _bunchball_nitro_add_notification_js();
+    _bunchball_nitro_add_nml_js();
+  }
 }
 
 function _bunchball_nitro_add_content_actions_js() {
