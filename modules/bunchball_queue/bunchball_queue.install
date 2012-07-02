@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function bunchball_queue_enable() {
+  variable_set('bunchball_nitro_logger', 'NitroQueueLogger');
+}
+
+/**
+ * Implements hook_disable().
+ */
+function bunchball_queue_disable() {
+  variable_del('bunchball_nitro_logger');
+}
