@@ -159,38 +159,30 @@ function _bunchball_nitro_node_post_render($markup, $element) {
 }
 
 /**
- * Initialize the JavaScript on the page
+ * Initialize the JavaScript on the page.
  */
 function _bunchball_nitro_initialize() {
-  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
+  global $user;
 
-  // if the nitro_js_url is already in the SESSION variable, then this
-  // has already run..
+  // Make sure javascript is only added once.
+  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
   $current_js_array = drupal_add_js();
   if (isset ($current_js_array[$nitro_js_url])) {
     return;
   }
 
-  // will get the API key from server side
+  // Make sure API key is set.
   $api_key = variable_get('bunchball_apikey', '');
-
   if ($api_key == '') {
     watchdog('bunchball_nitro', 'API Key not set', array());
     return;
   }
 
-  global $user;
-
-  // detect whether the environment is production or debug (sandbox)
+  // Detect whether the environment is production or debug (sandbox).
   $environment = variable_get('bunchball_environment', 'sandbox');
-  if (strlen($environment) == 0) {
-    $endpoint_url = 'sandbox';
-  }
-
-  // change this so that debug mode is reflected in the environment.
   $in_debug_mode = ($environment == 'sandbox');
 
-  // parse domain from the variables
+  // Parse domain from the variables.
   $endpoint_url = variable_get('bunchball_production_url', 'http://sandbox.bunchball.net/nitro/json');
   if (strlen($endpoint_url) == 0) {
     $endpoint_url = 'http://sandbox.bunchball.net/nitro/json';
@@ -198,7 +190,7 @@ function _bunchball_nitro_initialize() {
 
   $parsed_url = parse_url($endpoint_url);
 
-  // default value for the customer subdomain
+  // Default value for the customer subdomain.
   $customer_subdomain = 'sandbox';
   if (isset ($parsed_url['host'])) {
     $exploded_domain = explode(".", $parsed_url['host']);
@@ -211,10 +203,10 @@ function _bunchball_nitro_initialize() {
     }
   }
 
-  // instantiate the variables for the JS
+  // Instantiate the variables for the JS.
   $server_url = $in_debug_mode ?
-      'http://sandbox.bunchball.net/nitro/json' :
-      'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
+    'http://sandbox.bunchball.net/nitro/json' :
+    'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
   $user_id = $user->uid;
   $timestamp = time();
   $nitro = NitroAPI_Factory::getInstance();
@@ -224,11 +216,11 @@ function _bunchball_nitro_initialize() {
   // To include nitro.js, first put the following code into your HTML page as a
   // direct child of the <body> element or after the </body> tag.
   drupal_add_js($nitro_js_url, array(
-      'type' => 'external',
-      'weight' => -10,
-      'scope' => 'footer',
-      'group' => JS_LIBRARY,
-      'every_page' => TRUE,
+    'type' => 'external',
+    'weight' => -10,
+    'scope' => 'footer',
+    'group' => JS_LIBRARY,
+    'every_page' => TRUE,
   ));
 
   // Include settings for initializing the Nitro connection on the client side.
