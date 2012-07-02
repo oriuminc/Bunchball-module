@@ -94,6 +94,40 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
 }
 
 /**
+ * Submit callback for admin form.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function bunchball_nitro_admin_form_submit($form, &$form_state) {
+  if (isset($form_state['values']['notification_interval']) && $form_state['values']['notification_interval']) {
+    $interval = $form_state['values']['notification_interval'];
+    variable_set('bunchball_nitro_notification_interval', $interval);
+  }
+
+  $action_names = array();
+
+  // check to see which elements are set for action name tracking
+  $node_types = node_type_get_names();
+  foreach ($node_types as $machine => $human) {
+    if($form_state['values']['checkbox_' . $machine] > 0 && strlen($form_state['values']['name_' . $machine]) > 0) {
+      $action_names[$machine] = $form_state['values']['name_' . $machine];
+    }
+  }
+  variable_set('bunchball_nitro_admin', $action_names);
+
+  variable_del('bunchball_nitro_admin_youtube');
+  if ($form_state['values']['checkbox_youtube'] > 0 && strlen($form_state['values']['youtube_start']) > 0 && strlen($form_state['values']['youtube_end']) > 0) {
+    $youtube = array();
+    $youtube['start'] = $form_state['values']['youtube_start'];
+    $youtube['end'] = $form_state['values']['youtube_end'];
+    variable_set('bunchball_nitro_admin_youtube', $youtube);
+  }
+
+  drupal_set_message(t('The configuration options have been saved.'));
+}
+
+/**
  * Implement hook_view($node, $view_mode)
  */
 function bunchball_nitro_node_view($node, $view_mode, $langcode) {
