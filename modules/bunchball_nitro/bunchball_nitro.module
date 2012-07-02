@@ -123,8 +123,6 @@ function bunchball_nitro_admin_form_submit($form, &$form_state) {
     $youtube['end'] = $form_state['values']['youtube_end'];
     variable_set('bunchball_nitro_admin_youtube', $youtube);
   }
-
-  drupal_set_message(t('The configuration options have been saved.'));
 }
 
 /**
