@@ -1,0 +1,4 @@
+name = Request Queue
+description = Provides an interface for queueing HTTP requests to be run from the queue, with an asynchronous javascript call to run that queue.
+core = 7.x
+files[] = js/request_queue.queue.js

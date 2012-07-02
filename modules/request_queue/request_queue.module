@@ -1,0 +1,152 @@
+<?php
+
+/**
+ * Implements hook_init().
+ */
+function request_queue_init() {
+  // This session variable is set to indicate that an action was taken that
+  // requires running the queue on the next page view.  Typically, actions that
+  // trigger queued HTTP requests are done by logged-in users, but if they are not,
+  // then the presence of this anonymous session data may interfere with caching
+  // proxies.
+  if (!empty($_SESSION['request_queue_trigger'])) {
+    drupal_add_js(array('request_queue' => array('queues' => $_SESSION['request_queue_trigger'])), array('type' => 'setting'));
+    drupal_add_js(drupal_get_path('module', 'request_queue') . '/js/request_queue.queue.js', array('preprocess' => FALSE));
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function request_queue_menu() {
+  $items = array();
+
+  $items['request_queue'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'request_queue_select',
+    // @todo - any access check needed here? Seems relatively harmless to run the queue
+    'access callback' => TRUE,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function request_queue_cron_queue_info() {
+  return array(
+    'request_queue' => array(
+      'worker callback' => 'request_queue_worker',
+    ),
+  );
+}
+
+/**
+ * Page callback - run selected queues.
+ *
+ * Example call:
+ * http://example.com/request_queue/?queues=<comma,separated,module,list>
+ */
+function request_queue_select() {
+  request_queue_select_run(array_map('trim', explode(',', $_GET['queues'])));
+  drupal_exit();
+}
+
+/**
+ * Queue worker callback.
+ *
+ * @param $job
+ *   An associative array containing the keys:
+ *     - url: The url of the request
+ *     - options: any options to pass onto the request.  These can be assumed to
+ *       be the same as options for drupal_http_request for the time being, but
+ *       may change along with the backend HTTP client.
+ */
+function request_queue_worker($job) {
+  // @todo filter options to appropriate keys for drupal_http_request options.
+  // @todo add more defaults to options
+  $options = $job['options'];
+
+  $options += array(
+    // default timeout of 5 seconds - relatively short so processes don't hang,
+    // but should be long enough for most normal use.
+    'timeout' => 5.0,
+  );
+  $response = drupal_http_request($job['url'], $options);
+
+  if ($response->code != 200) {
+    watchdog('request_queue', 'Requestqueue call returned non-200 status: %response', array('%response' => print_r($response, true)), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Runs selected queues.
+ *
+ * @param $selected
+ *   Array of queue names to run.
+ */
+function request_queue_select_run(array $selected) {
+  // Clear the session variable so the JS is no longer added to the page.
+  if (isset($_SESSION['request_queue_trigger'])) {
+    unset($_SESSION['request_queue_trigger']);
+  }
+  // Allow execution to continue even if the request gets canceled.
+  @ignore_user_abort(TRUE);
+
+  // Prevent session information from being saved while cron is running.
+  drupal_save_session(FALSE);
+
+  // Force the current user to anonymous to ensure consistent permissions on
+  // cron runs.
+  $original_user = $GLOBALS['user'];
+  $GLOBALS['user'] = drupal_anonymous_user();
+
+  // Try to allocate enough time to run all the hook_cron implementations.
+  drupal_set_time_limit(240);
+
+  // Grab the defined cron queues.
+  $queues = module_invoke_all('cron_queue_info');
+  $queues = array_intersect_key($queues, array_fill_keys($selected, 0));
+  drupal_alter('cron_queue_info', $queues);
+
+  // Make sure every queue exists. There is no harm in trying to recreate an
+  // existing queue.
+  foreach ($queues as $queue_name => $info) {
+    DrupalQueue::get($queue_name)->createQueue();
+  }
+
+  foreach ($queues as $queue_name => $info) {
+    $function = $info['worker callback'];
+    $end = time() + (isset($info['time']) ? $info['time'] : 15);
+    $queue = DrupalQueue::get($queue_name);
+    while (time() < $end && ($item = $queue->claimItem())) {
+      $function($item->data);
+      $queue->deleteItem($item);
+    }
+  }
+
+  // Restore the user.
+  $GLOBALS['user'] = $original_user;
+  drupal_save_session(TRUE);
+}
+
+/**
+ * Enqueues a request for processing after the page has loaded.
+ *
+ * @param $url
+ *   The URL to request.
+ * @param unknown_type $options
+ *   Options to pass to the request.
+ * @param unknown_type $queue_name
+ *   Optional name of the queue to use for processing.
+ */
+function request_queue_request($url, $options = array(), $queue_name = 'request_queue') {
+  $queue = DrupalQueue::get($queue_name);
+  $queue->createItem(array('url' => $url, 'options' => $options));
+  if (!isset($_SESSION['request_queue_trigger'])) {
+    $_SESSION['request_queue_trigger'] = array();
+  }
+  // @todo - check do we always want request_queue included as default?
+  $_SESSION['request_queue_trigger'] = array_merge(array('request_queue'), array($queue_name));
+}
