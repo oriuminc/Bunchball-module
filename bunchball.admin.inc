@@ -1,6 +1,6 @@
 <?php
 /**
- * @file 
+ * @file
  *    Main admin form for bunchball module.
  */
 
@@ -10,7 +10,7 @@
 function bunchball_admin_form($form, &$form_state) {
 
   ctools_include('dependent');
-  
+
   $links = array(
       '!content_actions' => l('content actions', 'admin/config/people/bunchball/entities'),
       '!user_actions' => l('user actions', 'admin/config/people/bunchball/user-interaction'),
@@ -18,7 +18,7 @@ function bunchball_admin_form($form, &$form_state) {
   $form['description'] = array(
     '#markup' => t('Connection to Bunchball Nitro requires a subscription. Once subscribed, use the values on the Nitro Admin console to complete the fields below to connect the service.  Then configure the !content_actions and !user_actions to track.', $links),
   );
-  
+
   $form['bunchball_apikey'] = array(
     '#type' => 'textfield',
     '#default_value' => isset($form_state['values']['bunchball_apikey']) ? $form_state['values']['bunchball_apikey'] : variable_get('bunchball_apikey', ''),
@@ -71,6 +71,7 @@ function bunchball_admin_form($form, &$form_state) {
 
   $unique_id_options = array(
     'userid' => t('Drupal userid'),
+    'username' => t('Drupal username'),
     'email' => t('Email address'),
   );
 

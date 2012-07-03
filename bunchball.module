@@ -1,6 +1,6 @@
 <?php
 /**
- * @file 
+ * @file
  *    Bunchball module. Define api, configuration and architecture for Bunchball
  *    modules and plugins.
  */
@@ -95,6 +95,11 @@ function bunchball_get_bunchball_uid($uid) {
     case 'email':
       $account = user_load($uid);
       $unique_id = $account->mail;
+      break;
+
+    case 'username':
+      $account = user_load($uid);
+      $unique_id = $account->name;
       break;
 
     case 'janrain_uuid':
