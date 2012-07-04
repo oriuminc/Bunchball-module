@@ -8,22 +8,20 @@ interface NitroAPI {
   /**
    * Log in to set session.
    *
-   * @param $userName
-   *    User name
+   * @param int $uid
+   *   Drupal user id.
    *
-   *  @param $firstName
-   *    optional.  Does not need to be the user's real first name
+   *  @param string $firstName
+   *   Optional.  Does not need to be the user's real first name.
    *
-   *  @param $lastName
-   *    option. Does not need to be the user's real last name
+   *  @param string $lastName
+   *   Optional. Does not need to be the user's real last name.
    */
-  public function login($userName, $firstName ='', $lastName = '');
+  public function login($uid, $firstName = '', $lastName = '');
 
   /**
    * Log an action for the established session.
    *
-   * @param $userName
-   *    the user name to record info for
    * @param $actionTag
    *    The action tag to log
    * @param $value
@@ -130,7 +128,12 @@ interface NitroClient {
  */
 class NitroSynchClient implements NitroClient {
   public function request($url, $options = array()) {
+    $options += array(
+      'timeout' => variable_get('bunchball_client_timeout', 10.0),
+    );
+    bunchball_debug(__METHOD__ . ' url: %url with options: %options', array('%url' => $url, '%options' => print_r($options, true)));
     $response = drupal_http_request($url, $options);
+    bunchball_debug(__METHOD__ . ' response %response', array('%response' => print_r($response, true)));
     if ($response->code == 200) {
       return new SimpleXMLElement($response->data);
     }
@@ -145,11 +148,17 @@ class NitroSynchClient implements NitroClient {
  */
 class NitroSynchLogger implements NitroLogger {
   public function log($url, $options = array()) {
-    // @todo configurable options for the request timeout etc.
+    $options += array(
+      'timeout' => variable_get('bunchball_logger_timeout', 10.0),
+    );
+    bunchball_debug(__METHOD__ . ' url: %url with options: %options', array('%url' => $url, '%options' => print_r($options, true)));
     $response = drupal_http_request($url, $options);
+    bunchball_debug(__METHOD__ . ' response %response', array('%response' => print_r($response, true)));
     if ($response->code == 200) {
       $xml = new SimpleXMLElement($response->data);
-      if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+      $result = strval(reset($xml->xpath('/Nitro/@res'))) ;
+      bunchball_debug(__METHOD__ . ' result: %result', array('%result' => $result));
+      if ($result != 'ok') {
         throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
       }
       return $xml;
@@ -170,6 +179,7 @@ class NitroAPI_XML implements NitroAPI {
   private $user_roles;
   private $callbacks;
   private $logger;
+  private $logger_class;
   private $client;
   protected $is_logged_in = FALSE;
   protected $is_session_from_cache = FALSE;
@@ -201,6 +211,7 @@ class NitroAPI_XML implements NitroAPI {
     $this->apiKey = variable_get('bunchball_apikey');
     $this->secretKey = variable_get('bunchball_apisecret');
     $this->callbacks = array();
+    $this->logger_class = $logger;
     $this->logger = new $logger();
     $this->client = new $client();
   }
@@ -227,26 +238,14 @@ class NitroAPI_XML implements NitroAPI {
   /**
    * Log in to set session.
    *
-   * @param $userName
-   *    Do I use the user's GUID, or username, or email, or what?
-   *    All of these can be stored in bunchball as user preferences, so you can
-   *    always look them up.  But you still have to pick one to be the userId in
-   *    our (bunchball) system.  This is what you will use to make API calls, so
-   *    you should use the one that you will always have access to wherever you
-   *    need to make an API call from.
-   *
-   *    For Drupal and the bunchball module, the default plugins for interacting
-   *    with bunchball will assume a Drupal user id as the $userName.
-   *
-   *    If you need to use another ID (e.g. Janrain or other SSO id), then a
-   *    plugin can extend the base plugin class and override the actual calls to
-   *    the api
+   * @param int $uid
+   *   Drupal user identifier.
    *
    *  @param $firstName
-   *    optional.  Does not need to be the user's real first name
+   *    Optional.  Does not need to be the user's real first name
    *
    *  @param $lastName
-   *    option. Does not need to be the user's real last name
+   *    Optional. Does not need to be the user's real last name
    *
    *    You can pass in optional firstName and lastName information for a user.
    *    These become stored as preferences (named 'firstName' and 'lastName')
@@ -259,23 +258,20 @@ class NitroAPI_XML implements NitroAPI {
    *
    *    For Drupal 'firstName' is going to be the Drupal user name and 'lastName'
    *    user email.
-   *
-   *    As with 'userName' if different values are required, then the base plugin
-   *    class can be overriden to pass different values (e.g. Actual first and
-   *    last names as defined by fields added to the user entity)
-   *
    */
-  public function login($userName, $firstName = '', $lastName = '') {
-    $this->userName = $userName;
+  public function login($uid, $firstName ='', $lastName = '') {
+    $bunchball_uid = bunchball_get_bunchball_uid($uid);
+    $this->userName = $bunchball_uid;
 
     // Try retrieving the session from cache.
     $unique_id_type = variable_get('bunchball_unique_id', 'email');
-    $cache_key = "$unique_id_type:$userName:$firstName:$lastName";
+    $cache_key = "$unique_id_type:$bunchball_uid:$firstName:$lastName";
     $cache_entry = cache_get($cache_key, 'cache_bunchball_session');
 
     if ($cache_entry && $cache_entry->data && $cache_entry->expire > REQUEST_TIME) {
       $this->sessionKey = $cache_entry->data;
       $this->is_session_from_cache = TRUE;
+      bunchball_debug(__METHOD__ . ' Got session key: cache HIT; key: %key', array('%key' => $this->sessionKey));
     }
     else {
       $signature = $this->getSignature();
@@ -297,6 +293,7 @@ class NitroAPI_XML implements NitroAPI {
       // Cache expires in 72 hours - 1 minute.
       $expiration_time = REQUEST_TIME + ((72 * 60 * 60) - 60);
       cache_set($cache_key, $this->sessionKey, 'cache_bunchball_session', $expiration_time);
+      bunchball_debug(__METHOD__ . ' Got session key: cache MISS; Setting cached session key: %key', array('%key' => $this->sessionKey));
     }
 
     // Execute the postLogin callbacks for the first time.
@@ -306,6 +303,7 @@ class NitroAPI_XML implements NitroAPI {
           $callback['object']->$callback['function']();
         }
       }
+
       $this->is_logged_in = TRUE;
     }
   }
@@ -329,9 +327,6 @@ class NitroAPI_XML implements NitroAPI {
   /**
    * Log an action for the established session.
    *
-   * @param $userName
-   *    the user name to record info for
-   *
    * @param $actionTag
    *    The action tag to log
    *
@@ -351,6 +346,8 @@ class NitroAPI_XML implements NitroAPI {
     //Converting XML response attribute and values to array attributes and values
     $xml = $this->logger->log($request);
 
+    $suffix = ($this->logger_class != 'NitroSynchLogger' ? ' May not return a result immediately due to nonstandard logger %class - check the Bunchball debug log' : '');
+    bunchball_debug(__METHOD__ . ' Logging action [actionTag:value]: [%actionTag:%value]' . $suffix, array('%actionTag' => $actionTag, '%value' => $value, '%class' => $this->logger_class));
   }
 
   /**
@@ -386,7 +383,9 @@ class NitroAPI_XML implements NitroAPI {
               "&names=$names_list";
     }
     $xml = $this->client->request($request);
-    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+    $result = strval(reset($xml->xpath('/Nitro/@res')));
+    bunchball_debug(__METHOD__ . ' Result: %result', array('%result' => $result));
+    if ($result != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API setPreferences failed'));
     }
   }
@@ -404,10 +403,14 @@ class NitroAPI_XML implements NitroAPI {
     watchdog('bunchball', 'Get level - user: %username.', array('%username' => $this->userName), WATCHDOG_INFO);
     //Converting XML response attribute and values to array attributes and values
     $xml = $this->client->request($request);
-    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+    $result = strval(reset($xml->xpath('/Nitro/@res')));
+    if ($result != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
-    return strval(reset($xml->xpath('Nitro/users/User/SiteLevel/@name')));
+    $return = strval(reset($xml->xpath('Nitro/users/User/SiteLevel/@name')));
+    bunchball_debug(__METHOD__ . ' Result: %result; return: %return', array('%result' => $result, '%return' => $return));
+
+    return $return;
   }
 
   /**
@@ -428,6 +431,8 @@ class NitroAPI_XML implements NitroAPI {
     // As we don't care about the return value, we can use the logger (allowing
     // asynchronous implementations).
     $xml = $this->logger->log($request);
+    $suffix = ($this->logger_class != 'NitroSynchLogger' ? ' May not return a result immediately due to nonstandard logger %class - check the Bunchball debug log' : '');
+    bunchball_debug(__METHOD__ . ' Group: %group;' . $suffix, array('%group' => $group, '%class' => $this->logger_class));
   }
 
   /**
@@ -446,8 +451,9 @@ class NitroAPI_XML implements NitroAPI {
             $this->CRITERIA_CREDITS . '&userId=' . $this->userName;
 
     $xml = $this->client->request($request);
-
-    return reset($xml->xpath('/Nitro/Balance'));
+    $return = reset($xml->xpath('/Nitro/Balance'));
+    bunchball_debug(__METHOD__ . ' Return: %return', array('%return' => $return));
+    return $return;
   }
 
   /**
@@ -470,8 +476,9 @@ class NitroAPI_XML implements NitroAPI {
             "&returnCount=" . $this->value;
 
     $xml = $this->client->request($request);
-
-    return reset($xml->xpath('/Nitro/actions/Action'))->attributes();
+    $return = reset($xml->xpath('/Nitro/actions/Action'))->attributes();
+    bunchball_debug(__METHOD__ . ' Return: %return', array('%return' => $return));
+    return $return;
   }
 
   /**

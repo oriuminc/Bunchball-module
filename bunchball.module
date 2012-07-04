@@ -1,9 +1,18 @@
 <?php
 /**
- * @file 
+ * @file
  *    Bunchball module. Define api, configuration and architecture for Bunchball
  *    modules and plugins.
  */
+
+/**
+ * Constants related to debugging mode.
+ */
+define('BUNCHBALL_DEBUG_NONE', 0);
+
+define('BUNCHBALL_DEBUG_LOG', 1);
+
+define('BUNCHBALL_DEBUG_DISPLAY', 2);
 
 /**
  * Implement hook_menu().
@@ -30,6 +39,16 @@ function bunchball_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+
+  $items['admin/reports/bunchball'] = array(
+    'title' => 'Bunchball debug log',
+    'description' => 'Log of bunchball API requests and responses for test and debugging purposes',
+    'page callback' => 'bunchball_log_page',
+    'access callback' => 'bunchball_log_page_access',
+    'file' => 'bunchball.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
   return $items;
 }
 
@@ -57,10 +76,90 @@ function bunchball_help($path, $arg) {
 }
 
 /**
+ * Page access callback for displaying the debug log page.
+ *
+ * Only shows if the user has permission and debug mode is enabled.
+ */
+function bunchball_log_page_access() {
+  return (variable_get('bunchball_debug_mode', 0) & BUNCHBALL_DEBUG_LOG) && user_access('access site reports');
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
- * 
+ *
  * Change submit button trim.
  */
 function bunchball_form_bunchball_admin_form_alter(&$form, $form_state, $form_id) {
   $form['actions']['submit']['#value'] = t('Save');
+}
+
+/**
+ * Get the Bunchball uuid from a Drupal user id.
+ *
+ * @see bunchball_admin_form()
+ *
+ * @param int $uid
+ *   Drupal user id.
+ *
+ * @return string
+ *   Bunchball uuid.
+ */
+function bunchball_get_bunchball_uid($uid) {
+  $unique_id_type = variable_get('bunchball_unique_id', 'email');
+  $include_site_hash = variable_get('bunchball_unique_id_include_site_hash', FALSE);
+
+  // Make sure Janrain capture is enabled if we want to use it for generating
+  // uuids, else fall back to email.
+  if ($unique_id_type === 'janrain_uuid' && !module_exists('janrain_capture')) {
+    $unique_id_type = 'email';
+  }
+
+  $unique_id = '';
+  switch ($unique_id_type) {
+    case 'userid':
+      $unique_id = $uid;
+      break;
+
+    case 'email':
+      $account = user_load($uid);
+      $unique_id = $account->mail;
+      break;
+
+    case 'username':
+      $account = user_load($uid);
+      $unique_id = $account->name;
+      break;
+
+    case 'janrain_uuid':
+      // @todo
+      break;
+  }
+
+  if ($include_site_hash) {
+    $unique_id .= '_' . drupal_get_private_key();
+  }
+
+  return $unique_id;
+}
+
+/**
+ * Logs or displays a debug/testing message depending on settings.
+ */
+function bunchball_debug($message, $variables) {
+  if (variable_get('bunchball_debug_mode', 0) & BUNCHBALL_DEBUG_LOG) {
+    db_insert('bunchball_log')
+      ->fields(array(
+        'uid' => $GLOBALS['user']->uid,
+        // Can't rely on REQUEST_TIME to provide sufficient granularity
+        'timestamp' => time(),
+        'message' => $message,
+        'variables' => serialize($variables),
+      ))
+      ->execute();
+  }
+
+  // Setting messages should only be done for logged-in users due to anonymous caching.
+  if ((variable_get('bunchball_debug_mode', 0) & BUNCHBALL_DEBUG_DISPLAY) && user_is_logged_in()) {
+    drupal_set_message(t($message, $variables));
+  }
 }
