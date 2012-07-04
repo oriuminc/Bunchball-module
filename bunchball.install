@@ -26,5 +26,45 @@ function bunchball_schema() {
   $schema['cache_bunchball_session'] = drupal_get_schema_unprocessed('system', 'cache');
   $schema['cache_bunchball_session']['description'] = 'Bunchball session cache.';
 
+  $schema['bunchball_log'] = array(
+    'description' => 'Logs bunchball API calls and responses.',
+    'fields' => array(
+      'blid' => array(
+        'description' => 'Primary key ID',
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'User ID of the user that triggered the event.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'timestamp' => array(
+        'description' => 'Unix timestamp of the event',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'message' => array(
+        'description' => 'Log message text',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'variables' => array(
+        'description' => 'Variables to be interpolated into the message',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('blid'),
+    'indexes' => array(
+      'bunchball_log_timestamp' => array('timestamp'),
+      'bunchball_log_uid' => array('uid'),
+    )
+  );
+
   return $schema;
 }

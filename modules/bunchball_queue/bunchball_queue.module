@@ -31,14 +31,18 @@ function bunchball_queue_request_queue_worker($job) {
     // but should be long enough for most normal use.
     'timeout' => 5.0,
   );
+  bunchball_debug('Retrieved queued job for url: %url', array('%url' => $job['url']));
   $response = drupal_http_request($job['url'], $options);
-
+  bunchball_debug('Queued job response code: %code', array('%code' => $response->code));
   if ($response->code != 200) {
+    bunchball_debug('Queued job error: %response', array('%response' => print_r($response, TRUE)));
     watchdog('bunchball', 'Bunchball API call returned non-200 status: %response', array('%response' => print_r($response, true)), WATCHDOG_ERROR);
   }
   else {
     $xml = new simpleXMLElement($response->data);
-    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+    $result = strval(reset($xml->xpath('/Nitro/@res')));
+    bunchball_debug('Queued job result: %result', array('%result' => $result));
+    if ($result != 'ok') {
       watchdog('bunchball', 'Nitro API log action failed', array(), WATCHDOG_WARNING);
     }
   }
@@ -50,5 +54,6 @@ function bunchball_queue_request_queue_worker($job) {
 class NitroQueueLogger implements Nitrologger {
   public function log($url, $options = array()) {
     request_queue_request($url, $options, 'bunchball_request_queue');
+    bunchball_debug(__METHOD__ . ' Enqueued request for url: %url; return value cannot be reported, due to the queue mechanism', array('%url' => $url));
   }
 }

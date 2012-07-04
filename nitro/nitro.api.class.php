@@ -165,6 +165,7 @@ class NitroAPI_XML implements NitroAPI {
   private $user_roles;
   private $callbacks;
   private $logger;
+  private $logger_class;
   private $client;
   protected $is_logged_in = FALSE;
   protected $is_session_from_cache = FALSE;
@@ -196,6 +197,7 @@ class NitroAPI_XML implements NitroAPI {
     $this->apiKey = variable_get('bunchball_apikey');
     $this->secretKey = variable_get('bunchball_apisecret');
     $this->callbacks = array();
+    $this->logger_class = $logger;
     $this->logger = new $logger();
     $this->client = new $client();
   }
@@ -255,6 +257,7 @@ class NitroAPI_XML implements NitroAPI {
     if ($cache_entry && $cache_entry->data && $cache_entry->expire > REQUEST_TIME) {
       $this->sessionKey = $cache_entry->data;
       $this->is_session_from_cache = TRUE;
+      bunchball_debug(__METHOD__ . ' Got session key: cache HIT; key: %key', array('%key' => $this->sessionKey));
     }
     else {
       $signature = $this->getSignature();
@@ -276,6 +279,7 @@ class NitroAPI_XML implements NitroAPI {
       // Cache expires in 72 hours - 1 minute.
       $expiration_time = REQUEST_TIME + ((72 * 60 * 60) - 60);
       cache_set($cache_key, $this->sessionKey, 'cache_bunchball_session', $expiration_time);
+      bunchball_debug(__METHOD__ . ' Got session key: cache MISS; Setting cached session key: %key', array('%key' => $this->sessionKey));
     }
 
     // Execute the postLogin callbacks for the first time.
@@ -331,6 +335,8 @@ class NitroAPI_XML implements NitroAPI {
     //Converting XML response attribute and values to array attributes and values
     $xml = $this->logger->log($request);
 
+    $suffix = ($this->logger_class != 'NitroSynchLogger' ? ' May not return a result immediately due to nonstandard logger %class - check the Bunchball debug log' : '');
+    bunchball_debug(__METHOD__ . ' Logging action [actionTag:value]: [%actionTag:%value]' . $suffix, array('%actionTag' => $actionTag, '%value' => $value, '%class' => $this->logger_class));
   }
 
   /**
@@ -366,7 +372,9 @@ class NitroAPI_XML implements NitroAPI {
               "&names=$names_list";
     }
     $xml = $this->client->request($request);
-    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+    $result = strval(reset($xml->xpath('/Nitro/@res')));
+    bunchball_debug(__METHOD__ . ' Result: %result', array('%result' => $result));
+    if ($result != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API setPreferences failed'));
     }
   }
@@ -384,10 +392,14 @@ class NitroAPI_XML implements NitroAPI {
     watchdog('bunchball', 'Get level - user: %username.', array('%username' => $this->userName), WATCHDOG_INFO);
     //Converting XML response attribute and values to array attributes and values
     $xml = $this->client->request($request);
-    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+    $result = strval(reset($xml->xpath('/Nitro/@res')));
+    if ($result != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
-    return strval(reset($xml->xpath('Nitro/users/User/SiteLevel/@name')));
+    $return = strval(reset($xml->xpath('Nitro/users/User/SiteLevel/@name')));
+    bunchball_debug(__METHOD__ . ' Result: %result; return: %return', array('%result' => $result, '%return' => $return));
+
+    return $return;
   }
 
   /**
@@ -408,6 +420,8 @@ class NitroAPI_XML implements NitroAPI {
     // As we don't care about the return value, we can use the logger (allowing
     // asynchronous implementations).
     $xml = $this->logger->log($request);
+    $suffix = ($this->logger_class != 'NitroSynchLogger' ? ' May not return a result immediately due to nonstandard logger %class - check the Bunchball debug log' : '');
+    bunchball_debug(__METHOD__ . ' Group: %group;' . $suffix, array('%group' => $group, '%class' => $this->logger_class));
   }
 
   /**
@@ -426,8 +440,9 @@ class NitroAPI_XML implements NitroAPI {
             $this->CRITERIA_CREDITS . '&userId=' . $this->userName;
 
     $xml = $this->client->request($request);
-
-    return reset($xml->xpath('/Nitro/Balance'));
+    $return = reset($xml->xpath('/Nitro/Balance'));
+    bunchball_debug(__METHOD__ . ' Return: %return', array('%return' => $return));
+    return $return;
   }
 
   /**
@@ -450,8 +465,9 @@ class NitroAPI_XML implements NitroAPI {
             "&returnCount=" . $this->value;
 
     $xml = $this->client->request($request);
-
-    return reset($xml->xpath('/Nitro/actions/Action'))->attributes();
+    $return = reset($xml->xpath('/Nitro/actions/Action'))->attributes();
+    bunchball_debug(__METHOD__ . ' Return: %return', array('%return' => $return));
+    return $return;
   }
 
   /**

@@ -94,5 +94,75 @@ function bunchball_admin_form($form, &$form_state) {
     '#default_value' => variable_get('bunchball_unique_id_include_site_hash', FALSE),
   );
 
+  $form['bunchball_debug_mode'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      BUNCHBALL_DEBUG_NONE => t('Off'),
+      BUNCHBALL_DEBUG_LOG => t('Log only'),
+      BUNCHBALL_DEBUG_LOG | BUNCHBALL_DEBUG_DISPLAY => t('Display and log'),
+    ),
+    '#title' => t('Debug mode'),
+    '#default_value' => isset($form_state['values']['bunchball_debug_mode']) ? $form_state['values']['bunchball_debug_mode'] : variable_get('bunchball_debug_mode', 0),
+    '#description' => t('Set debug mode to show messages about what has been sent to bunchball and responses. "Display" will only display messages to the same user that triggered them, but could still show undesired information to end users, so should be used with caution.')
+  );
+
   return system_settings_form($form);
+}
+
+/**
+ * Page callback for viewing the bunchball event log.
+ */
+function bunchball_log_page() {
+  $header = array(
+    array('data' => t('ID'), 'field' => 'l.blid', 'sort' => 'desc'),
+    array('data' => t('Date'), 'field' => 'l.timestamp'),
+    t('Message'),
+    array('data' => t('User'), 'field' => 'l.uid'),
+  );
+
+  $result = db_select('bunchball_log', 'l')
+    ->extend('PagerDefault')
+    ->extend('TableSort')
+    ->fields('l')
+    ->limit(50)
+    ->orderByHeader($header)
+    ->execute();
+
+  $rows = array();
+  foreach ($result as $row) {
+    $rows[] = array('data' =>
+      array(
+        $row->blid,
+        format_date($row->timestamp, 'short'),
+        t($row->message, unserialize($row->variables)),
+        $row->uid,
+      ),
+    );
+  }
+
+  $build = array();
+  $build['bunchball_log_truncate'] = drupal_get_form('bunchball_log_truncate_form');
+  $build['bunchball_log_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No log messages available.'),
+  );
+
+  $build['bunchball_log_pager'] = array('#theme' => 'pager');
+
+  return $build;
+}
+
+function bunchball_log_truncate_form($form, &$form_state) {
+  $form['truncate'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clear logs')
+  );
+
+  return $form;
+}
+
+function bunchball_log_truncate_form_submit($form, &$form_state) {
+  db_query('TRUNCATE TABLE {bunchball_log}');
 }
