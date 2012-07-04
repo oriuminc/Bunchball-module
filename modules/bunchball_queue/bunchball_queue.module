@@ -49,6 +49,23 @@ function bunchball_queue_request_queue_worker($job) {
 }
 
 /**
+ * Implements hook_FORMID_alter().
+ *
+ * @see bunchball_admin_form()
+ */
+function bunchball_queue_form_bunchball_admin_form_alter(&$form, &$form_state) {
+  $form['bunchball_nitro_logger'] = array(
+    '#title' => t('Request type'),
+    '#type' => 'select',
+    '#options' => array(
+      'NitroQueueLogger' => t('Asynchronous'),
+      'NitroSynchLogger' => t('Synchronous'),
+    ),
+    '#default_value' => variable_get('bunchball_nitro_logger', 'NitroQueueLogger'),
+  );
+}
+
+/**
  * Class that enqueues action log requests and processes them on the next page load to save time
  */
 class NitroQueueLogger implements Nitrologger {
