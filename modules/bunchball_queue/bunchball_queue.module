@@ -55,7 +55,7 @@ function bunchball_queue_request_queue_worker($job) {
  * @see bunchball_admin_form()
  */
 function bunchball_queue_form_bunchball_admin_form_alter(&$form, &$form_state) {
-  $form['bunchball_nitro_logger'] = array(
+  $form['bunchball_dev_options_fieldset']['bunchball_nitro_logger'] = array(
     '#title' => t('Request type'),
     '#type' => 'select',
     '#options' => array(
