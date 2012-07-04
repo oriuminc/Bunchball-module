@@ -1,0 +1,177 @@
+<?php
+
+define('BUNCHBALL_TEST_CATEGORY', 'Bunchball');
+
+class BunchballAdminTestCase extends DrupalWebTestCase {
+
+  protected $privileged_user;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Bunchball admin UI test',
+      'description' => 'Tests the bunchball admin UI.',
+      'group' => BUNCHBALL_TEST_CATEGORY,
+    );
+  }
+
+  protected function setUp() {
+    parent::setUp(
+      'bunchball',
+      'bunchball_nitro',
+      'bunchball_queue',
+      'bunchball_entities',
+      'bunchball_fivestar',
+      'bunchball_groups',
+      'bunchball_queue',
+      'bunchball_poll',
+      'bunchball_user_interaction',
+      'bunchball_user_roles',
+      'bunchball_webform'
+    );
+
+    $this->privileged_user = $this->drupalCreateUser(array(
+      'configure bunchball',
+    ));
+  }
+
+  protected function bunchballTestAdmin($url, $edit) {
+    $this->drupalLogin($this->privileged_user);
+
+    $this->drupalGet($url);
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    $this->drupalGet($url);
+    foreach ($edit as $fieldname => $value) {
+      $this->assertFieldByName($fieldname, $value);
+    }
+  }
+
+  public function testConfigurationPage() {
+    $this->bunchballTestAdmin('admin/config/people/bunchball', array(
+      'bunchball_apikey' => md5(mt_rand()),
+      'bunchball_apisecret' => md5(mt_rand()),
+      'bunchball_environment' => 'sandbox',
+      'bunchball_sandbox_url' => 'http://sandbox.bunchball.net/nitro/xml',
+    ));
+  }
+
+  public function testContentActions() {
+    $edit = array();
+    $content_types = array('page', 'article');
+    foreach ($content_types as $ct) {
+      foreach (array('insert', 'update', 'comment') as $action) {
+        $edit["bunchball_entities[settings][node_{$ct}][node_{$ct}_{$action}_check]"] = TRUE;
+        $edit["bunchball_entities[settings][node_{$ct}][node_{$ct}_{$action}_action]"] = user_password();
+      }
+      $edit["checkbox_{$ct}"] = TRUE;
+      $edit["name_{$ct}"] = user_password();
+    }
+
+    $edit['bunchball_fivestar[settings][fivestar][check]'] = TRUE;
+    $edit['bunchball_fivestar[settings][fivestar][action]'] = user_password();
+    $edit['bunchball_poll[settings][poll][check]'] = TRUE;
+    $edit['bunchball_poll[settings][poll][action]'] = user_password();
+    $edit['bunchball_webform[settings][webform][check]'] = TRUE;
+    $edit['bunchball_webform[settings][webform][action]'] = user_password();
+
+    $this->bunchballTestAdmin('admin/config/people/bunchball/entities', $edit);
+  }
+
+  public function testUserActions() {
+    $edit = array();
+
+    $edit['bunchball_user_interaction[bunchball_user_login_check]'] = TRUE;
+    $edit['bunchball_user_interaction[bunchball_user_login_action]'] = user_password();
+
+    $edit['bunchball_user_interaction[bunchball_user_register_check]'] = TRUE;
+    $edit['bunchball_user_interaction[bunchball_user_register_action]'] = user_password();
+
+    $edit['bunchball_user_interaction[bunchball_user_profile_complete_check]'] = TRUE;
+    $edit['bunchball_user_interaction[bunchball_user_profile_complete_action]'] = user_password();
+
+    $edit['bunchball_user_interaction[bunchball_user_profile_picture_check]'] = TRUE;
+    $edit['bunchball_user_interaction[bunchball_user_profile_picture_action]'] = user_password();
+
+    $this->bunchballTestAdmin('admin/config/people/bunchball/user-interaction', $edit);
+  }
+}
+
+class BunchballNitroTestCase extends DrupalWebTestCase {
+  protected $privileged_user;
+
+  protected $bunchball_entities;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Bunchball Nitro connector test',
+      'description' => 'Tests the bunchball nitro connector class.',
+      'group' => BUNCHBALL_TEST_CATEGORY,
+    );
+  }
+
+  protected function setUp() {
+    parent::setUp(
+      'bunchball',
+      'bunchball_nitro',
+      'bunchball_queue',
+      'bunchball_entities',
+      'bunchball_fivestar',
+      'bunchball_groups',
+      'bunchball_queue',
+      'bunchball_poll',
+      'bunchball_user_interaction',
+      'bunchball_user_roles',
+      'bunchball_webform'
+    );
+
+    variable_set('nitroapi_class_type', 'Mock');
+    variable_set('bunchball_user_login', array(
+      'enabled' => 1,
+      'method' => user_password(),
+    ));
+    variable_set('bunchball_entities', $this->bunchball_entities = array(
+      'node_article' => array(
+        'name' => 'Article',
+        'type' => 'node',
+        'insert' => 1,
+        'insert_action' => user_password(),
+        'update' => 1,
+        'update_action' => user_password(),
+        'comment' => 1,
+        'comment_action' => user_password(),
+      ),
+      'node_page' => array(
+        'name' => 'Page',
+        'type' => 'node',
+        'insert' => 1,
+        'insert_action' => user_password(),
+        'update' => 1,
+        'update_action' => user_password(),
+        'comment' => 1,
+        'comment_action' => user_password(),
+      ),
+    ));
+    $this->privileged_user = $this->drupalCreateUser(array(
+      'access content',
+      'configure bunchball',
+      'create article content',
+      'create page content',
+    ));
+  }
+
+  public function testLogin() {
+    $this->drupalLogin($this->privileged_user);
+    $this->assertText('NITROAPI_MOCK_drupalLogin');
+  }
+
+  public function testEntities() {
+    $this->drupalLogin($this->privileged_user);
+    $this->drupalGet('node/add/article');
+    $this->drupalPost(NULL, array(
+      'title' => $this->randomName(),
+    ), t('Save'));
+    $this->assertText("NITROAPI_MOCK_logAction :: {$this->bunchball_entities['node_article']['insert_action']}");
+  }
+
+}
+

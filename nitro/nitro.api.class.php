@@ -92,17 +92,71 @@ class NitroAPI_Factory {
     // singleton instance
   private static $instance;
 
-    /**
+  /**
    * Implement singleton pattern.
    *
-   * @return singleton instance of this class
+   * @return NitroAPI singleton instance of this class
    */
   public static function getInstance($type = 'XML') {
     if (!isset(self::$instance)) {
+      if ($t = variable_get('nitroapi_class_type')) {
+        $type = $t;
+      }
       $className = "NitroAPI_$type";
-      self::$instance = new $className;
+      $logger = variable_get('bunchball_nitro_logger', 'NitroSynchLogger');
+      $client = variable_get('bunchball_nitro_client', 'NitroSynchClient');
+      self::$instance = new $className($logger, $client);
     }
     return self::$instance;
+  }
+}
+
+/**
+ * Interface for a class that logs actions to bunchball.
+ */
+interface NitroLogger {
+  public function log($url, $options = array());
+}
+
+/**
+ * Interface for a class that handles requests whose response is needed immediately.
+ */
+interface NitroClient {
+  public function request($url, $options = array());
+}
+
+/**
+ * Synchronous implementation of NitroClient
+ */
+class NitroSynchClient implements NitroClient {
+  public function request($url, $options = array()) {
+    $response = drupal_http_request($url, $options);
+    if ($response->code == 200) {
+      return new SimpleXMLElement($response->data);
+    }
+    else {
+      throw new NitroAPI_HttpException();
+    }
+  }
+}
+
+/**
+ * Synchronous implementation of NitroLogger.
+ */
+class NitroSynchLogger implements NitroLogger {
+  public function log($url, $options = array()) {
+    // @todo configurable options for the request timeout etc.
+    $response = drupal_http_request($url, $options);
+    if ($response->code == 200) {
+      $xml = new SimpleXMLElement($response->data);
+      if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+        throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
+      }
+      return $xml;
+    }
+    else {
+      throw new NitroAPI_HttpException();
+    }
   }
 }
 
@@ -115,6 +169,8 @@ class NitroAPI_XML implements NitroAPI {
   private $sessionKey;
   private $user_roles;
   private $callbacks;
+  private $logger;
+  private $client;
   protected $is_logged_in = FALSE;
   protected $is_session_from_cache = FALSE;
 
@@ -128,7 +184,7 @@ class NitroAPI_XML implements NitroAPI {
   /**
    * Constructor
    */
-  public function __construct() {
+  public function __construct($logger, $client) {
     switch (variable_get('bunchball_environment')) {
       case 'production':
         $this->baseURL = variable_get('bunchball_production_url');
@@ -145,6 +201,8 @@ class NitroAPI_XML implements NitroAPI {
     $this->apiKey = variable_get('bunchball_apikey');
     $this->secretKey = variable_get('bunchball_apisecret');
     $this->callbacks = array();
+    $this->logger = new $logger();
+    $this->client = new $client();
   }
 
   /**
@@ -164,19 +222,6 @@ class NitroAPI_XML implements NitroAPI {
     //MD5 on signature
     $signature = md5($unencryptedSignature);
     return $signature;
-  }
-
-  /**
-   * Undocumented as this is only here until the pluggable solution is in place ...
-   */
-  private function request($url) {
-    $response = drupal_http_request($url);
-    if ($response->code == 200) {
-      return new SimpleXMLElement($response->data);
-    }
-    else {
-      throw new NitroAPI_HttpException();
-    }
   }
 
   /**
@@ -245,7 +290,7 @@ class NitroAPI_XML implements NitroAPI {
         "&firstName=$firstName" .
         "&lastName=$lastName";
 
-      $xml = $this->request($request);
+      $xml = $this->client->request($request);
 
       $this->sessionKey = strval(reset($xml->xpath('/Nitro/Login/sessionKey')));
 
@@ -304,11 +349,8 @@ class NitroAPI_XML implements NitroAPI {
             "&value=$value";
     watchdog('bunchball', 'Log Action: %actionTag; value: %value', array('%actionTag' => $actionTag, '%value' => $value), WATCHDOG_INFO);
     //Converting XML response attribute and values to array attributes and values
-    $xml = $this->request($request);
+    $xml = $this->logger->log($request);
 
-    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
-      throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
-    }
   }
 
   /**
@@ -343,7 +385,7 @@ class NitroAPI_XML implements NitroAPI {
               "&userId={$this->userName}" .
               "&names=$names_list";
     }
-    $xml = $this->request($request);
+    $xml = $this->client->request($request);
     if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API setPreferences failed'));
     }
@@ -361,7 +403,7 @@ class NitroAPI_XML implements NitroAPI {
             "&sessionKey={$this->sessionKey}";
     watchdog('bunchball', 'Get level - user: %username.', array('%username' => $this->userName), WATCHDOG_INFO);
     //Converting XML response attribute and values to array attributes and values
-    $xml = $this->request($request);
+    $xml = $this->client->request($request);
     if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
       throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
     }
@@ -383,10 +425,9 @@ class NitroAPI_XML implements NitroAPI {
     watchdog('bunchball', 'Add user to group - user: %username group: %group.',
             array('%username' => $this->userName, '%group' => $group), WATCHDOG_INFO);
 
-    $xml = $this->request($request);
-    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
-      throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
-    }
+    // As we don't care about the return value, we can use the logger (allowing
+    // asynchronous implementations).
+    $xml = $this->logger->log($request);
   }
 
   /**
@@ -404,7 +445,7 @@ class NitroAPI_XML implements NitroAPI {
             $this->POINT_CATEGORY_ALL . "&criteria=" .
             $this->CRITERIA_CREDITS . '&userId=' . $this->userName;
 
-    $xml = $this->request($request);
+    $xml = $this->client->request($request);
 
     return reset($xml->xpath('/Nitro/Balance'));
   }
@@ -428,7 +469,7 @@ class NitroAPI_XML implements NitroAPI {
             "&criteria=" . $this->CRITERIA_MAX .
             "&returnCount=" . $this->value;
 
-    $xml = $this->request($request);
+    $xml = $this->client->request($request);
 
     return reset($xml->xpath('/Nitro/actions/Action'))->attributes();
   }

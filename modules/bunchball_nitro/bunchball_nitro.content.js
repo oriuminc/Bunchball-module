@@ -9,7 +9,7 @@
 }) (jQuery);
 
 var _currentUserId = '';
-var _userCommandsArray = new Array();
+var _userCommandsArray = [];
 var _thePlayer = '';
 var _playerPlayed = 0;
 
@@ -27,13 +27,12 @@ function gotCurrentUserId(inUserId) {
 // ViewedContent is called because the user is currently viewing content.
 function userViewedContent() {
   var title    = Drupal.settings.bunchball_nitro.node_title;
-  var type     = Drupal.settings.bunchball_nitro.node_type;
   var cat      = Drupal.settings.bunchball_nitro.node_cat;
   var bb_tag   = Drupal.settings.bunchball_nitro.node_action;
-  var sentTags = bb_tag + ', Title: ' + title + ', Category: ' + cat;
+  var sentTags = encodeURIComponent(bb_tag + ', Title: ' + title + ', Category: ' + cat);
 
   // add requests for all players into the array to walk through.
-  var inObj = new Object();
+  var inObj = {};
   inObj.uid = _currentUserId;
   inObj.tags = sentTags;
   inObj.ses = '';
@@ -44,7 +43,7 @@ function userViewedContent() {
   // TODO: here is where you'd check to make sure the users isn't the same as
   // the creator.
 
-  inObj = new Object();
+  inObj = {};
   inObj.uid = uid;
   inObj.tags = sentTags;
   inObj.ses = '';
@@ -104,7 +103,7 @@ function onYouTubePlayerReady(playerId) {
   (function ($) {
     $("div.oembed-video .oembed-content object embed").each(function(i){
       _thePlayer = this;
-      _thePlayer.addEventListener("onStateChange", "nitroVideoStateChange");
+      _thePlayer.addEventListener("onStateChange", nitroVideoStateChange);
     });
   }) (jQuery);
 }
@@ -124,10 +123,10 @@ function nitroVideoStateChange(newState) {
 
   // only continue if there is something in Action
   if (action.length > 1) {
-    action = action + ",Artist: " + Drupal.settings.bunchball_nitro.artist_name
-      + ", Category: " + Drupal.settings.bunchball_nitro.artist_cat;
+    action = encodeURIComponent(action + ",Artist: " + Drupal.settings.bunchball_nitro.artist_name
+      + ", Category: " + Drupal.settings.bunchball_nitro.artist_cat);
 
-    var inObj = new Object();
+    var inObj = {};
     inObj.uid = _currentUserId;
     inObj.tags = action;
     inObj.ses = '';
@@ -141,7 +140,7 @@ function nitroSocialShareClicked(network) {
   if(network.length > 0) {
     var action = "Share_Link, Network: " + network;
 
-    var inObj = new Object();
+    var inObj = {};
     inObj.uid = _currentUserId;
     inObj.tags = action;
     inObj.ses = '';

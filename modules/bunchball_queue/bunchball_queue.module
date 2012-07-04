@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function bunchball_queue_cron_queue_info() {
+  return array(
+    'bunchball_request_queue' => array(
+      'worker callback' => 'bunchball_queue_request_queue_worker',
+      // default timeout of 15 sec should be ok.
+    ),
+  );
+}
+
+/**
+ * Queue worker callback.
+ *
+ * @param $job
+ *   An associative array containing the keys:
+ *     - url: The url of the request
+ *     - options: any options to pass onto the request.  These can be assumed to
+ *       be the same as options for drupal_http_request for the time being, but
+ *       may change along with the backend HTTP client.
+ */
+function bunchball_queue_request_queue_worker($job) {
+  $valid_options = array_fill_keys(array('headers', 'method', 'data', 'max_redirects', 'timeout', 'context'), 0);
+  $options = array_intersect_key($job['options'], $valid_options);
+
+  $options += array(
+    // default timeout of 5 seconds - relatively short so processes don't hang,
+    // but should be long enough for most normal use.
+    'timeout' => 5.0,
+  );
+  $response = drupal_http_request($job['url'], $options);
+
+  if ($response->code != 200) {
+    watchdog('bunchball', 'Bunchball API call returned non-200 status: %response', array('%response' => print_r($response, true)), WATCHDOG_ERROR);
+  }
+  else {
+    $xml = new simpleXMLElement($response->data);
+    if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+      watchdog('bunchball', 'Nitro API log action failed', array(), WATCHDOG_WARNING);
+    }
+  }
+}
+
+/**
+ * Class that enqueues action log requests and processes them on the next page load to save time
+ */
+class NitroQueueLogger implements Nitrologger {
+  public function log($url, $options = array()) {
+    request_queue_request($url, $options, 'bunchball_request_queue');
+  }
+}

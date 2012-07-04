@@ -8,7 +8,7 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
 
   private $options;
   private $nitro;
-  
+
   function __construct() {
     $this->options = variable_get('bunchball_groups');
     $this->nitro = NitroAPI_Factory::getInstance();
@@ -16,13 +16,14 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
 
   /**
    * Form callback for this plugin.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @return array
    *    form to be rendered
    */
   public function adminForm($form, &$form_state) {
+    $num_rows = 1;
     if (isset($form_state['bunchball_groups_num_rows'])) {
       $num_rows = $form_state['bunchball_groups_num_rows'];
     }
@@ -32,7 +33,7 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
         $form_state['bunchball_groups_num_rows'] = $num_rows;
       }
     }
-    
+
     $form['bunchball_groups'] = array(
         '#type' => 'fieldset',
         '#title' => t('Bunchball groups'),
@@ -58,22 +59,23 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
 
   /**
    * Form validation callback for this plugin.
-   * 
+   *
    * @todo check that checkboxes and action textboxes are consistent
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormValidate($form, &$form_state) {}
 
   /**
    * Submit callback for this plugin.
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormSubmit($form, &$form_state) {
-    $values = $form_state['values']['bunchball_groups']['settings'];
+    $values = isset($form_state['values']['bunchball_groups']['settings']) ?
+      $form_state['values']['bunchball_groups']['settings'] : array();
     $this->options['groups'] = array();
     foreach ($values as $key => $value) {
       if (!empty($value['group']['value']) && !empty($value['group']['group']) && empty($value['group']['delete'])) {
@@ -85,11 +87,11 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
 
   /**
    * AJAX callback.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @param $op
-   * @param $data 
+   * @param $data
    */
   public function adminFormAjax($form, &$form_state, $op, $data) {
     if ($op == 'addOneRow') {
@@ -97,7 +99,7 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
       $form_state['rebuild'] = TRUE;
     }
   }
-  
+
   /**
    * Send action to Bunchball.
    *
@@ -137,10 +139,10 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
 
   /**
    * Build the form fields for a content type.
-   * 
+   *
    * @param $num_rows
    *    Number of rows in the table of rules.
-   * 
+   *
    * @return array
    *    form field elements for one content type
    */
@@ -160,19 +162,19 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
     for (;$num_rows >0; $num_rows--) {
       $form[] = $this->buildRow($profile_fields);
     }
-    
+
     return $form;
   }
 
   /**
    * Create a row of fields.
-   * 
+   *
    * @param $profile_fields
    *    array of custom profile fields
-   * 
-   * @param $group_data 
+   *
+   * @param $group_data
    *    array of stored data for group
-   * 
+   *
    * @return array
    *    row of fields
    */
@@ -194,7 +196,7 @@ class BunchballGroups implements BunchballPluginInterface, BunchballUserInteract
       // if not new row
       $row['group']['delete'] = array(
         '#type' => 'checkbox',
-        '#default_value' => FALSE,
+        '#default_value' => array(),
       );
     }
     return $row;

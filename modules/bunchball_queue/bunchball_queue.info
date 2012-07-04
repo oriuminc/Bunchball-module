@@ -1,0 +1,6 @@
+name = Bunchball Queue
+description = Queue bunchball action logging requests for faster page loads.
+core = 7.x
+package = Bunchball
+dependencies[] = bunchball
+dependencies[] = request_queue
