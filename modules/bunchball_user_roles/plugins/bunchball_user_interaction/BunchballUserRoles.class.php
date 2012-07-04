@@ -9,7 +9,7 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
 
   private $options;
   private $nitro;
-  
+
   function __construct() {
     $this->options = variable_get('bunchball_user_roles');
     $this->nitro = NitroAPI_Factory::getInstance();
@@ -18,7 +18,7 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
 
   /**
    * Form callback for this plugin.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @return array
@@ -39,17 +39,17 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
   /**
    * Form validation callback for this plugin.
    *   - not required
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormValidate($form, &$form_state) {}
 
   /**
    * Submit callback for this plugin.
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormSubmit($form, &$form_state) {
     $values = $form_state['values']['bunchball_user_roles']['settings'];
@@ -59,19 +59,19 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
 
   /**
    * AJAX callback.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @param $op
-   * @param $data 
+   * @param $data
    */
   public function adminFormAjax($form, &$form_state, $op, $data) {}
-  
+
   /**
    * Send command to Bunchball.
-   * 
+   *
    * @param $user
-   * @param $op 
+   * @param $op
    */
   public function send($user, $op) {
     if ($op == 'setRole') {
@@ -90,10 +90,10 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
   private function getActionName() {
     return $this->options['roles']['whitelist'];
   }
-  
+
   /**
    * Build the form fields for a content type.
-   * 
+   *
    * @return array
    *    form field elements for one content type
    */
@@ -111,19 +111,18 @@ class BunchballUserRoles implements BunchballPluginInterface, BunchballUserInter
     );
     return $form;
   }
-  
+
   /**
    * Update user roles on post-login.
    */
   public function postLogin() {
     $level = $this->nitro->getLevel();
     global $user;
-    if (in_array($level, $this->options['roles']['whitelist'])) {
+    if (in_array($level, is_array($this->options['roles']['whitelist']) ? $this->options['roles']['whitelist'] : array())) {
       // add role to user
       if ($role = user_role_load_by_name($level)) {
         $user->roles[$role->rid] = $role->name;
         user_save($user);
-        
       }
     }
   }

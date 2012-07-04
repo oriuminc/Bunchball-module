@@ -8,9 +8,10 @@ core = "7.x"
 package = Bunchball
 
 dependencies[] = ctools
-dependencies[] = httprl
 
 files[] = nitro/nitro.api.class.php
 files[] = BunchballPluginInterface.inc
+files[] = bunchball.test
+files[] = nitro/nitro.api.mock.inc
 
 configure =  admin/config/people/bunchball

@@ -9,7 +9,7 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
 
   private $options;
   private $nitro;
-  
+
   function __construct() {
     $this->options = variable_get('bunchball_poll');
     $this->nitro = NitroAPI_Factory::getInstance();
@@ -17,7 +17,7 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
 
   /**
    * Form callback for this plugin.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @return array
@@ -36,19 +36,19 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
 
   /**
    * Form validation callback for this plugin.
-   * 
+   *
    * @todo check that checkboxes and action textboxes are consistent
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormValidate($form, &$form_state) {}
 
   /**
    * Submit callback for this plugin.
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormSubmit($form, &$form_state) {
     $values = $form_state['values']['bunchball_poll']['settings'];
@@ -59,19 +59,19 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
 
   /**
    * AJAX callback.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @param $op
-   * @param $data 
+   * @param $data
    */
   public function adminFormAjax($form, &$form_state, $op, $data) {}
-  
+
   /**
    * Register rating actions.
    *
    * @param $id
-   * @param $type 
+   * @param $type
    * @param $user
    */
   public function send($id, $type, $user, $op) {
@@ -87,7 +87,7 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
       }
     }
   }
-  
+
   private function checkSend() {
     return $this->options['poll']['check'];
   }
@@ -95,10 +95,10 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
   private function getActionName() {
     return $this->options['poll']['action'];
   }
-  
+
   /**
    * Build the form fields for a content type.
-   * 
+   *
    * @return array
    *    form field elements for one content type
    */
@@ -115,6 +115,11 @@ class BunchballEntitiesPoll implements BunchballPluginInterface, BunchballEntiti
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options['poll']['action']) ? $this->options['poll']['action'] : NULL,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="[poll][check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
     return $form;
   }

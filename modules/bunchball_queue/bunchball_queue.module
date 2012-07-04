@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function bunchball_queue_cron_queue_info() {
+  return array(
+    'bunchball_request_queue' => array(
+      'worker callback' => 'bunchball_queue_request_queue_worker',
+      // default timeout of 15 sec should be ok.
+    ),
+  );
+}
+
+/**
+ * Queue worker callback.
+ *
+ * @param $job
+ *   An associative array containing the keys:
+ *     - url: The url of the request
+ *     - options: any options to pass onto the request.  These can be assumed to
+ *       be the same as options for drupal_http_request for the time being, but
+ *       may change along with the backend HTTP client.
+ */
+function bunchball_queue_request_queue_worker($job) {
+  $valid_options = array_fill_keys(array('headers', 'method', 'data', 'max_redirects', 'timeout', 'context'), 0);
+  $options = array_intersect_key($job['options'], $valid_options);
+
+  $job['options'] += array(
+    // Default timeout of 10 seconds - on the shorter side so processes don't hang,
+    // but should be long enough for most normal use.  Timeouts of 5 seconds have
+    // been observed to fail on the bunchball sandbox in normal use.
+    'timeout' => variable_get('bunchball_logger_timeout', 10.0),
+  );
+  bunchball_debug('Retrieved queued job for url: %url with options: %options', array('%url' => $job['url'], '%options' => print_r($job['options'], true)));
+  $response = drupal_http_request($job['url'], $job['options']);
+  bunchball_debug('Queued job response %response', array('%response' => print_r($response, true)));
+  if ($response->code != 200) {
+    bunchball_debug('Queued job error: %response', array('%response' => print_r($response, TRUE)));
+    watchdog('bunchball', 'Bunchball API call returned non-200 status: %response', array('%response' => print_r($response, TRUE)), WATCHDOG_ERROR);
+  }
+  else {
+    $xml = new simpleXMLElement($response->data);
+    $result = strval(reset($xml->xpath('/Nitro/@res')));
+    bunchball_debug('Queued job result: %result', array('%result' => $result));
+    if ($result != 'ok') {
+      watchdog('bunchball', 'Nitro API log action failed', array(), WATCHDOG_WARNING);
+    }
+  }
+}
+
+/**
+ * Implements hook_FORMID_alter().
+ *
+ * @see bunchball_admin_form()
+ */
+function bunchball_queue_form_bunchball_admin_form_alter(&$form, &$form_state) {
+  $form['bunchball_dev_options_fieldset']['bunchball_nitro_logger'] = array(
+    '#title' => t('Request type'),
+    '#type' => 'select',
+    '#options' => array(
+      'NitroQueueLogger' => t('Asynchronous'),
+      'NitroSynchLogger' => t('Synchronous'),
+    ),
+    '#default_value' => variable_get('bunchball_nitro_logger', 'NitroQueueLogger'),
+  );
+}
+
+/**
+ * Class that enqueues action log requests and processes them on the next page load to save time
+ */
+class NitroQueueLogger implements Nitrologger {
+  public function log($url, $options = array()) {
+    request_queue_request($url, $options, 'bunchball_request_queue');
+    bunchball_debug(__METHOD__ . ' Enqueued request for url: %url; return value cannot be reported, due to the queue mechanism', array('%url' => $url));
+  }
+}

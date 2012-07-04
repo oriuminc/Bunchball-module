@@ -44,10 +44,15 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
       '#default_value' => isset($nitro_ct_enabled[$machine]) ? $nitro_ct_enabled[$machine] : '',
       '#size' => 60,
       '#maxlength' => 128,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="checkbox_' . $machine . '"]' => array('checked' => FALSE),
+        ),
+      ),
     );
   }
 
-  // youtube element..
+  // Youtube element.
   $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
 
   $form['bunchball_nitro']['element_youtube'] = array(
@@ -68,6 +73,11 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
     '#default_value' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : '',
     '#size' => 60,
     '#maxlength' => 128,
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="checkbox_youtube"]' => array('checked' => FALSE),
+      ),
+    ),
   );
   $form['bunchball_nitro']['element_youtube']['youtube_end'] = array(
     '#type' => 'textfield',
@@ -75,13 +85,54 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
     '#default_value' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : '',
     '#size' => 60,
     '#maxlength' => 128,
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="checkbox_youtube"]' => array('checked' => FALSE),
+      ),
+    ),
   );
 }
 
 /**
- * Implement hook_view($node, $view_mode)
+ * Submit callback for admin form.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function bunchball_nitro_admin_form_submit($form, &$form_state) {
+  if (isset($form_state['values']['notification_interval']) && $form_state['values']['notification_interval']) {
+    $interval = $form_state['values']['notification_interval'];
+    variable_set('bunchball_nitro_notification_interval', $interval);
+  }
+
+  $action_names = array();
+
+  // check to see which elements are set for action name tracking
+  $node_types = node_type_get_names();
+  foreach ($node_types as $machine => $human) {
+    if($form_state['values']['checkbox_' . $machine] > 0 && strlen($form_state['values']['name_' . $machine]) > 0) {
+      $action_names[$machine] = $form_state['values']['name_' . $machine];
+    }
+  }
+  variable_set('bunchball_nitro_admin', $action_names);
+
+  variable_del('bunchball_nitro_admin_youtube');
+  if ($form_state['values']['checkbox_youtube'] > 0 && strlen($form_state['values']['youtube_start']) > 0 && strlen($form_state['values']['youtube_end']) > 0) {
+    $youtube = array();
+    $youtube['start'] = $form_state['values']['youtube_start'];
+    $youtube['end'] = $form_state['values']['youtube_end'];
+    variable_set('bunchball_nitro_admin_youtube', $youtube);
+  }
+}
+
+/**
+ * Implements hook_node_view.
  */
 function bunchball_nitro_node_view($node, $view_mode, $langcode) {
+  if (user_is_anonymous()) {
+    return;
+  }
+
   // make sure the user is currently viewing in full content mode
   if ($view_mode != 'full') {
     return;
@@ -96,14 +147,14 @@ function bunchball_nitro_node_view($node, $view_mode, $langcode) {
 
   drupal_add_js(array(
     'bunchball_nitro' => array(
-        'node_id' => $node->nid,
-        'node_uid' => $node->uid,
-        'node_title' => filter_xss($node->title, array()),
-        'node_cat' => $node->type,
-        'node_type' => $node->type,
-        'node_action' => $nitro_ct_enabled[$node->type],
-        )
-    ), 'setting');
+      'node_id' => $node->nid,
+      'node_uid' => $node->uid,
+      'node_title' => $node->title,
+      'node_cat' => $node->type,
+      'node_type' => $node->type,
+      'node_action' => $nitro_ct_enabled[$node->type],
+      )),
+    'setting');
 
   _bunchball_nitro_add_content_actions_js();
 }
@@ -119,6 +170,9 @@ function bunchball_nitro_node_view_alter(&$build) {
  * Function used for post render of the HTML to modify youtube URLs
  */
 function _bunchball_nitro_node_post_render($markup, $element) {
+  if (user_is_anonymous()) {
+    return $markup;
+  }
 
   // make sure there is a youtube video in here..
   if (strpos($markup, "feature=oembed") === FALSE) {
@@ -130,7 +184,7 @@ function _bunchball_nitro_node_post_render($markup, $element) {
   $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
   drupal_add_js(array(
     'bunchball_nitro' => array(
-      'artist_name' => isset($element['#node']) ? filter_xss($element['#node']->title, array()) : "N/A",
+      'artist_name' => isset($element['#node']) ? $element['#node']->title : "N/A",
       'artist_cat' =>  isset($element['#node']) ? $element['#node']->type : "N/A",
       'artist_start' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : 'youtube_start',
       'artist_end' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : 'youtube_end',
@@ -144,38 +198,30 @@ function _bunchball_nitro_node_post_render($markup, $element) {
 }
 
 /**
- * Initialize the JavaScript on the page
+ * Initialize the JavaScript on the page.
  */
 function _bunchball_nitro_initialize() {
-  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
+  global $user;
 
-  // if the nitro_js_url is already in the SESSION variable, then this
-  // has already run..
+  // Make sure javascript is only added once.
+  $nitro_js_url = "http://assets.bunchball.net/scripts/nitro/current/nitro.js";
   $current_js_array = drupal_add_js();
   if (isset ($current_js_array[$nitro_js_url])) {
     return;
   }
 
-  // will get the API key from server side
+  // Make sure API key is set.
   $api_key = variable_get('bunchball_apikey', '');
-
   if ($api_key == '') {
     watchdog('bunchball_nitro', 'API Key not set', array());
     return;
   }
 
-  global $user;
-
-  // detect whether the environment is production or debug (sandbox)
+  // Detect whether the environment is production or debug (sandbox).
   $environment = variable_get('bunchball_environment', 'sandbox');
-  if (strlen($environment) == 0) {
-    $endpoint_url = 'sandbox';
-  }
-
-  // change this so that debug mode is reflected in the environment.
   $in_debug_mode = ($environment == 'sandbox');
 
-  // parse domain from the variables
+  // Parse domain from the variables.
   $endpoint_url = variable_get('bunchball_production_url', 'http://sandbox.bunchball.net/nitro/json');
   if (strlen($endpoint_url) == 0) {
     $endpoint_url = 'http://sandbox.bunchball.net/nitro/json';
@@ -183,7 +229,7 @@ function _bunchball_nitro_initialize() {
 
   $parsed_url = parse_url($endpoint_url);
 
-  // default value for the customer subdomain
+  // Default value for the customer subdomain.
   $customer_subdomain = 'sandbox';
   if (isset ($parsed_url['host'])) {
     $exploded_domain = explode(".", $parsed_url['host']);
@@ -196,11 +242,11 @@ function _bunchball_nitro_initialize() {
     }
   }
 
-  // instantiate the variables for the JS
+  // Instantiate the variables for the JS.
   $server_url = $in_debug_mode ?
-      'http://sandbox.bunchball.net/nitro/json' :
-      'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
-  $user_id = $user->uid;
+    'http://sandbox.bunchball.net/nitro/json' :
+    'http://' . $customer_subdomain . '.nitro.bunchball.net/nitro/json/';
+  $user_id = bunchball_get_bunchball_uid($user->uid);
   $timestamp = time();
   $nitro = NitroAPI_Factory::getInstance();
   $signature = $nitro->getSignature();
@@ -209,11 +255,11 @@ function _bunchball_nitro_initialize() {
   // To include nitro.js, first put the following code into your HTML page as a
   // direct child of the <body> element or after the </body> tag.
   drupal_add_js($nitro_js_url, array(
-      'type' => 'external',
-      'weight' => -10,
-      'scope' => 'footer',
-      'group' => JS_LIBRARY,
-      'every_page' => TRUE,
+    'type' => 'external',
+    'weight' => -10,
+    'scope' => 'footer',
+    'group' => JS_LIBRARY,
+    'every_page' => TRUE,
   ));
 
   // Include settings for initializing the Nitro connection on the client side.
@@ -248,9 +294,11 @@ function _bunchball_nitro_initialize() {
  * Implements hook_init().
  */
 function bunchball_nitro_init() {
-  _bunchball_nitro_initialize();
-  _bunchball_nitro_add_notification_js();
-  _bunchball_nitro_add_nml_js();
+  if (user_is_logged_in()) {
+    _bunchball_nitro_initialize();
+    _bunchball_nitro_add_notification_js();
+    _bunchball_nitro_add_nml_js();
+  }
 }
 
 function _bunchball_nitro_add_content_actions_js() {
@@ -305,5 +353,135 @@ function _bunchball_nitro_add_nml_js() {
       'weight' => 0,
       'every_page' => TRUE,
     )
+  );
+}
+
+/**
+ * Implements hook_filter_info().
+ *
+ * @see _bunchball_nitro_filter_bunchball_process()
+ * @see _bunchball_nitro_filter_bunchball_tips()
+ */
+function bunchball_nitro_filter_info() {
+  $filters['filter_bunchball'] = array(
+    'title' => t('Bunchball'),
+    'description' => t('Every instance of [bunchball-?] in the input text will be replaced with a preconfigured replacement.'),
+    'process callback' => '_bunchball_nitro_filter_bunchball_process',
+    'tips callback' => '_bunchball_nitro_filter_bunchball_tips',
+    'cache' => FALSE,
+  );
+  return $filters;
+}
+
+/**
+ * Process callback for 'filter_bunchball'.
+ *
+ * Replaces bunchball placeholder tags.
+ *
+ * @see bunchball_nitro_filter_info()
+ * @see _bunchball_nitro_filter_bunchball_get_available_placeholders()
+ * @see _bunchball_nitro_filter_bunchball_get_replacement()
+ *
+ * @param string $text
+ *   Raw text that needs to be processed.
+ *
+ * @return string
+ *   Processed text with bunchball placeholders replaced.
+ */
+function _bunchball_nitro_filter_bunchball_process($text) {
+  $placeholders = _bunchball_nitro_filter_bunchball_get_available_placeholders();
+  $processed_text = $text;
+
+  foreach ($placeholders as $placeholder => $info) {
+    $replacement = _bunchball_nitro_filter_bunchball_get_replacement($placeholder);
+    $processed_text = str_replace("[bunchball-{$placeholder}]", $replacement, $processed_text);
+  }
+
+  return $processed_text;
+}
+
+/**
+ * Tips callback for 'filter_bunchball'.
+ *
+ * @see bunchball_nitro_filter_info()
+ * @see _bunchball_nitro_filter_bunchball_get_available_placeholders()
+ *
+ * @param stdClass $filter
+ *   Filter object.
+ * @param stdClass $format
+ *   Format object.
+ * @param bool $long
+ *   If long or short help text is required.
+ *
+ * @return string
+ *   Help text describing filter usage.
+ */
+function _bunchball_nitro_filter_bunchball_tips($filter, $format, $long = FALSE) {
+  if ($long) {
+    $header = array(t('Placeholder'), t('Description'));
+    $rows = array();
+    $placeholders = _bunchball_nitro_filter_bunchball_get_available_placeholders();
+
+    foreach ($placeholders as $placeholder => $info) {
+      $rows[] = array("[bunchball-{$placeholder}]", $info);
+    }
+
+    $output = t('Every instance of [bunchball-?] in the input text will be replaced with a configurable value. The "?" in the placeholder corresponds to available tags (e.g. [bunchball-owner_id]). The following is a list of available placeholders:');
+    $output .= theme('table', array(
+      'header' => $header,
+      'rows' => $rows,
+    ));
+
+    return $output;
+  }
+  else {
+    return t('Every instance of [bunchball-?] in the input text will be replaced with a configurable value. The "?" in the placeholder corresponds to available tags (e.g. [bunchball-owner_id]).');
+  }
+}
+
+/**
+ * Get replacement of placeholder.
+ *
+ * @see bunchball_get_bunchball_uid()
+ *
+ * @param string $placeholder
+ *   The placeholder that needs to be replaced.
+ *   Possible values:
+ *   - 'logged_in_user_id'
+ *   - 'node_or_profile_user_id'
+ *
+ * @return null|string
+ *   Bunchball uid.
+ */
+function _bunchball_nitro_filter_bunchball_get_replacement($placeholder) {
+  $replacement = NULL;
+
+  switch ($placeholder) {
+    case 'logged_in_user_id':
+      global $user;
+      $replacement = bunchball_get_bunchball_uid($user->uid);
+      break;
+
+    case 'node_or_profile_user_id':
+      $menu_router_item = menu_get_item();
+      $uid = isset($menu_router_item['map'][1]->uid) ? $menu_router_item['map'][1]->uid : NULL;
+      $replacement = bunchball_get_bunchball_uid($uid);
+      break;
+  }
+
+  return $replacement;
+}
+
+/**
+ * Get an associative array describing available bunchball placeholders.
+ *
+ * @return array
+ *   Associative array with the following structure:
+ *   - 'placeholder name' => 'placeholder description'
+ */
+function _bunchball_nitro_filter_bunchball_get_available_placeholders() {
+  return array(
+    'logged_in_user_id' => t('Bunchball user id of the currently logged in user.'),
+    'node_or_profile_user_id' => t('Bunchball user id of the author of the currently viewed node page or user profile.'),
   );
 }
