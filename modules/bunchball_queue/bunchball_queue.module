@@ -26,17 +26,18 @@ function bunchball_queue_request_queue_worker($job) {
   $valid_options = array_fill_keys(array('headers', 'method', 'data', 'max_redirects', 'timeout', 'context'), 0);
   $options = array_intersect_key($job['options'], $valid_options);
 
-  $options += array(
-    // default timeout of 5 seconds - relatively short so processes don't hang,
-    // but should be long enough for most normal use.
-    'timeout' => 5.0,
+  $job['options'] += array(
+    // Default timeout of 10 seconds - on the shorter side so processes don't hang,
+    // but should be long enough for most normal use.  Timeouts of 5 seconds have
+    // been observed to fail on the bunchball sandbox in normal use.
+    'timeout' => variable_get('bunchball_logger_timeout', 10.0),
   );
-  bunchball_debug('Retrieved queued job for url: %url', array('%url' => $job['url']));
-  $response = drupal_http_request($job['url'], $options);
-  bunchball_debug('Queued job response code: %code', array('%code' => $response->code));
+  bunchball_debug('Retrieved queued job for url: %url with options: %options', array('%url' => $job['url'], '%options' => print_r($job['options'], true)));
+  $response = drupal_http_request($job['url'], $job['options']);
+  bunchball_debug('Queued job response %response', array('%response' => print_r($response, true)));
   if ($response->code != 200) {
     bunchball_debug('Queued job error: %response', array('%response' => print_r($response, TRUE)));
-    watchdog('bunchball', 'Bunchball API call returned non-200 status: %response', array('%response' => print_r($response, true)), WATCHDOG_ERROR);
+    watchdog('bunchball', 'Bunchball API call returned non-200 status: %response', array('%response' => print_r($response, TRUE)), WATCHDOG_ERROR);
   }
   else {
     $xml = new simpleXMLElement($response->data);

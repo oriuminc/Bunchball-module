@@ -94,7 +94,43 @@ function bunchball_admin_form($form, &$form_state) {
     '#default_value' => variable_get('bunchball_unique_id_include_site_hash', FALSE),
   );
 
-  $form['bunchball_debug_mode'] = array(
+  $form['bunchball_dev_options_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t('Development and performance tuning options'),
+  );
+
+  $timeout_options = array();
+  foreach(range(5, 60, 5) as $timeout) {
+    $timeout_options[(float)$timeout] = t('@timeout sec', array('@timeout' => $timeout));
+  }
+  $form['bunchball_dev_options_fieldset']['bunchball_client_timeout'] = array(
+    '#type' => 'select',
+    '#options' => $timeout_options,
+    '#title' => t('API Client timeout'),
+    '#default_value' => isset($form_state['values']['bunchball_client_timeout']) ? $form_state['values']['bunchball_client_timeout'] : variable_get('bunchball_client_timeout', 10.0),
+    '#description' => t('Default timeout of the API client.  This should be set
+      sufficiently high to accomodate most normal requests, but the lowest possible
+      value above that. Setting this value too high will potentially cause page
+      requests to hang for the length of this value in the event of the bunchball
+      server being unresponsive.'),
+  );
+
+  $form['bunchball_dev_options_fieldset']['bunchball_logger_timeout'] = array(
+    '#type' => 'select',
+    '#options' => $timeout_options,
+    '#title' => t('Action logging API client timeout'),
+    '#default_value' => isset($form_state['values']['bunchball_logger_timeout']) ? $form_state['values']['bunchball_logger_timeout'] : variable_get('bunchball_logger_timeout', 10.0),
+    '#description' => t('Default timeout of the action logging client.  Essentially
+      the same as the API client timeout, but can be configured to a separate value.
+      Action logging responses typically are not essential to the further functioning
+      of the site, so it is possible to set this timeout somewhat lower than the
+      client timeout (though should still be high enough to capture the large majority
+      of API requests).'),
+  );
+
+  $form['bunchball_dev_options_fieldset']['bunchball_debug_mode'] = array(
     '#type' => 'select',
     '#options' => array(
       BUNCHBALL_DEBUG_NONE => t('Off'),

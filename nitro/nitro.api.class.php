@@ -125,7 +125,12 @@ interface NitroClient {
  */
 class NitroSynchClient implements NitroClient {
   public function request($url, $options = array()) {
+    $options += array(
+      'timeout' => variable_get('bunchball_client_timeout', 10.0),
+    );
+    bunchball_debug(__METHOD__ . ' url: %url with options: %options', array('%url' => $url, '%options' => print_r($options, true)));
     $response = drupal_http_request($url, $options);
+    bunchball_debug(__METHOD__ . ' response %response', array('%response' => print_r($response, true)));
     if ($response->code == 200) {
       return new SimpleXMLElement($response->data);
     }
@@ -140,11 +145,17 @@ class NitroSynchClient implements NitroClient {
  */
 class NitroSynchLogger implements NitroLogger {
   public function log($url, $options = array()) {
-    // @todo configurable options for the request timeout etc.
+    $options += array(
+      'timeout' => variable_get('bunchball_logger_timeout', 10.0),
+    );
+    bunchball_debug(__METHOD__ . ' url: %url with options: %options', array('%url' => $url, '%options' => print_r($options, true)));
     $response = drupal_http_request($url, $options);
+    bunchball_debug(__METHOD__ . ' response %response', array('%response' => print_r($response, true)));
     if ($response->code == 200) {
       $xml = new SimpleXMLElement($response->data);
-      if (strval(reset($xml->xpath('/Nitro/@res'))) != 'ok') {
+      $result = strval(reset($xml->xpath('/Nitro/@res'))) ;
+      bunchball_debug(__METHOD__ . ' result: %result', array('%result' => $result));
+      if ($result != 'ok') {
         throw new NitroAPI_LogActionException(t('Nitro API log action failed'));
       }
       return $xml;
