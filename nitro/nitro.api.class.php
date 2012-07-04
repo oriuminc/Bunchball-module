@@ -324,9 +324,6 @@ class NitroAPI_XML implements NitroAPI {
   /**
    * Log an action for the established session.
    *
-   * @param $userName
-   *    the user name to record info for
-   *
    * @param $actionTag
    *    The action tag to log
    *
