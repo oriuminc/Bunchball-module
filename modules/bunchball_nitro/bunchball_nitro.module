@@ -355,3 +355,133 @@ function _bunchball_nitro_add_nml_js() {
     )
   );
 }
+
+/**
+ * Implements hook_filter_info().
+ *
+ * @see _bunchball_nitro_filter_bunchball_process()
+ * @see _bunchball_nitro_filter_bunchball_tips()
+ */
+function bunchball_nitro_filter_info() {
+  $filters['filter_bunchball'] = array(
+    'title' => t('Bunchball'),
+    'description' => t('Every instance of [bunchball-?] in the input text will be replaced with a preconfigured replacement.'),
+    'process callback' => '_bunchball_nitro_filter_bunchball_process',
+    'tips callback' => '_bunchball_nitro_filter_bunchball_tips',
+    'cache' => FALSE,
+  );
+  return $filters;
+}
+
+/**
+ * Process callback for 'filter_bunchball'.
+ *
+ * Replaces bunchball placeholder tags.
+ *
+ * @see bunchball_nitro_filter_info()
+ * @see _bunchball_nitro_filter_bunchball_get_available_placeholders()
+ * @see _bunchball_nitro_filter_bunchball_get_replacement()
+ *
+ * @param string $text
+ *   Raw text that needs to be processed.
+ *
+ * @return string
+ *   Processed text with bunchball placeholders replaced.
+ */
+function _bunchball_nitro_filter_bunchball_process($text) {
+  $placeholders = _bunchball_nitro_filter_bunchball_get_available_placeholders();
+  $processed_text = $text;
+
+  foreach ($placeholders as $placeholder => $info) {
+    $replacement = _bunchball_nitro_filter_bunchball_get_replacement($placeholder);
+    $processed_text = str_replace("[bunchball-{$placeholder}]", $replacement, $processed_text);
+  }
+
+  return $processed_text;
+}
+
+/**
+ * Tips callback for 'filter_bunchball'.
+ *
+ * @see bunchball_nitro_filter_info()
+ * @see _bunchball_nitro_filter_bunchball_get_available_placeholders()
+ *
+ * @param stdClass $filter
+ *   Filter object.
+ * @param stdClass $format
+ *   Format object.
+ * @param bool $long
+ *   If long or short help text is required.
+ *
+ * @return string
+ *   Help text describing filter usage.
+ */
+function _bunchball_nitro_filter_bunchball_tips($filter, $format, $long = FALSE) {
+  if ($long) {
+    $header = array(t('Placeholder'), t('Description'));
+    $rows = array();
+    $placeholders = _bunchball_nitro_filter_bunchball_get_available_placeholders();
+
+    foreach ($placeholders as $placeholder => $info) {
+      $rows[] = array("[bunchball-{$placeholder}]", $info);
+    }
+
+    $output = t('Every instance of [bunchball-?] in the input text will be replaced with a configurable value. The "?" in the placeholder corresponds to available tags (e.g. [bunchball-owner_id]). The following is a list of available placeholders:');
+    $output .= theme('table', array(
+      'header' => $header,
+      'rows' => $rows,
+    ));
+
+    return $output;
+  }
+  else {
+    return t('Every instance of [bunchball-?] in the input text will be replaced with a configurable value. The "?" in the placeholder corresponds to available tags (e.g. [bunchball-owner_id]).');
+  }
+}
+
+/**
+ * Get replacement of placeholder.
+ *
+ * @see bunchball_get_bunchball_uid()
+ *
+ * @param string $placeholder
+ *   The placeholder that needs to be replaced.
+ *   Possible values:
+ *   - 'logged_in_user_id'
+ *   - 'node_or_profile_user_id'
+ *
+ * @return null|string
+ *   Bunchball uid.
+ */
+function _bunchball_nitro_filter_bunchball_get_replacement($placeholder) {
+  $replacement = NULL;
+
+  switch ($placeholder) {
+    case 'logged_in_user_id':
+      global $user;
+      $replacement = bunchball_get_bunchball_uid($user->uid);
+      break;
+
+    case 'node_or_profile_user_id':
+      $menu_router_item = menu_get_item();
+      $uid = isset($menu_router_item['map'][1]->uid) ? $menu_router_item['map'][1]->uid : NULL;
+      $replacement = bunchball_get_bunchball_uid($uid);
+      break;
+  }
+
+  return $replacement;
+}
+
+/**
+ * Get an associative array describing available bunchball placeholders.
+ *
+ * @return array
+ *   Associative array with the following structure:
+ *   - 'placeholder name' => 'placeholder description'
+ */
+function _bunchball_nitro_filter_bunchball_get_available_placeholders() {
+  return array(
+    'logged_in_user_id' => t('Bunchball user id of the currently logged in user.'),
+    'node_or_profile_user_id' => t('Bunchball user id of the author of the currently viewed node page or user profile.'),
+  );
+}
