@@ -6,3 +6,7 @@
 .fieldset-wrapper .form-type-checkbox {
   margin: 8px 0 0 0;
 }
+
+fieldset.collapsible fieldset.form-wrapper legend span.fieldset-legend {
+  background-image: none;
+}
