@@ -10,10 +10,6 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
   $node_types = node_type_get_names();
   $nitro_ct_enabled = variable_get('bunchball_nitro_admin', array());
 
-  $form['#attached']['js'] = array(
-    drupal_get_path('module', 'bunchball_nitro') . '/bunchball_nitro.admin.js',
-  );
-
   $form['bunchball_nitro'] = array(
     '#type' => 'fieldset',
     '#title' => t('Nitro Javascript'),
@@ -27,20 +23,16 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
 
   // build form
   foreach ($node_types as $machine => $human) {
-    $form['bunchball_nitro']['element_' . $machine] = array(
-      '#type' => 'fieldset',
-      '#title' => $human,
-      '#collapsible' => FALSE,
-      '#collapsed' => FALSE,
-    );
-    $form['bunchball_nitro']['element_' . $machine]['checkbox_' . $machine] = array(
+    $form['bunchball_entities']['settings']["node_{$machine}"]["node_{$machine}_view_check"] = array(
       '#type' => 'checkbox',
-      '#title' => t('Enabled'),
+      '#title' => t('View'),
+      '#description' => t('Notify the Bunchball service when a user views this content type.'),
       '#default_value' => isset($nitro_ct_enabled[$machine]) ? 1 : 0,
     );
-    $form['bunchball_nitro']['element_' . $machine]['name_' . $machine] = array(
+    $form['bunchball_entities']['settings']["node_{$machine}"]["node_{$machine}_view_name"] = array(
       '#type' => 'textfield',
       '#title' => t('Nitro action name'),
+      '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($nitro_ct_enabled[$machine]) ? $nitro_ct_enabled[$machine] : '',
       '#size' => 60,
       '#maxlength' => 128,
@@ -306,4 +298,38 @@ function _bunchball_nitro_add_nml_js() {
       'every_page' => TRUE,
     )
   );
+}
+
+/**
+ * Submit callback for admin form.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function bunchball_nitro_admin_form_submit($form, &$form_state) {
+  if (isset($form_state['values']['notification_interval']) && $form_state['values']['notification_interval']) {
+    $interval = $form_state['values']['notification_interval'];
+    variable_set('bunchball_nitro_notification_interval', $interval);
+  }
+
+  $action_names = array();
+
+  // check to see which elements are set for action name tracking
+  $node_types = node_type_get_names();
+  foreach ($node_types as $machine => $human) {
+    if($form_state['values']['bunchball_entities']['settings']["node_{$machine}"]["node_{$machine}_view_check"] > 0 
+        && strlen($form_state['values']['bunchball_entities']['settings']["node_{$machine}"]["node_{$machine}_view_name"]) > 0) {
+      $action_names[$machine] = $form_state['values']['bunchball_entities']['settings']["node_{$machine}"]["node_{$machine}_view_name"];
+    }
+  }
+  variable_set('bunchball_nitro_admin', $action_names);
+
+  variable_del('bunchball_nitro_admin_youtube');
+  if ($form_state['values']['checkbox_youtube'] > 0 && strlen($form_state['values']['youtube_start']) > 0 && strlen($form_state['values']['youtube_end']) > 0) {
+    $youtube = array();
+    $youtube['start'] = $form_state['values']['youtube_start'];
+    $youtube['end'] = $form_state['values']['youtube_end'];
+    variable_set('bunchball_nitro_admin_youtube', $youtube);
+  }
+
 }
