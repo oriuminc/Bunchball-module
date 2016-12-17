@@ -8,7 +8,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
 
   private $options;
   private $nitro;
-  
+
   function __construct() {
     $this->options = variable_get('bunchball_entities');
     $this->nitro = NitroAPI_Factory::getInstance();
@@ -16,7 +16,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
 
   /**
    * Form callback for this plugin.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @return array
@@ -35,19 +35,19 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
 
   /**
    * Form validation callback for this plugin.
-   * 
+   *
    * @todo check that checkboxes and action textboxes are consistent
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormValidate($form, &$form_state) {}
 
   /**
    * Submit callback for this plugin.
-   * 
+   *
    * @param $form
-   * @param $form_state 
+   * @param $form_state
    */
   public function adminFormSubmit($form, &$form_state) {
     $this->options = $this->getDrupalContentTypes();
@@ -62,25 +62,25 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
     }
     variable_set('bunchball_entities', $this->options);
   }
-  
+
   /**
    * AJAX callback.
-   * 
+   *
    * @param $form
    * @param $form_state
    * @param $op
-   * @param $data 
+   * @param $data
    */
   public function adminFormAjax($form, &$form_state, $op, $data) {}
-  
+
   /**
    * Register content actions.
    *
    * @param $id
-   * @param $type 
+   * @param $type
    * @param $user
    * @param $op
-   *    operation to register (ie: insert / update / comment) 
+   *    operation to register (ie: insert / update / comment)
    */
   public function send($id, $type, $user, $op) {
     if (in_array($op, array('insert', 'update', 'comment')) && $this->checkSend($id, $op)) {
@@ -95,7 +95,7 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
       }
     }
   }
-  
+
   private function checkSend($id, $op) {
     return $this->options[$id][$op];
   }
@@ -103,10 +103,10 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
   private function getActionName($id, $op) {
     return $this->options[$id]["{$op}_action"];
   }
-  
+
   /**
    * Build a set of form fields for all content types.
-   * 
+   *
    * @return array
    *    form elements for all content types
    */
@@ -117,10 +117,10 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
     }
     return $form;
   }
-  
+
   /**
    * Build the form fields for a content type.
-   * 
+   *
    * @param $id
    *    identifier for the content type
    * @param $type
@@ -146,6 +146,11 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options[$id]['insert_action']) ? $this->options[$id]['insert_action'] : NULL,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="' . $id . '_insert_check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
     $form[$id][$id . '_update_check'] = array(
       '#type' => 'checkbox',
@@ -158,6 +163,11 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options[$id]['update_action']) ? $this->options[$id]['update_action'] : NULL,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="' . $id . '_update_check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
     $form[$id][$id . '_comment_check'] = array(
       '#type' => 'checkbox',
@@ -170,15 +180,20 @@ class BunchballEntitiesDefault implements BunchballPluginInterface, BunchballEnt
       '#title' => t('Nitro action name'),
       '#description' => t('The machine name used to map this action to your Bunchball Nitro Server.'),
       '#default_value' => isset($this->options[$id]['comment_action']) ? $this->options[$id]['comment_action'] : NULL,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name$="' . $id . '_comment_check]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
     return $form;
   }
 
   /**
    * Get an array of content types know to Drupal.
-   * 
+   *
    * @return array
-   *    array of the available system content types. 
+   *    array of the available system content types.
    */
   private function getDrupalContentTypes() {
     $types = array();

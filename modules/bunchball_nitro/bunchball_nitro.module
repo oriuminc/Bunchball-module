@@ -36,10 +36,15 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
       '#default_value' => isset($nitro_ct_enabled[$machine]) ? $nitro_ct_enabled[$machine] : '',
       '#size' => 60,
       '#maxlength' => 128,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="checkbox_' . $machine . '"]' => array('checked' => FALSE),
+        ),
+      ),
     );
   }
 
-  // youtube element..
+  // Youtube element.
   $nitro_youtube_enabled = variable_get('bunchball_nitro_admin_youtube', array());
 
   $form['bunchball_nitro']['element_youtube'] = array(
@@ -60,6 +65,11 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
     '#default_value' => isset($nitro_youtube_enabled['start']) ? $nitro_youtube_enabled['start'] : '',
     '#size' => 60,
     '#maxlength' => 128,
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="checkbox_youtube"]' => array('checked' => FALSE),
+      ),
+    ),
   );
   $form['bunchball_nitro']['element_youtube']['youtube_end'] = array(
     '#type' => 'textfield',
@@ -67,6 +77,11 @@ function bunchball_form_bunchball_entities_admin_form_alter(&$form, &$form_state
     '#default_value' => isset($nitro_youtube_enabled['end']) ? $nitro_youtube_enabled['end'] : '',
     '#size' => 60,
     '#maxlength' => 128,
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="checkbox_youtube"]' => array('checked' => FALSE),
+      ),
+    ),
   );
 }
 
